@@ -24,20 +24,15 @@
 
 #include <QList>
 
+#include "atomlabelrenderer.h"
 #include "graphicsitem.h"
 #include "sumformula.h"
+#include "alignment.h"
 
 namespace Molsketch {
 
   class Bond;
   class Molecule;
-
-  enum Alignment {
-    Left,
-    Right,
-    Up,
-    Down
-  };
 
   /// Atom class
   class Atom : public graphicsItem
@@ -144,8 +139,7 @@ namespace Molsketch {
     XmlObjectInterface* produceChild(const QString &name, const QXmlStreamAttributes &attributes) override;
 
   private:
-    void drawAtomLabel(QPainter *painter, const QString &lbl, int alignment);
-    QRectF computeBoundingRect();
+    AtomLabelRenderer renderer;
 
     void initialize(const QPointF & position,
                     const QString & element,
@@ -160,12 +154,11 @@ namespace Molsketch {
     int m_userImplicitHydrogens;
     bool m_implicitHydrogens;
     QRectF m_shape;
-    qreal computeTotalWdith(const int &alignment, const QString &lbl, const QFontMetrics &fmSymbol, const QFontMetrics &fmScript);
+    QRectF computeBoundingRect();
     QFont getSymbolFont() const;
     QFont getSubscriptFont(const QFont &symbolFont) const;
     QPair<QFont, QFont> getFonts() const;
     QString composeLabel(bool leftAligned) const;
-    qreal computeXOffset(int alignment, const QFontMetrics &fmSymbol, const QString &lbl, const qreal &totalWidth);
     void drawElectrons(QPainter* painter);
     void drawCharge(QPainter* painter);
     void renderColoredSquare(QPainter* painter);
