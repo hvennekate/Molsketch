@@ -61,22 +61,22 @@ namespace Molsketch {
     // compute the horizontal starting position
     qreal xOffset, yOffset, yOffsetSubscript;
     switch (alignment) {
-    case Right:
-      xOffset = - 0.5 * fmSymbol.width(lbl.left(1));
-      break;
-    case Left:
-      xOffset = 0.5 * fmSymbol.width(lbl.right(1)) - totalWidth;
-      break;
-    case Up:
-    case Down:
-      if (lbl.contains("H") && !QRegExp("H[0-9]*").exactMatch(lbl))
-        xOffset = - 0.5 * fmSymbol.width(lbl.left(lbl.indexOf("H")));
-      else
+      case Right:
+        xOffset = - 0.5 * fmSymbol.width(lbl.left(1));
+        break;
+      case Left:
+        xOffset = 0.5 * fmSymbol.width(lbl.right(1)) - totalWidth;
+        break;
+      case Up:
+      case Down:
+        if (lbl.contains("H") && !QRegExp("H[0-9]*").exactMatch(lbl))
+          xOffset = - 0.5 * fmSymbol.width(lbl.left(lbl.indexOf("H")));
+        else
+          xOffset = - 0.5 * totalWidth;
+        break;
+      default:
         xOffset = - 0.5 * totalWidth;
-      break;
-    default:
-      xOffset = - 0.5 * totalWidth;
-      break;
+        break;
     }
     // compute the vertical starting position
     yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent());
@@ -154,9 +154,9 @@ namespace Molsketch {
   }
 
   qreal AtomLabelRenderer::computeTotalWdith(const int& alignment,
-                                const QString& lbl,
-                                const QFontMetrics &fmSymbol,
-                                const QFontMetrics &fmScript)
+                                             const QString& lbl,
+                                             const QFontMetrics &fmSymbol,
+                                             const QFontMetrics &fmScript)
   {
     qreal totalWidth = 0;
     if ((alignment == Right) || (alignment == Left) || !lbl.contains("H")) {
