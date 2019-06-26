@@ -124,4 +124,52 @@ public:
   void testAtomWithLeadingHUp() {
     assertLabelAndBoundingBox("HAB", {"0, 5, Times, 10", "HAB"}, {0, -24.5, 29, 34}, Alignment::Up);
   }
+
+  void testHAtomOnlyLeft() {
+    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Left);
+  }
+
+  void testHAtomOnlyRight() {
+    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Right);
+  }
+
+  void testHAtomOnlyUp() {
+    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Up);
+  }
+
+  void testHAtomOnlyDown() {
+    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Down);
+  }
+
+  void testH2OnlyLeft() {
+    assertLabelAndBoundingBox("H2", {"-11, 5, Times, 10", "-1, 9, Times, 7", "H", "2"}, {-11.5, -9.5, 15, 19}, Alignment::Left);
+  }
+
+  void testH2OnlyRight() {
+    assertLabelAndBoundingBox("H2", {"-5, 5, Times, 10", "5, 9, Times, 7", "H", "2"}, {-5, -9.5, 15, 19}, Alignment::Right);
+  }
+
+  void testH2OnlyUp() {
+    assertLabelAndBoundingBox("H2", {"-7, 5, Times, 10", "2, 9, Times, 7", "H", "2"}, {-7.5, -9.5, 15, 19}, Alignment::Up);
+  }
+
+  void testH2OnlyDown() {
+    assertLabelAndBoundingBox("H2", {"-7, 5, Times, 10", "2, 9, Times, 7", "H", "2"}, {-7.5, -9.5, 15, 19}, Alignment::Down);
+  }
+
+  void testStackedHHDown() { // This is actually buggy
+    assertLabelAndBoundingBox("CHH", {"-4, 5, Times, 10", "-4, 20, Times, 10", "-4, 35, Times, 10", "C", "H", "H"}, {-4.5, -9.5, 20, 34}, Alignment::Down);
+  }
+
+  void testStackedHHUp() { // This is actually buggy
+    assertLabelAndBoundingBox("CHH", {"-4, 5, Times, 10", "-4, -9, Times, 10", "-4, -24, Times, 10", "C", "H", "H"}, {-4.5, -24.5, 20, 34}, Alignment::Up);
+  }
+
+  void testStackedHHLeft() { // This is actually buggy (bounding rect)
+    assertLabelAndBoundingBox("CHH", {"-24, 5, Times, 10", "CHH"}, {-24, -9.5, 29, 19}, Alignment::Left);
+  }
+
+  void testStackedHHRight() {  // This is actually buggy (bounding rect)
+    assertLabelAndBoundingBox("CHH", {"-4, 5, Times, 10", "CHH"}, {-4.5, -9.5, 29, 19}, Alignment::Right);
+  }
 };

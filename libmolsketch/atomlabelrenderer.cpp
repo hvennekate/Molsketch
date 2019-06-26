@@ -33,54 +33,16 @@ namespace Molsketch {
     QFontMetrics fmSymbol(symbolFont);
     QFontMetrics fmScript(subscriptFont);
 
-
     // compute the total width
-    qreal totalWidth = 0.0;
-    if ((alignment == Right) || (alignment == Left) || !lbl.contains("H")) {
-      for (int i = 0; i < lbl.size(); ++i) {
-        if (lbl[i].isDigit())
-          totalWidth += fmScript.width(lbl[i]);
-        else
-          totalWidth += fmSymbol.width(lbl[i]);
-      }
-    } else {
-      totalWidth = fmSymbol.width(lbl.left(lbl.indexOf("H")));
-      qreal width = 0.0;
-      for (int i = lbl.indexOf("H"); i < lbl.size(); ++i) {
-        if (lbl[i].isDigit())
-          width += fmScript.width(lbl[i]);
-        else
-          width += fmSymbol.width(lbl[i]);
-      }
-
-      if (width > totalWidth)
-        totalWidth = width;
-    }
+    qreal totalWidth = computeTotalWdith(alignment, lbl, fmSymbol, fmScript);
 
     QString str, subscript;
     // compute the horizontal starting position
-    qreal xOffset, yOffset, yOffsetSubscript;
-    switch (alignment) {
-      case Right:
-        xOffset = - 0.5 * fmSymbol.width(lbl.left(1));
-        break;
-      case Left:
-        xOffset = 0.5 * fmSymbol.width(lbl.right(1)) - totalWidth;
-        break;
-      case Up:
-      case Down:
-        if (lbl.contains("H") && !QRegExp("H[0-9]*").exactMatch(lbl))
-          xOffset = - 0.5 * fmSymbol.width(lbl.left(lbl.indexOf("H")));
-        else
-          xOffset = - 0.5 * totalWidth;
-        break;
-      default:
-        xOffset = - 0.5 * totalWidth;
-        break;
-    }
+    qreal xOffset = computeXOffset(alignment, fmSymbol, lbl, totalWidth),
+        yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent()),
+        yOffsetSubscript = yOffset + fmSymbol.descent();
+
     // compute the vertical starting position
-    yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent());
-    yOffsetSubscript = yOffset + fmSymbol.descent();
     qreal xInitial = xOffset;
 
     for (int i = 0; i < lbl.size(); ++i) {
@@ -184,25 +146,18 @@ namespace Molsketch {
 
   qreal AtomLabelRenderer::computeXOffset(int alignment, const QFontMetrics& fmSymbol, const QString& lbl, const qreal& totalWidth)
   {
-    qreal xOffset;
     switch (alignment) {
       case Right:
-        xOffset = - 0.5 * fmSymbol.width(lbl.left(1));
-        break;
+        return - 0.5 * fmSymbol.width(lbl.left(1));
       case Left:
-        xOffset = 0.5 * fmSymbol.width(lbl.right(1)) - totalWidth;
-        break;
+        return 0.5 * fmSymbol.width(lbl.right(1)) - totalWidth;
       case Up:
       case Down:
         if (lbl.contains("H") && !QRegExp("H[0-9]*").exactMatch(lbl))
-          xOffset = - 0.5 * fmSymbol.width(lbl.left(lbl.indexOf("H")));
-        else
-          xOffset = - 0.5 * totalWidth;
-        break;
+          return - 0.5 * fmSymbol.width(lbl.left(lbl.indexOf("H")));
+        [[fallthrough]];
       default:
-        xOffset = - 0.5 * totalWidth;
-        break;
+        return - 0.5 * totalWidth;
     }
-    return xOffset;
   }
 } // namespace Molsketch
