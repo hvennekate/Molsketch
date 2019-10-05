@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include <QPainter>
+#include <QRegularExpression>
+#include <numeric>
 
 #include "atomlabelrenderer.h"
 
@@ -36,7 +38,6 @@ namespace Molsketch {
     // compute the total width
     qreal totalWidth = computeTotalWdith(alignment, lbl, fmSymbol, fmScript);
 
-    QString str, subscript;
     // compute the horizontal starting position
     qreal xOffset = computeXOffset(alignment, fmSymbol, lbl, totalWidth),
         yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent()),
@@ -45,56 +46,34 @@ namespace Molsketch {
     // compute the vertical starting position
     qreal xInitial = xOffset;
 
-    for (int i = 0; i < lbl.size(); ++i) {
-      if (lbl[i] == 'H') {
-        if ((alignment == Up) || (alignment == Down))
-          if (!str.isEmpty()) {
-            // write the current string
-            painter->setFont(symbolFont);
-            painter->drawText(xOffset, yOffset, str);
-            if (alignment == Down) {
-              yOffset += fmSymbol.ascent()/* - fmSymbol.descent()*/;
-              yOffsetSubscript += fmSymbol.ascent()/* - fmSymbol.descent()*/;
-            } else {
-              yOffset -= fmSymbol.ascent()/* + fmSymbol.descent()*/;
-              yOffsetSubscript -= fmSymbol.ascent()/* + fmSymbol.descent()*/;
-            }
-            xOffset = xInitial;
-            str.clear();
-          }
-      }
+    QRegularExpression boxContent{(alignment == Up || alignment == Down) ? "H?[A-GI-Za-z]+|[0-9]+|H" : "[A-Za-z]+|[0-9]+"};
+    auto matches = boxContent.globalMatch(lbl);
+    while (matches.hasNext()) {
+      auto character = matches.next().captured();
+      QRegularExpression number{"[0-9]+"};
+      QRegularExpression hydrogens("^H[0-9]*$");
 
-      if (lbl[i].isDigit()) {
-        if (!str.isEmpty()) {
-          // write the current string
+      if (character == 'H' && !hydrogens.match(lbl).hasMatch() && (alignment == Up || alignment == Down)) {
           painter->setFont(symbolFont);
-          painter->drawText(xOffset, yOffset, str);
-          xOffset += fmSymbol.width(str);
-          str.clear();
-        }
-
-        subscript += lbl.mid(i, 1);
+          if (alignment == Down) {
+            yOffset += fmSymbol.ascent();
+            yOffsetSubscript += fmSymbol.ascent();
+          } else {
+            yOffset -= fmSymbol.ascent();
+            yOffsetSubscript -= fmSymbol.ascent();
+          }
+          xOffset = xInitial;
+        painter->drawText(xOffset, yOffset, character);
+      } else if (number.match(character).hasMatch()) {
+        painter->setFont(subscriptFont);
+        painter->drawText(xOffset, yOffsetSubscript, character);
+        xOffset += fmScript.width(character);
       } else {
-        if (!subscript.isEmpty()) {
-          // write the current subscript
-          painter->setFont(subscriptFont);
-          painter->drawText(xOffset, yOffsetSubscript, subscript);
-          xOffset += fmScript.width(subscript);
-          subscript.clear();
-        }
-
-        str += lbl.mid(i, 1);
+        painter->setFont(symbolFont);
+        painter->drawText(xOffset, yOffset, character);
+        xOffset += fmSymbol.width(character);
       }
     }
-    if (!str.isEmpty()) {
-      painter->setFont(symbolFont);
-      painter->drawText(xOffset, yOffset, str);
-    }
-    if (!subscript.isEmpty()) {
-      painter->setFont(subscriptFont);
-      painter->drawText(xOffset, yOffsetSubscript, subscript);
-    }
-
     painter->restore();
   }
 
@@ -141,6 +120,7 @@ namespace Molsketch {
       if (width > totalWidth)
         totalWidth = width;
     }
+
     return totalWidth;
   }
 
