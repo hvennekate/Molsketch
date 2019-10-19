@@ -74,102 +74,102 @@ private:
   }
 public:
   void testSimpleAtomLabel() {
-    assertLabelAndBoundingBox("test", {"-2, 5, Times, 10", "test"}, {-2, -9.5, 19, 19});
+    assertLabelAndBoundingBox("test", {"-2, 5.5, Times, 10", "test"}, {-2, -9.5, 19, 19});
   }
 
   void testSimpleAtomLabelWithSubscript() {
-    assertLabelAndBoundingBox("test3", {"-2, 5, Times, 10", "17, 9, Times, 7", "test", "3"}, {-2, -9.5, 24, 19});
+    assertLabelAndBoundingBox("test3", {"-2, 5.5, Times, 10", "17, 9, Times, 7", "test", "3"}, {-2, -9.5, 24, 19});
   }
 
   void testSimpleAtomLabelWithSubscriptMiddle() {
-    assertLabelAndBoundingBox("te3st", {"-2, 5, Times, 10", "8, 9, Times, 7", "13, 5, Times, 10", "te", "3", "st"}, {-2, -9.5, 24, 19});
+    assertLabelAndBoundingBox("te3st", {"-2, 5.5, Times, 10", "8, 9, Times, 7", "13, 5.5, Times, 10", "te", "3", "st"}, {-2, -9.5, 24, 19});
   }
 
   void testSimpleAtomLabelWithSubscriptBeginning() {
-    assertLabelAndBoundingBox("3test", {"-3, 9, Times, 7", "1, 5, Times, 10", "3", "test"}, {-3.5, -9.5, 24, 19});
+    assertLabelAndBoundingBox("3test", {"-3, 9, Times, 7", "1.5, 5.5, Times, 10", "3", "test"}, {-3.5, -9.5, 24, 19});
   }
 
   void testSimpleAtomLabelWithSubscriptMultiple() {
-    assertLabelAndBoundingBox("te3st", {"-2, 5, Times, 10", "8, 9, Times, 7", "13, 5, Times, 10", "te", "3", "st"}, {-2, -9.5, 24, 19});
+    assertLabelAndBoundingBox("te3st", {"-2, 5.5, Times, 10", "8, 9, Times, 7", "13, 5.5, Times, 10", "te", "3", "st"}, {-2, -9.5, 24, 19});
   }
 
   void testAtomWithTrailingHLeft() {
-    assertLabelAndBoundingBox("ABH", {"-24, 5, Times, 10", "ABH"}, {-24, -9.5, 29, 19}, Alignment::Left);
+    assertLabelAndBoundingBox("ABH", {"-24, 5.5, Times, 10", "ABH"}, {-24, -9.5, 29, 19}, Alignment::Left);
   }
 
   void testAtomWithTrailingHRight() {
-    assertLabelAndBoundingBox("ABH", {"-5, 5, Times, 10", "ABH"}, {-5, -9.5, 29, 19}, Alignment::Right);
+    assertLabelAndBoundingBox("ABH", {"-5, 5.5, Times, 10", "ABH"}, {-5, -9.5, 29, 19}, Alignment::Right);
   }
 
   void testAtomWithTrailingHDown() {
-    assertLabelAndBoundingBox("ABH", {"-9, 5, Times, 10", "-9, 20, Times, 10", "AB", "H"}, {-9.5, -9.5, 19, 34}, Alignment::Down);
+    assertLabelAndBoundingBox("ABH", {"-9.5, 5.5, Times, 10", "-9, 20, Times, 10", "AB", "H"}, {-9.5, -9.5, 19, 34}, Alignment::Down);
   }
 
   void testAtomWithTrailingHUp() {
-    assertLabelAndBoundingBox("ABH", {"-9, 5, Times, 10", "-9, -9, Times, 10", "AB", "H"}, {-9.5, -24.5, 19, 34}, Alignment::Up);
+    assertLabelAndBoundingBox("ABH", {"-9.5, 5.5, Times, 10", "-9, -9, Times, 10", "AB", "H"}, {-9.5, -24.5, 19, 34}, Alignment::Up);
   }
 
   void testAtomWithLeadingHLeft() {
-    assertLabelAndBoundingBox("HAB", {"-24, 5, Times, 10", "HAB"}, {-24.5, -9.5, 29, 19}, Alignment::Left);
+    assertLabelAndBoundingBox("HAB", {"-24.5, 5.5, Times, 10", "HAB"}, {-24.5, -9.5, 29, 19}, Alignment::Left);
   }
 
   void testAtomWithLeadingHRight() {
-    assertLabelAndBoundingBox("HAB", {"-5, 5, Times, 10", "HAB"}, {-5, -9.5, 29, 19}, Alignment::Right);
+    assertLabelAndBoundingBox("HAB", {"-5, 5.5, Times, 10", "HAB"}, {-5, -9.5, 29, 19}, Alignment::Right);
   }
 
   void testAtomWithLeadingHDown() {
-    assertLabelAndBoundingBox("HAB", {"0, 5, Times, 10", "HAB"}, {0, -9.5, 29, 34}, Alignment::Down);
+    assertLabelAndBoundingBox("HAB", {"0, 5.5, Times, 10", "HAB"}, {0, -9.5, 29, 34}, Alignment::Down);
   }
 
   void testAtomWithLeadingHUp() {
-    assertLabelAndBoundingBox("HAB", {"0, 5, Times, 10", "HAB"}, {0, -24.5, 29, 34}, Alignment::Up);
+    assertLabelAndBoundingBox("HAB", {"0, 5.5, Times, 10", "HAB"}, {0, -24.5, 29, 34}, Alignment::Up);
   }
 
   void testHAtomOnlyLeft() {
-    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Left);
+    assertLabelAndBoundingBox("H", {"-5, 5.5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Left);
   }
 
   void testHAtomOnlyRight() {
-    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Right);
+    assertLabelAndBoundingBox("H", {"-5, 5.5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Right);
   }
 
   void testHAtomOnlyUp() {
-    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Up);
+    assertLabelAndBoundingBox("H", {"-5, 5.5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Up);
   }
 
   void testHAtomOnlyDown() {
-    assertLabelAndBoundingBox("H", {"-5, 5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Down);
+    assertLabelAndBoundingBox("H", {"-5, 5.5, Times, 10", "H"}, {-5, -9.5, 10, 19}, Alignment::Down);
   }
 
   void testH2OnlyLeft() {
-    assertLabelAndBoundingBox("H2", {"-11, 5, Times, 10", "-1, 9, Times, 7", "H", "2"}, {-11.5, -9.5, 15, 19}, Alignment::Left);
+    assertLabelAndBoundingBox("H2", {"-11.5, 5.5, Times, 10", "-1, 9, Times, 7", "H", "2"}, {-11.5, -9.5, 15, 19}, Alignment::Left);
   }
 
   void testH2OnlyRight() {
-    assertLabelAndBoundingBox("H2", {"-5, 5, Times, 10", "5, 9, Times, 7", "H", "2"}, {-5, -9.5, 15, 19}, Alignment::Right);
+    assertLabelAndBoundingBox("H2", {"-5, 5.5, Times, 10", "5, 9, Times, 7", "H", "2"}, {-5, -9.5, 15, 19}, Alignment::Right);
   }
 
   void testH2OnlyUp() {
-    assertLabelAndBoundingBox("H2", {"-7, 5, Times, 10", "2, 9, Times, 7", "H", "2"}, {-7.5, -9.5, 15, 19}, Alignment::Up);
+    assertLabelAndBoundingBox("H2", {"-7.5, 5.5, Times, 10", "2, 9, Times, 7", "H", "2"}, {-7.5, -9.5, 15, 19}, Alignment::Up);
   }
 
   void testH2OnlyDown() {
-    assertLabelAndBoundingBox("H2", {"-7, 5, Times, 10", "2, 9, Times, 7", "H", "2"}, {-7.5, -9.5, 15, 19}, Alignment::Down);
+    assertLabelAndBoundingBox("H2", {"-7.5, 5.5, Times, 10", "2, 9, Times, 7", "H", "2"}, {-7.5, -9.5, 15, 19}, Alignment::Down);
   }
 
   void testStackedHHDown() { // This is actually buggy
-    assertLabelAndBoundingBox("CHH", {"-4, 5, Times, 10", "-4, 20, Times, 10", "-4, 35, Times, 10", "C", "H", "H"}, {-4.5, -9.5, 20, 34}, Alignment::Down);
+    assertLabelAndBoundingBox("CHH", {"-4.5, 5.5, Times, 10", "-4, 20, Times, 10", "-4, 35, Times, 10", "C", "H", "H"}, {-4.5, -9.5, 20, 34}, Alignment::Down);
   }
 
   void testStackedHHUp() { // This is actually buggy
-    assertLabelAndBoundingBox("CHH", {"-4, 5, Times, 10", "-4, -9, Times, 10", "-4, -24, Times, 10", "C", "H", "H"}, {-4.5, -24.5, 20, 34}, Alignment::Up);
+    assertLabelAndBoundingBox("CHH", {"-4.5, 5.5, Times, 10", "-4, -9, Times, 10", "-4, -24, Times, 10", "C", "H", "H"}, {-4.5, -24.5, 20, 34}, Alignment::Up);
   }
 
   void testStackedHHLeft() { // This is actually buggy (bounding rect)
-    assertLabelAndBoundingBox("CHH", {"-24, 5, Times, 10", "CHH"}, {-24, -9.5, 29, 19}, Alignment::Left);
+    assertLabelAndBoundingBox("CHH", {"-24, 5.5, Times, 10", "CHH"}, {-24, -9.5, 29, 19}, Alignment::Left);
   }
 
   void testStackedHHRight() {  // This is actually buggy (bounding rect)
-    assertLabelAndBoundingBox("CHH", {"-4, 5, Times, 10", "CHH"}, {-4.5, -9.5, 29, 19}, Alignment::Right);
+    assertLabelAndBoundingBox("CHH", {"-4.5, 5.5, Times, 10", "CHH"}, {-4.5, -9.5, 29, 19}, Alignment::Right);
   }
 };

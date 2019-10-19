@@ -70,7 +70,7 @@ namespace Molsketch {
         xOffset += fmScript.width(character);
       } else {
         painter->setFont(symbolFont);
-        painter->drawText(xOffset, yOffset, character);
+        painter->drawText(QPointF(xOffset, yOffset), character);
         xOffset += fmSymbol.width(character);
       }
     }
