@@ -58,8 +58,6 @@
 #include <openbabel/op.h>
 #include <openbabel/stereo/stereo.h>
 
-OpenBabel::OBElementTable eTable ;
-
 namespace Molsketch
 {
   static const char INCHI_FORMAT[] = "inchi";
