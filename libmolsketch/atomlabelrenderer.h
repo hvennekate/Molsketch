@@ -32,6 +32,7 @@
 class QPainter;
 
 namespace Molsketch {
+  class TextBox;
 
   class AtomLabelRenderer {
   public:
@@ -40,6 +41,7 @@ namespace Molsketch {
   private:
     qreal computeTotalWdith(const int &alignment, const QString &lbl, const QFontMetrics &fmSymbol, const QFontMetrics &fmScript);
     qreal computeXOffset(int alignment, const QFontMetrics &fmSymbol, const QString &lbl, const qreal &totalWidth);
+    QVector<Molsketch::TextBox *> generateTextBoxes(int alignment, const QString &lbl, const QPair<QFont, QFont>& fonts);
   };
 
 } // namespace Molsketch

@@ -21,77 +21,126 @@
 
 #include <QPainter>
 #include <QRegularExpression>
+#include <QDebug>
 #include <numeric>
+#include <algorithm>
 
 #include "atomlabelrenderer.h"
 
 namespace Molsketch {
 
-  void AtomLabelRenderer::drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, int alignment)
+  class TextBox {
+  protected:
+    QPointF offset;
+    QFont font;
+    QFontMetrics metrics; // TODO should really be QFontMetricsF
+    TextBox(const QPointF &offset, const QFont &font) : offset(offset), font(font), metrics(font) {}
+  public:
+    virtual void render(QPainter *painter) const = 0;
+    virtual QRectF boundingRect() const = 0;
+  };
+
+  class RegularTextBox : public TextBox {
+    QString text;
+  public:
+    RegularTextBox(const QString &text, const QPointF &offset, const QFont &font)
+      : TextBox(offset, font), text(text) {}
+
+    void render(QPainter *painter) const override {
+      painter->save();
+      painter->setFont(font);
+      painter->drawText(offset, text);
+      painter->restore();
+    }
+
+    QRectF boundingRect() const override {
+      return QRectF(offset, QSizeF(metrics.width(text), metrics.height()))
+          .translated(0, metrics.descent()-metrics.height()); // TODO replace with metrics.boundingRect()
+//      return QRectF(metrics.boundingRect(text)).translated(offset); // TODO remove QRectF with QFontMetricsF
+    }
+  };
+
+  class StackedTextBox : public TextBox {
+    QString topText, bottomText;
+    int shiftUp, shiftDown, mainHeight;
+  public:
+    StackedTextBox(const QString &topText,
+                   const QString &bottomText,
+                   const QPointF &offset,
+                   const QFont & font,
+                   const QFontMetrics & mainFontMetrics)
+      : TextBox(offset, font),
+        topText(topText),
+        bottomText(bottomText),
+        shiftUp(mainFontMetrics.ascent()),
+        shiftDown(mainFontMetrics.descent()),
+        mainHeight(mainFontMetrics.height())
+    {}
+
+    void render(QPainter *painter) const override {
+      painter->save();
+      painter->setFont(font);
+      painter->drawText(offset + QPointF(0, shiftDown), bottomText);
+      painter->drawText(offset + QPointF(0, shiftUp), topText);
+      painter->restore();
+    }
+
+    QRectF boundingRect() const override {
+      return QRectF(offset, QSizeF(qMax(metrics.width(topText), metrics.width(bottomText)), mainHeight))
+          .translated(0, shiftDown - mainHeight);
+      // TODO compute height correctly
+    }
+  };
+
+  QVector<TextBox*> AtomLabelRenderer::generateTextBoxes(int alignment, const QString &lbl, const QPair<QFont, QFont>& fonts)
   {
-    painter->save(); // TODO unite with computeBoundingRect
     QFont symbolFont = fonts.first;
-    QFont subscriptFont = fonts.second;
+    QFont subscriptFont = fonts.second; // TODO get code from atom to fix second font
     QFontMetrics fmSymbol(symbolFont);
     QFontMetrics fmScript(subscriptFont);
 
-    // compute the total width
-    qreal totalWidth = computeTotalWdith(alignment, lbl, fmSymbol, fmScript);
-
     // compute the horizontal starting position
+    qreal totalWidth = computeTotalWdith(alignment, lbl, fmSymbol, fmScript);
     qreal xOffset = computeXOffset(alignment, fmSymbol, lbl, totalWidth),
-        yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent()),
-        yOffsetSubscript = yOffset + fmSymbol.descent();
-
-    // compute the vertical starting position
+        yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent());
+    QPointF currentPosition{xOffset, yOffset};
     qreal xInitial = xOffset;
 
     QRegularExpression boxContent{(alignment == Up || alignment == Down) ? "H?[A-GI-Za-z]+|[0-9]+|H" : "[A-Za-z]+|[0-9]+"};
     auto matches = boxContent.globalMatch(lbl);
+    QVector<TextBox*> boxes;
     while (matches.hasNext()) {
       auto character = matches.next().captured();
       QRegularExpression number{"[0-9]+"};
       QRegularExpression hydrogens("^H[0-9]*$");
 
       if (character == 'H' && !hydrogens.match(lbl).hasMatch() && (alignment == Up || alignment == Down)) {
-          painter->setFont(symbolFont);
-          if (alignment == Down) {
-            yOffset += fmSymbol.ascent();
-            yOffsetSubscript += fmSymbol.ascent();
-          } else {
-            yOffset -= fmSymbol.ascent();
-            yOffsetSubscript -= fmSymbol.ascent();
-          }
-          xOffset = xInitial;
-        painter->drawText(xOffset, yOffset, character);
+        currentPosition = QPointF(xInitial, currentPosition.y() +(alignment == Down ? fmSymbol.ascent() : - fmSymbol.ascent()));
+        boxes << new RegularTextBox(character, currentPosition, symbolFont);
       } else if (number.match(character).hasMatch()) {
-        painter->setFont(subscriptFont);
-        painter->drawText(xOffset, yOffsetSubscript, character);
-        xOffset += fmScript.width(character);
+        boxes << new StackedTextBox("", character, currentPosition, subscriptFont, fmSymbol);
       } else {
-        painter->setFont(symbolFont);
-        painter->drawText(QPointF(xOffset, yOffset), character);
-        xOffset += fmSymbol.width(character);
+        boxes << new RegularTextBox(character, currentPosition, symbolFont);
       }
+      currentPosition.rx() = boxes.last()->boundingRect().right();
     }
+
+    return boxes;
+  }
+
+  void AtomLabelRenderer::drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, int alignment)
+  {
+    auto boxes = generateTextBoxes(alignment, lbl, fonts);
+    painter->save(); // TODO unite with computeBoundingRect
+    std::for_each(boxes.begin(), boxes.end(), [&](const TextBox *box){ box->render(painter); });
     painter->restore();
   }
 
   QRectF AtomLabelRenderer::computeBoundingRect(const QString &lbl, const QPair<QFont, QFont> &fonts, Alignment alignment) {
-    if (fonts.first.pointSizeF() < 0) return QRectF();
-    QFontMetrics fmSymbol(fonts.first), fmScript(fonts.second);
-
-    qreal totalWidth = computeTotalWdith(alignment, lbl, fmSymbol, fmScript);
-    qreal xOffset = computeXOffset(alignment, fmSymbol, lbl, totalWidth);
-    qreal yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent());
-    qreal yOffsetSubscript = yOffset + fmSymbol.descent();
-
-    // compute the shape
-    if ((alignment == Right) || (alignment == Left) || !lbl.contains("H") || QRegExp("H[0-9]*").exactMatch(lbl))
-      return QRectF(xOffset, yOffsetSubscript - fmSymbol.height(), totalWidth, fmSymbol.height());
-    if (alignment == Down)
-      return QRectF(xOffset, yOffsetSubscript - fmSymbol.height(), totalWidth, fmSymbol.ascent() + fmSymbol.height());
-    return QRectF(xOffset, yOffsetSubscript - fmSymbol.ascent() - fmSymbol.height(), totalWidth, fmSymbol.ascent() + fmSymbol.height());
+    auto boxes = generateTextBoxes(alignment, lbl, fonts);
+    QRectF result;
+    std::for_each(boxes.begin(), boxes.end(), [&](const TextBox *box) { result |= box->boundingRect(); });
+    return result;
   }
 
   qreal AtomLabelRenderer::computeTotalWdith(const int& alignment,
