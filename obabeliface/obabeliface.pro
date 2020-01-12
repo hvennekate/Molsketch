@@ -1,4 +1,4 @@
-include(../findOpenBabel.pri)
+include(findOpenBabel.pri)
 include(../settings.pri)
 
 TEMPLATE = lib
