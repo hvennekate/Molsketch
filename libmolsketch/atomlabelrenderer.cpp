@@ -33,7 +33,7 @@ namespace Molsketch {
   protected:
     QPointF offset;
     QFont font;
-    QFontMetrics metrics; // TODO should really be QFontMetricsF
+    QFontMetricsF metrics; // TODO should really be QFontMetricsF
     TextBox(const QPointF &offset, const QFont &font) : offset(offset), font(font), metrics(font) {}
   public:
     virtual void render(QPainter *painter) const = 0;
@@ -68,7 +68,7 @@ namespace Molsketch {
                    const QString &bottomText,
                    const QPointF &offset,
                    const QFont & font,
-                   const QFontMetrics & mainFontMetrics)
+                   const QFontMetricsF & mainFontMetrics)
       : TextBox(offset, font),
         topText(topText),
         bottomText(bottomText),
@@ -96,8 +96,8 @@ namespace Molsketch {
   {
     QFont symbolFont = fonts.first;
     QFont subscriptFont = fonts.second; // TODO get code from atom to fix second font
-    QFontMetrics fmSymbol(symbolFont);
-    QFontMetrics fmScript(subscriptFont);
+    QFontMetricsF fmSymbol(symbolFont);
+    QFontMetricsF fmScript(subscriptFont);
 
     // compute the horizontal starting position
     qreal totalWidth = computeTotalWdith(alignment, lbl, fmSymbol, fmScript);
@@ -145,8 +145,8 @@ namespace Molsketch {
 
   qreal AtomLabelRenderer::computeTotalWdith(const int& alignment,
                                              const QString& lbl,
-                                             const QFontMetrics &fmSymbol,
-                                             const QFontMetrics &fmScript)
+                                             const QFontMetricsF &fmSymbol,
+                                             const QFontMetricsF &fmScript)
   {
     qreal totalWidth = 0;
     if ((alignment == Right) || (alignment == Left) || !lbl.contains("H")) {
@@ -173,7 +173,7 @@ namespace Molsketch {
     return totalWidth;
   }
 
-  qreal AtomLabelRenderer::computeXOffset(int alignment, const QFontMetrics& fmSymbol, const QString& lbl, const qreal& totalWidth)
+  qreal AtomLabelRenderer::computeXOffset(int alignment, const QFontMetricsF& fmSymbol, const QString& lbl, const qreal& totalWidth)
   {
     switch (alignment) {
       case Right:
