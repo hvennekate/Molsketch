@@ -20,6 +20,7 @@
 #include <cxxtest/TestSuite.h>
 #include "utilities.h"
 #include <sumformula.h>
+#include <cmath>
 
 using namespace Molsketch;
 
@@ -223,5 +224,35 @@ public:
     auto a2b5_10minus = SumFormula{{"A", 2, -10}, {"B", 5}};
     QS_ASSERT_EQUALS(SumFormula::fromString("A2-3B5-7", &valid), a2b5_10minus);
     TS_ASSERT(valid);
+  }
+
+  void testIsotopes() {
+    auto formulaWithIsotopes = SumFormula{{"C", 1, 0, 13}, {"H", 4, 0, 2}};
+    QS_ASSERT_EQUALS(formulaWithIsotopes.toHtml(), "<super>13</super>C<super>2</super>H<sub>4</sub>");
+    QS_ASSERT_EQUALS(formulaWithIsotopes.toString(), "13C 2H4");
+
+    auto formulaSortableIsotopes = SumFormula{{"C", 1, 0, 13}, {"C", 1, 0, 12}, {"C", 1, 0, 14}};
+    QS_ASSERT_EQUALS(formulaSortableIsotopes.toHtml(), "<super>12</super>C<super>13</super>C<super>14</super>C");
+    QS_ASSERT_EQUALS(formulaSortableIsotopes.toString(), "12C 13C 14C");
+  }
+
+  void testMassCalculation() {
+    using std::isnan;
+
+    auto abMasses = QMap<QString, qreal>{{"A", 3}, {"B", 10.5}};
+    auto a2b = SumFormula{{"A", 2}, {"B"}};
+    TS_ASSERT_EQUALS(a2b.calculateMass(abMasses), 16.5);
+
+    auto a2c = SumFormula{{"A", 2}, {"C"}};
+    TS_ASSERT_IS_NAN(a2c.calculateMass(abMasses));
+
+    auto aIsotopeMasses = QMap<std::pair<QString,int>, qreal>{{{"A", 4}, 4.125}};
+    auto a_4ab = SumFormula{{"A"}, {"A", 1, 0, 4}, {"B"}};
+    auto a_4ab_mass = a_4ab.calculateMass(abMasses, aIsotopeMasses);
+    TS_ASSERT_EQUALS(a_4ab_mass, 17.625);
+
+    auto a_5ab_withInvalidIsotope = SumFormula{{"A"}, {"A", 1, 0, 5}, {"B"}};
+    auto a_5ab_mass = a_5ab_withInvalidIsotope.calculateMass(abMasses, aIsotopeMasses);
+    TS_ASSERT_IS_NAN(a_5ab_mass);
   }
 };

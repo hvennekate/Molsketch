@@ -20,6 +20,7 @@
 #define SUMFORMULA_H
 
 #include <QScopedPointer>
+#include <QMap>
 
 namespace Molsketch {
 
@@ -30,13 +31,14 @@ namespace Molsketch {
     Q_DECLARE_PRIVATE(SumFormula)
     QScopedPointer<SumFormulaPrivate> d_ptr;
   public:
-    SumFormula(const QString& atomSymbol, int count = 1, int charge = 0);
+    SumFormula(const QString& atomSymbol, int count = 1, int charge = 0, int isotope = 0);
     SumFormula(const std::initializer_list<SumFormula> &items);
     SumFormula(const SumFormula& other);
     SumFormula();
     virtual ~SumFormula();
     operator QString() const;
     int charge() const;
+    qreal calculateMass(const QMap<QString, qreal>& atomicMasses, const QMap<std::pair<QString, int>, qreal>& isotopeMasses = {}) const;
     SumFormula& operator+=(const SumFormula &other);
     SumFormula operator+(const SumFormula &other) const;
     bool operator ==(const SumFormula &other) const;

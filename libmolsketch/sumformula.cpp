@@ -18,29 +18,33 @@
  ***************************************************************************/
 #include "sumformula.h"
 
-#include <QMap>
 #include <QDebug>
 #include <QRegularExpression>
+#include <numeric>
 
 namespace Molsketch {
 
-  class ElementSymbol : public QString {
+  class ElementSymbol {
+  private:
+    QString symbol;
+    int isotope;
   public:
-    ElementSymbol(const QString& other) : QString(other) {}
+    explicit ElementSymbol(const QString& symbol) : ElementSymbol(symbol, 0) {}
+    ElementSymbol(const QString& symbol, int isotope) : symbol(symbol), isotope(isotope) {}
+    int getIsotope() const { return isotope; }
+    QString getSymbol() const { return symbol; }
+    bool operator <(const ElementSymbol& other) const {
+      if (symbol == other.symbol) {
+        return isotope < other.isotope;
+      }
+      if (symbol == "C") return true;
+      if (other.symbol == "C") return false;
+      if (symbol == "H") return true;
+      if (other.symbol == "H") return false;
+      return symbol < other.symbol;
+    }
   };
-}
 
-template<>
-bool qMapLessThanKey<Molsketch::ElementSymbol>(const Molsketch::ElementSymbol &a, const Molsketch::ElementSymbol &b) {
-  if (a == b) return false;
-  if (a == "C") return true;
-  if (b == "C") return false;
-  if (a == "H") return true;
-  if (b == "H") return false;
-  return a < b;
-}
-
-namespace Molsketch {
   struct SumFormulaPrivate {
     QMap<ElementSymbol, int> elementCounts;
     int charge;
@@ -50,9 +54,15 @@ namespace Molsketch {
                    bool trailingChargeSign = false) const {
       QString result;
       for (auto element : elementCounts.keys()) {
+        int isotope = element.getIsotope();
+        if (isotope) {
+          result += ((!result.isEmpty() && superscriptOpen.isEmpty() && superscriptClose.isEmpty())
+                     ? " " : "")
+              + superscriptOpen + QString::number(isotope) + superscriptClose;
+        }
+        result += element.getSymbol();
         int count = elementCounts[element];
-        if (count != 1) result += element + subscriptOpen + QString::number(count) + subscriptClose;
-        else result += element;
+        if (count != 1) result += subscriptOpen + QString::number(count) + subscriptClose;
       }
       if (charge) {
         result += superscriptOpen;
@@ -65,7 +75,7 @@ namespace Molsketch {
     }
   };
 
-  SumFormula::SumFormula(const QString& atomSymbol, int count, int charge)
+  SumFormula::SumFormula(const QString& atomSymbol, int count, int charge, int isotope)
     : SumFormula()
   {
     Q_D(SumFormula);
@@ -73,7 +83,7 @@ namespace Molsketch {
       qWarning() << "Tried to initialize sum formula with invalid element count. Element:" << atomSymbol << "count:" << count;
       return;
     }
-    d->elementCounts[atomSymbol] = count;
+    d->elementCounts[ElementSymbol{atomSymbol, isotope}] = count;
     d->charge = charge;
   }
 
@@ -101,7 +111,25 @@ namespace Molsketch {
   int SumFormula::charge() const {
     Q_D(const SumFormula);
     return d->charge;
+  }
 
+  qreal SumFormula::calculateMass(const QMap<QString, qreal> &atomicMasses, const QMap<std::pair<QString, int>, qreal>& isotopeMasses) const
+  {
+    Q_D(const SumFormula);
+    return std::accumulate(d->elementCounts.constKeyValueBegin(),
+                           d->elementCounts.constKeyValueEnd(),
+                           0.,
+                           [&](qreal mass, const std::pair<ElementSymbol, int> elementCount) {
+      auto elementSymbol = elementCount.first.getSymbol();
+      auto isotope = elementCount.first.getIsotope();
+      if (isotope) {
+        auto isotopeKey = std::make_pair(elementSymbol, isotope);
+        if (!isotopeMasses.contains(isotopeKey)) return qQNaN();
+        return mass + elementCount.second * isotopeMasses[isotopeKey];
+      }
+      if (!atomicMasses.contains(elementSymbol)) return qQNaN();
+      return mass + elementCount.second * atomicMasses[elementSymbol];
+    });
   }
 
   SumFormula &SumFormula::operator+=(const SumFormula &other) {
