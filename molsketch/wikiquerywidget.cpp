@@ -88,8 +88,8 @@ public:
 
 void WikiQueryWidget::processMoleculeQuery(QNetworkReply *reply) {
   ui->progressWidget->hide();
-  if (!reply->isFinished()) reply->abort();
   if (!reply) return;
+  if (!reply->isFinished()) reply->abort();
 
   qDebug("Network error code: %d", reply->error());
   if (reply->error() != QNetworkReply::NoError) {
@@ -137,7 +137,6 @@ void WikiQueryWidget::startMoleculeQuery(const QString& queryString) {
                                 " . SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". } "
                                 "FILTER(REGEX(?label, \"" + queryString + "\", \"i\")) "
                                 "} GROUP BY ?qnumber"
-//                                " LIMIT 100 ORDER BY DESC(?label)"
                                 ));
   QUrl url("https://query.wikidata.org/sparql");
   url.setQuery(query);

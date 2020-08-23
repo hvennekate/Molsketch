@@ -64,6 +64,8 @@ QString makeComparisonString(const char *first, const char *second, T expected, 
 
 #define QSM_ASSERT_EQUALS(MESSAGE, VAL1, VAL2) {QString __comparison("\n    "); QDebug __out(&__comparison); __out << VAL1; __comparison += "\n != "; __out << VAL2; TSM_ASSERT_EQUALS((MESSAGE + __comparison).toStdString().data(), VAL1, VAL2)}
 
+#define QSM_ASSERT_NOT_EQUALS(MESSAGE, VAL1, VAL2) {QString __comparison("\n    "); QDebug __out(&__comparison); __out << VAL1; __comparison += "\n != "; __out << VAL2; TSM_ASSERT_DIFFERS((MESSAGE + __comparison).toStdString().data(), VAL1, VAL2)}
+
 #define QSM_ASSERT_DELTA(MESSAGE, VAL1, VAL2, DELTA) {QString __comparison("\n    "); QDebug __out(&__comparison); __out << VAL1; __comparison += "\n != "; __out << VAL2; TSM_ASSERT_DELTA((MESSAGE + __comparison).toStdString().data(), VAL1, VAL2, DELTA)}
 
 #define QSO_ASSERT(ASSERTION, ...) {TSM_ASSERT(joinToString(__VA_ARGS__), ASSERTION)}

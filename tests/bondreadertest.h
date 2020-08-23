@@ -25,7 +25,7 @@
 
 using namespace Molsketch;
 
-class bondReaderTest : public CxxTest::TestSuite {
+class BondReaderTest : public CxxTest::TestSuite {
   Atom *atom1, *atom2;
   Bond *bond;
   Molecule *molecule;
