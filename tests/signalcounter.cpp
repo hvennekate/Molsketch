@@ -26,6 +26,10 @@ SIGNAL_COUNTER_DEF(BoolSignalCounter, bool)
 SIGNAL_COUNTER_DEF(ColorSignalCounter, QColor)
 SIGNAL_COUNTER_DEF(FontSignalCounter, QFont)
 SIGNAL_COUNTER_DEF(StringListSignalCounter, QStringList)
+typedef QMap<QString, qreal> StringDoubleMap ;
+SIGNAL_COUNTER_DEF(StringDoubleMapSignalCounter, StringDoubleMap)
+typedef QMap<std::pair<QString, int>, qreal> StringIntDoubleMap;
+SIGNAL_COUNTER_DEF(StringIntDoubleMapSignalCounter, StringIntDoubleMap)
 
 ModelIndexSignalCounter::ModelIndexSignalCounter(QObject *parent) : QObject(parent) {}
 

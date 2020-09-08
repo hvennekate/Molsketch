@@ -56,6 +56,21 @@ const QString STRING_LIST_AS_STRING("AAAAAgAAABYAdABlAHMAdABTAHQAcgBpAG4AZwAxAAA
 const QStringList ALTERNATE_STRING_LIST{"alternate1", "Alternate2"};
 const QString ALTERNATE_STRING_LIST_AS_STRING("AAAAAgAAABQAYQBsAHQAZQByAG4AYQB0AGUAMQAAABQAQQBsAHQAZQByAG4AYQB0AGUAMg==");
 
+const QString STRING_DOUBLE_MAP_KEY("TestStringDoubleMap");
+const QMap<QString, qreal> STRING_DOUBLE_MAP_VALUE{{"one", 1.}, {"onehalf", 1.5}, {"quarter", 0.25}, {"minushalf", -.5}};
+const QVariantMap STRING_DOUBLE_MAP_VARIANT{{"one", 1.}, {"onehalf", 1.5}, {"quarter", 0.25}, {"minushalf", -.5}};
+const QString STRING_DOUBLE_MAP_AS_STRING("{\"minushalf\":-0.5,\"one\":1,\"onehalf\":1.5,\"quarter\":0.25}");
+const QMap<QString, qreal> ALTERNATE_STRING_DOUBLE_MAP_VALUE{{"two", 2.}, {"threehalf", 3.5}};
+const QVariantMap ALTERNATE_STRING_DOUBLE_MAP_VARIANT{{"two", 2.}, {"threehalf", 3.5}};
+const QString ALTERNATE_STRING_DOUBLE_MAP_AS_STRING("{\"threehalf\":3.5,\"two\":2}");
+
+const QString STRING_INT_DOUBLE_MAP_KEY("TestStringIntDoubleMap");
+const QMap<std::pair<QString, int>, qreal> STRING_INT_DOUBLE_MAP_VALUE{{{"one", 1}, 1.}, {{"onehalf", -3}, 1.5}, {{"one", 2}, 0.25}, {{"minushalf", 0}, -.5}};
+const QVariantMap STRING_INT_DOUBLE_MAP_VARIANT{{"one", QVariantMap{{"1", 1.}, {"2", 0.25}}}, {"onehalf", QVariantMap{{"-3", 1.5}}}, {"minushalf", QVariantMap{{"0", -.5}}}};
+const QString STRING_INT_DOUBLE_MAP_AS_STRING("[{\"keyInt\":0,\"keyString\":\"minushalf\",\"value\":-0.5},{\"keyInt\":1,\"keyString\":\"one\",\"value\":1},{\"keyInt\":2,\"keyString\":\"one\",\"value\":0.25},{\"keyInt\":-3,\"keyString\":\"onehalf\",\"value\":1.5}]");
+const QMap<std::pair<QString, int>, qreal> ALTERNATE_STRING_INT_DOUBLE_MAP_VALUE{{{"two", 0}, 2.}, {{"threehalf", 1}, 3.5}};
+const QVariantMap ALTERNATE_STRING_INT_DOUBLE_MAP_VARIANT{{"two", QVariantMap{{"0", 2.}}}, {"threehalf", QVariantMap{{"1", 3.5}}}};
+const QString ALTERNATE_STRING_INT_DOUBLE_MAP_AS_STRING("[{\"keyInt\":1,\"keyString\":\"threehalf\",\"value\":3.5},{\"keyInt\":0,\"keyString\":\"two\",\"value\":2}]");
 
 template<typename T, typename SETTINGS_ITEM_TYPE, typename SIGNAL_COUNTER_TYPE>
 class SettingsItemTestCase : public CxxTest::TestSuite {
@@ -115,6 +130,17 @@ protected:
       alternateVariant(QVariant(alternate))
   {}
 
+  SettingsItemTestCase(const QString& key, T value, T alternate, const QString &valueAsString, const QString &alternateAsString, const QVariant &variant, const QVariant &alternateVariant)
+    : key(key),
+      valueAsString(valueAsString),
+      alternateAsString(alternateAsString),
+      valueAsXml("<" + key + " value=\"" +valueAsString.toHtmlEscaped() + "\"/>"), // TODO escape xml
+      value(value),
+      alternate(alternate),
+      variant(variant),
+      alternateVariant(alternateVariant)
+  {}
+
 public:
   void setUp() override {
     facade = SettingsFacade::transientSettings();
@@ -123,7 +149,7 @@ public:
     emptySettingsItem = new SETTINGS_ITEM_TYPE(key, emptyFacade);
     signalCounter = new SIGNAL_COUNTER_TYPE;
 
-    facade->setValue(key, value);
+    facade->setValue(key, variant);
     QObject::connect(settingsItem, &SETTINGS_ITEM_TYPE::updated, signalCounter, &SIGNAL_COUNTER_TYPE::record);
   }
 
@@ -190,6 +216,28 @@ public:
 class StringListSettingsItemUnitTest : public SettingsItemTestCase<QStringList, StringListSettingsItem, StringListSignalCounter> {
 public:
   StringListSettingsItemUnitTest() : SettingsItemTestCase(STRING_LIST_KEY, STRING_LIST_VALUE, ALTERNATE_STRING_LIST, STRING_LIST_AS_STRING, ALTERNATE_STRING_LIST_AS_STRING) {}
+  void testReading() { readValue(); }
+  void testWritingXml() { assertWritingXml(); }
+  void testReadingXml() { assertWritingXml(); }
+  void testSettingValue() { performSettingCycle(alternate); }
+  void testSettingVariant() { performSettingCycle(alternateVariant); }
+  void testSettingString() { performSettingCycle(alternateAsString); }
+};
+
+class StringDoubleMapSettingsItemUnitTest : public SettingsItemTestCase<QMap<QString, qreal>, StringDoubleMapSettingsItem, StringDoubleMapSignalCounter> {
+public:
+  StringDoubleMapSettingsItemUnitTest() : SettingsItemTestCase(STRING_DOUBLE_MAP_KEY, STRING_DOUBLE_MAP_VALUE, ALTERNATE_STRING_DOUBLE_MAP_VALUE, STRING_DOUBLE_MAP_AS_STRING, ALTERNATE_STRING_DOUBLE_MAP_AS_STRING, STRING_DOUBLE_MAP_VARIANT, ALTERNATE_STRING_DOUBLE_MAP_VARIANT) {}
+  void testReading() { readValue(); }
+  void testWritingXml() { assertWritingXml(); }
+  void testReadingXml() { assertWritingXml(); }
+  void testSettingValue() { performSettingCycle(alternate); }
+  void testSettingVariant() { performSettingCycle(alternateVariant); }
+  void testSettingString() { performSettingCycle(alternateAsString); }
+};
+
+class StringIntDoubleMapSettingsItemUnitTest : public SettingsItemTestCase<QMap<std::pair<QString, int>, qreal>, StringIntDoubleMapSettingsItem, StringIntDoubleMapSignalCounter> {
+public:
+  StringIntDoubleMapSettingsItemUnitTest() : SettingsItemTestCase(STRING_INT_DOUBLE_MAP_KEY, STRING_INT_DOUBLE_MAP_VALUE, ALTERNATE_STRING_INT_DOUBLE_MAP_VALUE, STRING_INT_DOUBLE_MAP_AS_STRING, ALTERNATE_STRING_INT_DOUBLE_MAP_AS_STRING, STRING_INT_DOUBLE_MAP_VARIANT, ALTERNATE_STRING_INT_DOUBLE_MAP_VARIANT) {}
   void testReading() { readValue(); }
   void testWritingXml() { assertWritingXml(); }
   void testReadingXml() { assertWritingXml(); }

@@ -113,6 +113,22 @@ public slots:
   void record(const QStringList&value);
 };
 
+class StringDoubleMapSignalCounter : public QObject, public SignalCounter<QMap<QString, qreal>> {
+  Q_OBJECT
+public:
+  explicit StringDoubleMapSignalCounter(QObject *parent = 0);
+public slots:
+  void record(const QMap<QString, qreal> &value);
+};
+
+class StringIntDoubleMapSignalCounter : public QObject, public SignalCounter<QMap<std::pair<QString, int>, qreal>> {
+  Q_OBJECT
+public:
+  explicit StringIntDoubleMapSignalCounter(QObject *parent = 0);
+public slots:
+  void record(const QMap<std::pair<QString, int>, qreal> &value);
+};
+
 class ModelIndexSignalCounter : public QObject, public SignalCounter<QModelIndex, int, int>
 {
   Q_OBJECT

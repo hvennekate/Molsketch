@@ -22,6 +22,9 @@
 #include <QColor>
 #include <QFont>
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 const QString XML_VALUE_ATTRIBUTE("value");
 
@@ -259,6 +262,126 @@ namespace Molsketch {
     debug.nospace() << "SettingsItem (" << (void*) setting << ", key: " << setting->d_ptr->key << ")";
     return debug;
   }
+
 #endif
+
+  StringDoubleMapSettingsItem::StringDoubleMapSettingsItem(const QString &key, SettingsFacade *facade, QObject *parent)
+    : SettingsItem(key, facade, parent) {}
+
+  QString StringDoubleMapSettingsItem::serialize() const {
+    auto jsonMap = QJsonObject();
+    auto map = get();
+    for (auto it = map.cbegin(); it != map.cend(); ++it)
+      jsonMap.insert(it.key(), {it.value()});
+    auto jsonDocument = QJsonDocument();
+    jsonDocument.setObject(jsonMap);
+    return jsonDocument.toJson(QJsonDocument::Compact);
+  }
+
+  QVariant StringDoubleMapSettingsItem::getVariant() const {
+    return d_ptr->facade->value(d_ptr->key);
+  }
+
+  QMap<QString, qreal> StringDoubleMapSettingsItem::get() const {
+    auto variantMap = getVariant().toMap();
+    QMap<QString, qreal> result;
+    for (auto it = variantMap.cbegin(); it != variantMap.cend(); ++it)
+      result[it.key()] = it.value().toDouble();
+    return result;
+  }
+
+  void StringDoubleMapSettingsItem::set(const QVariant &value) {
+    if (d_ptr->locked) return;
+    d_ptr->locked = true;
+    qInfo() << "Setting" << d_ptr->key << "to new value" << value;
+    d_ptr->facade->setValue(d_ptr->key, value);
+    emit updated(get());
+    d_ptr->locked = false;
+  }
+
+  void StringDoubleMapSettingsItem::set(const QString &data) {
+    auto jsonObject = QJsonDocument::fromJson(data.toUtf8()).object();
+    QMap<QString, qreal> newValue;
+    for (auto it = jsonObject.constBegin(); it != jsonObject.constEnd(); ++it)
+      newValue[it.key()] = it.value().toDouble();
+    set(newValue);
+  }
+
+  void StringDoubleMapSettingsItem::set(const QMap<QString, qreal> &value) {
+    QVariantMap variantMap;
+    for (auto it = value.cbegin(); it != value.cend(); ++it)
+      variantMap[it.key()] = it.value();
+    set(variantMap);
+  }
+
+  const char *STRING_KEY = "keyString";
+  const char *INT_KEY = "keyInt";
+  const char *VALUE = "value";
+
+  StringIntDoubleMapSettingsItem::StringIntDoubleMapSettingsItem(const QString &key, SettingsFacade *facade, QObject *parent)
+    : SettingsItem(key, facade, parent) {}
+
+  QString StringIntDoubleMapSettingsItem::serialize() const {
+    QJsonArray jsonList;
+    auto map = get();
+    for (auto it = map.cbegin(); it != map.cend(); ++it) {
+      QJsonObject entry;
+      entry.insert(STRING_KEY, it.key().first);
+      entry.insert(INT_KEY, it.key().second);
+      entry.insert(VALUE, it.value());
+      jsonList << entry;
+    }
+    auto jsonDocument = QJsonDocument();
+    jsonDocument.setArray(jsonList);
+    return jsonDocument.toJson(QJsonDocument::Compact);
+  }
+
+  QVariant StringIntDoubleMapSettingsItem::getVariant() const {
+    return d_ptr->facade->value(d_ptr->key);
+  }
+
+  QMap<std::pair<QString, int>, qreal> StringIntDoubleMapSettingsItem::get() const {
+    QMap<std::pair<QString, int>, qreal> result;
+    auto variantMap = getVariant().toMap();
+    for (auto it = variantMap.cbegin(); it != variantMap.cend(); ++it) {
+      auto string = it.key();
+      auto innerMap = it.value().toMap();
+      for (auto inner = innerMap.cbegin(); inner != innerMap.cend(); ++inner)
+        result[std::make_pair(string, inner.key().toInt())] = inner.value().toDouble();
+    }
+    return result;
+  }
+
+  void StringIntDoubleMapSettingsItem::set(const QVariant &value) {
+    if (d_ptr->locked) return;
+    d_ptr->locked = true;
+    qInfo() << "Setting" << d_ptr->key << "to new value" << value;
+    d_ptr->facade->setValue(d_ptr->key, value);
+    emit updated(get());
+    d_ptr->locked = false;
+  }
+
+  void StringIntDoubleMapSettingsItem::set(const QString &data) {
+    auto jsonList = QJsonDocument::fromJson(data.toUtf8()).array();
+    QMap<std::pair<QString, int>, qreal> newValue;
+    for (auto value : jsonList) {
+      auto jsonObject = value.toObject();
+      newValue[std::make_pair(jsonObject[STRING_KEY].toString(), jsonObject[INT_KEY].toInt())]
+          = jsonObject[VALUE].toDouble();
+    }
+    set(newValue);
+  }
+
+  void StringIntDoubleMapSettingsItem::set(const QMap<std::pair<QString, int>, qreal> &value) {
+    QVariantMap variantMap;
+    for (auto it = value.cbegin(); it != value.cend(); ++it) {
+      auto string = it.key().first;
+      auto integer = it.key().second;
+      auto oldMap = variantMap[string].toMap();
+      oldMap[QString::number(integer)] = it.value();
+      variantMap[string] = oldMap;
+    }
+    set(variantMap);
+  }
 
 } // namespace Molsketch

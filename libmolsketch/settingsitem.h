@@ -131,6 +131,36 @@ namespace Molsketch {
     void updated(const QStringList&);
   };
 
+  class StringDoubleMapSettingsItem : public SettingsItem {
+    Q_OBJECT
+  public:
+    StringDoubleMapSettingsItem(const QString& key, SettingsFacade *facade, QObject *parent = 0);
+    QString serialize() const override;
+    QVariant getVariant() const override;
+    QMap<QString, qreal> get() const;
+    void set(const QVariant&) override;
+    void set(const QString&) override;
+  public slots:
+    void set(const QMap<QString, qreal>&);
+  signals:
+    void updated(const QMap<QString, qreal>&);
+  };
+
+  class StringIntDoubleMapSettingsItem : public SettingsItem {
+    Q_OBJECT
+  public:
+    StringIntDoubleMapSettingsItem(const QString& key, SettingsFacade *facade, QObject *parent = 0);
+    QString serialize() const override;
+    QVariant getVariant() const override;
+    QMap<std::pair<QString, int>, qreal> get() const;
+    void set(const QVariant&) override;
+    void set(const QString&) override;
+  public slots:
+    void set(const QMap<std::pair<QString, int>, qreal>&);
+  signals:
+    void updated(const QMap<std::pair<QString, int>, qreal>&);
+  };
+
   class SettingsItemUndoCommand : public Commands::Command<SettingsItem, SettingsItemUndoCommand, Commands::SettingsItemId> {
     QUndoStack *stack;
     QVariant newValue;
