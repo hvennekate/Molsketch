@@ -26,71 +26,10 @@
 #include <algorithm>
 
 #include "atomlabelrenderer.h"
+#include "painting/regulartextbox.h"
+#include "painting/stackedtextbox.h"
 
 namespace Molsketch {
-
-  class TextBox {
-  protected:
-    QPointF offset;
-    QFont font;
-    QFontMetricsF metrics; // TODO should really be QFontMetricsF
-    TextBox(const QPointF &offset, const QFont &font) : offset(offset), font(font), metrics(font) {}
-  public:
-    virtual void render(QPainter *painter) const = 0;
-    virtual QRectF boundingRect() const = 0;
-  };
-
-  class RegularTextBox : public TextBox {
-    QString text;
-  public:
-    RegularTextBox(const QString &text, const QPointF &offset, const QFont &font)
-      : TextBox(offset, font), text(text) {}
-
-    void render(QPainter *painter) const override {
-      painter->save();
-      painter->setFont(font);
-      painter->drawText(offset, text);
-      painter->restore();
-    }
-
-    QRectF boundingRect() const override {
-      return QRectF(offset, QSizeF(metrics.width(text), metrics.height()))
-          .translated(0, metrics.descent()-metrics.height()); // TODO replace with metrics.boundingRect()
-//      return QRectF(metrics.boundingRect(text)).translated(offset); // TODO remove QRectF with QFontMetricsF
-    }
-  };
-
-  class StackedTextBox : public TextBox {
-    QString topText, bottomText;
-    int shiftUp, shiftDown, mainHeight;
-  public:
-    StackedTextBox(const QString &topText,
-                   const QString &bottomText,
-                   const QPointF &offset,
-                   const QFont & font,
-                   const QFontMetricsF & mainFontMetrics)
-      : TextBox(offset, font),
-        topText(topText),
-        bottomText(bottomText),
-        shiftUp(mainFontMetrics.ascent()),
-        shiftDown(mainFontMetrics.descent()),
-        mainHeight(mainFontMetrics.height())
-    {}
-
-    void render(QPainter *painter) const override {
-      painter->save();
-      painter->setFont(font);
-      painter->drawText(offset + QPointF(0, shiftDown), bottomText);
-      painter->drawText(offset + QPointF(0, shiftUp), topText);
-      painter->restore();
-    }
-
-    QRectF boundingRect() const override {
-      return QRectF(offset, QSizeF(qMax(metrics.width(topText), metrics.width(bottomText)), mainHeight))
-          .translated(0, shiftDown - mainHeight);
-      // TODO compute height correctly
-    }
-  };
 
   QVector<TextBox*> AtomLabelRenderer::generateTextBoxes(int alignment, const QString &lbl, const QPair<QFont, QFont>& fonts)
   {
