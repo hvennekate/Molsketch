@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DrawingTestDialog</class>
+ <widget class="QDialog" name="DrawingTestDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QGraphicsView" name="view"/>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QCheckBox" name="drawGrid">
+         <property name="text">
+          <string>Grid</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="drawOrigin">
+         <property name="text">
+          <string>Origin</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="drawBounds">
+         <property name="text">
+          <string>Bounds</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Zoom</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="zoom">
+         <property name="minimum">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.200000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Size</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="size">
+         <property name="maximum">
+          <number>300</number>
+         </property>
+         <property name="value">
+          <number>50</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>DrawingTestDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>281</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>DrawingTestDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>295</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>drawGrid</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>DrawingTestDialog</receiver>
+   <slot>redraw()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>360</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>334</x>
+     <y>38</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>drawOrigin</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>DrawingTestDialog</receiver>
+   <slot>redraw()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>357</x>
+     <y>51</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>393</x>
+     <y>73</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>zoom</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>DrawingTestDialog</receiver>
+   <slot>redraw()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>388</x>
+     <y>127</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>393</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>size</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>DrawingTestDialog</receiver>
+   <slot>redraw()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>388</x>
+     <y>175</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>392</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>drawBounds</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>DrawingTestDialog</receiver>
+   <slot>redraw()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>334</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>355</x>
+     <y>200</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>redraw()</slot>
+ </slots>
+</ui>
