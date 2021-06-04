@@ -47,6 +47,11 @@ namespace Molsketch { // TODO turn on warnings for switch'es
   QDebug operator<<(QDebug debug, const Anchor& anchor);
 #endif
 
+  class Linkable {
+  public:
+    virtual QPointF getAnchorPoint(const Anchor &anchor) const = 0;
+  };
+
   class BoundingBoxLinkerPrivate;
 
   class BoundingBoxLinker : public abstractXmlObject {
@@ -56,7 +61,8 @@ namespace Molsketch { // TODO turn on warnings for switch'es
     explicit BoundingBoxLinker(Anchor originAnchor = Anchor::Center, Anchor ownAnchor = Anchor::Center, const QPointF& offset = QPointF());
     BoundingBoxLinker(const BoundingBoxLinker& other);
     virtual ~BoundingBoxLinker();
-    QPointF getShift(const QRectF& reference, const QRectF& target) const;
+    QPointF getShift(const QRectF &reference, const QRectF &target) const;
+    QPointF getShift(const Linkable &reference, const Linkable &target) const;
     QString xmlName() const override;
     static QString xmlClassName();
     QXmlStreamAttributes xmlAttributes() const override;
