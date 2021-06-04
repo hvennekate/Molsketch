@@ -1,7 +1,7 @@
 isEmpty(CXXTEST_PATH) : error("Pass CXXTEST_PATH on command line")
 include(../obabeliface/findOpenBabel.pri)
 include(../settings.pri)
-
+# TODO: split off library to allow for faster linking
 TESTS = $$files(*test.h, true)
 
 SOURCES += $$files($$PWD/../*.cpp, true)
