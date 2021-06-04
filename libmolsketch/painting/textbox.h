@@ -10,13 +10,14 @@ namespace Molsketch {
 
 class TextBox {
 protected:
-  QPointF offset;
+  QPointF offset; // TODO removes
   QFont font;
-  QFontMetricsF metrics; // TODO should really be QFontMetricsF
+  QFontMetricsF metrics;
   TextBox(const QPointF &offset, const QFont &font) : offset(offset), font(font), metrics(font) {}
 public:
   virtual void render(QPainter *painter) const = 0;
   virtual QRectF boundingRect() const = 0;
+  virtual ~TextBox(){}
 };
 
 

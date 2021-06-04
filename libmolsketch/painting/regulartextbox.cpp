@@ -7,9 +7,7 @@ RegularTextBox::RegularTextBox(const QString &text, const QPointF &offset, const
   : TextBox(offset, font), text(text) {}
 
 QRectF RegularTextBox::boundingRect() const {
-  return QRectF(offset, QSizeF(metrics.width(text), metrics.height()))
-      .translated(0, metrics.descent()-metrics.height()); // TODO replace with metrics.boundingRect()
-  //      return QRectF(metrics.boundingRect(text)).translated(offset); // TODO remove QRectF with QFontMetricsF
+  return metrics.boundingRect(text);
 }
 
 void RegularTextBox::render(QPainter *painter) const {

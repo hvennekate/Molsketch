@@ -7,13 +7,12 @@ namespace Molsketch {
 
 class StackedTextBox : public TextBox {
   QString topText, bottomText;
-  int shiftUp, shiftDown, mainHeight;
+  QFontMetricsF originalFontMetrics;
 public:
   StackedTextBox(const QString &topText,
                  const QString &bottomText,
-                 const QPointF &offset,
-                 const QFont & font,
-                 const QFontMetricsF & mainFontMetrics);
+                 const QPointF &offset, // TODO remove
+                 const QFont & font);
   void render(QPainter *painter) const override;
   QRectF boundingRect() const override;
 };

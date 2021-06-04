@@ -57,7 +57,7 @@ namespace Molsketch {
         currentPosition = QPointF(xInitial, currentPosition.y() +(alignment == Down ? fmSymbol.ascent() : - fmSymbol.ascent()));
         boxes << new RegularTextBox(character, currentPosition, symbolFont);
       } else if (number.match(character).hasMatch()) {
-        boxes << new StackedTextBox("", character, currentPosition, subscriptFont, fmSymbol);
+        boxes << new StackedTextBox("", character, currentPosition, symbolFont);
       } else {
         boxes << new RegularTextBox(character, currentPosition, symbolFont);
       }
