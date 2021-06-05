@@ -44,7 +44,19 @@ public:
 
 class BoxDrawingManualTest : public CxxTest::TestSuite {
 public:
-  void testSimpleBoxDrawing() {
+  void testRegularBoxDrawing() {
+    TS_SKIP("Manual test");
+    DrawingTestDialog dialog(new TestRegularTextBox("C"));
+    dialog.exec();
+  }
+
+  void testStackedTextBoxDrawing() {
+    TS_SKIP("Manual test");
+    DrawingTestDialog dialog(new TestStackedTextBox("TOP", "BOTTOM"));
+    dialog.exec();
+  }
+
+  void testBothTextBoxDrawing() {
 //    TS_SKIP("Manual test");
     DrawingTestDialog dialog({
                                new TestStackedTextBox("ABC", "DEF"),

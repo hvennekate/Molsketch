@@ -8,6 +8,7 @@ namespace Molsketch {
 class StackedTextBox : public TextBox {
   QString topText, bottomText;
   QFontMetricsF originalFontMetrics;
+  qreal shiftUp, shiftDown;
 public:
   StackedTextBox(const QString &topText,
                  const QString &bottomText,
