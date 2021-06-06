@@ -1,6 +1,7 @@
 #include "textline.h"
 #include "textbox.h"
 #include <algorithm>
+#include <QDebug>
 
 namespace Molsketch {
 
@@ -48,7 +49,28 @@ namespace Molsketch {
   }
 
   void TextLine::render(QPainter *painter) const {
-    // TODO
+    painter->save();
+    QPointF offset(-d->centerBox->boundingRect().center());
+    auto centerTransform = QTransform(painter->transform()).translate(offset.x(), offset.y());
+    painter->setTransform(centerTransform);
+    d->centerBox->render(painter);
+
+    painter->setTransform(QTransform(centerTransform).translate(d->centerBox->boundingRect().width(), 0));
+    for (auto box : qAsConst(d->rightBoxes)) {
+      auto bounds = box->boundingRect();
+      painter->setTransform(QTransform(painter->transform()).translate(-bounds.left(), 0));
+      box->render(painter);
+      painter->setTransform(QTransform(painter->transform()).translate(bounds.right(), 0));
+    }
+
+    painter->setTransform(centerTransform);
+    for (auto box : qAsConst(d->leftBoxes)) {
+      auto bounds = box->boundingRect();
+      painter->setTransform(QTransform(painter->transform()).translate(-bounds.left() - bounds.width(), 0));
+      box->render(painter);
+    }
+
+    painter->restore();
   }
 
   void TextLine::addBoxRight(const TextBox *newBox) {
