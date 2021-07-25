@@ -33,6 +33,11 @@ class QXmlStreamReader;
 class QXmlStreamAttributes;
 class QMainWindow;
 
+#define QS_MANUAL_TEST {\
+  if (qEnvironmentVariable("RUN_MANUAL_TESTS").toLower() != "true")\
+    TS_SKIP("Manual test");\
+  }
+
 #define QS_ASSERT_EQUALS(VAL1,VAL2) {_TS_TRY { \
   if (!(VAL1 == VAL2)) CxxTest::tracker().failedTest(__FILE__, __LINE__, \
   makeComparisonString(#VAL1, #VAL2, VAL1, VAL2, "!=", "    Expected:       ", "    to be equal to: ").toStdString().data()); \

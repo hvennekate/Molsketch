@@ -1,13 +1,13 @@
-#ifndef MOLSKETCH_TEXTLINE_H
-#define MOLSKETCH_TEXTLINE_H
+#ifndef MOLSKETCH_TEXTFIELD_H
+#define MOLSKETCH_TEXTFIELD_H
 
 #include "paintableaggregate.h"
 
 namespace Molsketch {
 
-  class TextBox;
+  class TextLine;
 
-  class TextLine : public PaintableAggregate {
+  class TextField : public PaintableAggregate {
     QRectF addRectFBefore(const QRectF &base, QRectF toAdd) const override;
     QRectF addRectFAfter(const QRectF &base, QRectF toAdd) const override;
     QPointF beforeItemPreShift(const Paintable *item) const override;
@@ -15,11 +15,11 @@ namespace Molsketch {
     QPointF afterItemPreShift(const Paintable *item) const override;
     QPointF afterItemPostShift(const Paintable *item) const override;
   public:
-    explicit TextLine(const TextBox *centerBox);
-    void addBoxRight(const TextBox *newBox);
-    void addBoxLeft(const TextBox *newBox);
+    explicit TextField(const TextLine *centerLine);
+    void addLineAbove(const TextLine *newLine);
+    void addLineBelow(const TextLine *newLine);
   };
 
 } // namespace Molsketch
 
-#endif // MOLSKETCH_TEXTLINE_H
+#endif // MOLSKETCH_TEXTFIELD_H

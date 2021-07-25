@@ -21,9 +21,9 @@
 #ifndef OBABELIFACE_H
 #define OBABELIFACE_H
 
-#include <QString>
 #include <QPointF>
 #include <vector>
+#include <QString>
 
 class QGraphicsScene ;
 
@@ -36,6 +36,7 @@ namespace Molsketch
 
 extern "C"
 {
+
   namespace Molsketch
   {
 /**

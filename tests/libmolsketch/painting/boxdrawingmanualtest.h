@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 
 #include <painting/regulartextbox.h>
+#include <painting/textfield.h>
 #include <painting/textline.h>
 
 using namespace Molsketch;
@@ -40,28 +41,28 @@ public:
 class BoxDrawingManualTest : public CxxTest::TestSuite {
   DrawingTestDialog::Drawable *createRegularTextBox(const QString &text) {
     return new DelegatingDrawable<RegularTextBox>
-        (new RegularTextBox(text, QPointF(), TEST_FONT), &TextBox::render, &TextBox::boundingRect);
+        (new RegularTextBox(text, QPointF(), TEST_FONT), &TextBox::paint, &TextBox::boundingRect);
   }
 
   DrawingTestDialog::Drawable *createStackedTextBox(const QString &upper, const QString &lower) {
     return new DelegatingDrawable<StackedTextBox>
-        (new StackedTextBox(upper, lower, QPointF(), TEST_FONT), &TextBox::render, &TextBox::boundingRect);
+        (new StackedTextBox(upper, lower, QPointF(), TEST_FONT), &TextBox::paint, &TextBox::boundingRect);
   }
 public:
   void testRegularBoxDrawing() {
-    TS_SKIP("Manual test");
+    QS_MANUAL_TEST
     DrawingTestDialog dialog(createRegularTextBox("C"));
     dialog.exec();
   }
 
   void testStackedTextBoxDrawing() {
-    TS_SKIP("Manual test");
+    QS_MANUAL_TEST
     DrawingTestDialog dialog(createStackedTextBox("TOP", "BOTTOM"));
     dialog.exec();
   }
 
   void testBothTextBoxDrawing() {
-    TS_SKIP("Manual test");
+    QS_MANUAL_TEST
     DrawingTestDialog dialog({
                                createStackedTextBox("ABC", "DEF"),
                                createRegularTextBox("XXX")
@@ -70,13 +71,25 @@ public:
   }
 
   void testTextLine() {
-    TS_SKIP("Manual test");
+    QS_MANUAL_TEST
     auto line = new TextLine(new RegularTextBox("XXX", QPointF(), TEST_FONT));
     line->addBoxLeft(new RegularTextBox("L", QPointF(), TEST_FONT));
     line->addBoxLeft(new RegularTextBox("K", QPointF(), TEST_FONT));
     line->addBoxRight(new RegularTextBox("R", QPointF(), TEST_FONT));
     line->addBoxRight(new RegularTextBox("S", QPointF(), TEST_FONT));
-    DrawingTestDialog dialog(new DelegatingDrawable(line, &TextLine::render, &TextLine::boundingBox));
+    DrawingTestDialog dialog(new DelegatingDrawable<TextLine>(line, &TextLine::paint, &TextLine::boundingRect));
+    dialog.exec();
+  }
+
+  // TODO test non-centered lines (with box before/after center box)
+  void testTextField() {
+    QS_MANUAL_TEST
+    auto field = new TextField(new TextLine(new RegularTextBox("XXX", QPointF(), TEST_FONT)));
+    field->addLineAbove(new TextLine(new RegularTextBox("A", QPointF(), TEST_FONT)));
+    field->addLineAbove(new TextLine(new RegularTextBox("Z", QPointF(), TEST_FONT)));
+    field->addLineBelow(new TextLine(new RegularTextBox("B", QPointF(), TEST_FONT)));
+    field->addLineBelow(new TextLine(new RegularTextBox("C", QPointF(), TEST_FONT)));
+    DrawingTestDialog dialog(new DelegatingDrawable<TextField>(field, &TextField::paint, &TextField::boundingRect));
     dialog.exec();
   }
 };

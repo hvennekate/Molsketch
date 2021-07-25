@@ -1,84 +1,49 @@
 #include "textline.h"
 #include "textbox.h"
 #include <algorithm>
-#include <QDebug>
+#include <QPainter>
 
 namespace Molsketch {
 
-  class TextLine::TextLinePrivate {
-  public:
-    QList<const TextBox*> leftBoxes, rightBoxes;
-    QScopedPointer<const TextBox> centerBox;
-    explicit TextLinePrivate(const TextBox *centerBox) : centerBox(centerBox) {}
-    ~TextLinePrivate() {
-      for (auto box : leftBoxes + rightBoxes) delete box;
-    }
-  };
-
-  TextLine::TextLine(const TextBox *centerBox)
-    : d(new TextLinePrivate(centerBox))
-  {}
-
-  TextLine::~TextLine() {
-    delete d;
-  }
-
-  QRectF addToLeft(const QRectF &base, QRectF toAdd) {
+  QRectF TextLine::addRectFBefore(const QRectF &base, QRectF toAdd) const {
     if (!toAdd.isValid()) return base;
     toAdd.moveRight(base.left());
     return toAdd | base;
   }
 
-  QRectF addToRight(const QRectF &base, QRectF toAdd) {
+  QRectF TextLine::addRectFAfter(const QRectF &base, QRectF toAdd) const {
     if (!toAdd.isValid()) return base;
     toAdd.moveLeft(base.right());
     return base | toAdd;
   }
 
-  QRectF boundingRectFromPointer(const TextBox *p) {
-    return p->boundingRect();
+  QPointF TextLine::beforeItemPreShift(const Paintable *item) const {
+    auto bounds = item->boundingRect();
+    return QPointF(-bounds.left() - bounds.width(), 0);
   }
 
-  QRectF TextLine::boundingBox() const {
-    auto resultBox = std::transform_reduce(d->leftBoxes.cbegin(), d->leftBoxes.cend(), d->centerBox->boundingRect(), addToLeft,
-                                           boundingRectFromPointer);
-    resultBox = std::transform_reduce(d->rightBoxes.cbegin(), d->rightBoxes.cend(), resultBox, addToRight,
-                                      boundingRectFromPointer);
-    // TODO determine baseline
-    return resultBox.translated(- d->centerBox->boundingRect().center());
+  QPointF TextLine::beforeItemPostShift(const Paintable *item) const {
+    Q_UNUSED(item)
+    return QPointF();
   }
 
-  void TextLine::render(QPainter *painter) const {
-    painter->save();
-    QPointF offset(-d->centerBox->boundingRect().center());
-    auto centerTransform = QTransform(painter->transform()).translate(offset.x(), offset.y());
-    painter->setTransform(centerTransform);
-    d->centerBox->render(painter);
-
-    painter->setTransform(QTransform(centerTransform).translate(d->centerBox->boundingRect().width(), 0));
-    for (auto box : qAsConst(d->rightBoxes)) {
-      auto bounds = box->boundingRect();
-      painter->setTransform(QTransform(painter->transform()).translate(-bounds.left(), 0));
-      box->render(painter);
-      painter->setTransform(QTransform(painter->transform()).translate(bounds.right(), 0));
-    }
-
-    painter->setTransform(centerTransform);
-    for (auto box : qAsConst(d->leftBoxes)) {
-      auto bounds = box->boundingRect();
-      painter->setTransform(QTransform(painter->transform()).translate(-bounds.left() - bounds.width(), 0));
-      box->render(painter);
-    }
-
-    painter->restore();
+  QPointF TextLine::afterItemPreShift(const Paintable *item) const {
+    return QPointF(-item->boundingRect().left(), 0);
   }
+
+  QPointF TextLine::afterItemPostShift(const Paintable *item) const {
+    return QPointF(item->boundingRect().right(), 0);
+  }
+
+  TextLine::TextLine(const TextBox *centerBox)
+    : PaintableAggregate(centerBox) {}
 
   void TextLine::addBoxRight(const TextBox *newBox) {
-    d->rightBoxes << newBox;
+    addAfter(newBox);
   }
 
   void TextLine::addBoxLeft(const TextBox *newBox) {
-    d->leftBoxes << newBox;
+    addBefore(newBox);
   }
 
 } // namespace Molsketch
