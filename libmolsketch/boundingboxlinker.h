@@ -50,6 +50,7 @@ namespace Molsketch { // TODO turn on warnings for switch'es
   class Linkable {
   public:
     virtual QPointF getAnchorPoint(const Anchor &anchor) const = 0;
+    static QPointF getAnchorPoint(const QRectF &, const Anchor &anchor);
   };
 
   class BoundingBoxLinkerPrivate;

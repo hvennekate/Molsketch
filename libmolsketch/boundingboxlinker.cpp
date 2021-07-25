@@ -52,17 +52,7 @@ namespace Molsketch {
   public:
     RectFLinkable(const QRectF& rect) : rect(rect) {}
     QPointF getAnchorPoint(const Anchor &anchor) const override {
-      switch (anchor) {
-        case Anchor::Center: return rect.center();
-        case Anchor::BottomLeft: return rect.bottomLeft();
-        case Anchor::BottomRight: return rect.bottomRight();
-        case Anchor::TopLeft: return rect.topLeft();
-        case Anchor::TopRight: return rect.topRight();
-        case Anchor::Bottom: return (rect.bottomLeft() + rect.bottomRight())/2.;
-        case Anchor::Left: return (rect.topLeft() + rect.bottomLeft())/2.;
-        case Anchor::Right: return (rect.topRight() + rect.bottomRight())/2.;
-        case Anchor::Top: return (rect.topLeft() + rect.topRight())/2.;
-      }
+      return Linkable::getAnchorPoint(rect, anchor);
     }
   };
 
@@ -198,4 +188,19 @@ namespace Molsketch {
   BoundingBoxLinker BoundingBoxLinker::atTopRight() { return BoundingBoxLinker(Anchor::TopRight); }
   BoundingBoxLinker BoundingBoxLinker::atBottomLeft() { return BoundingBoxLinker(Anchor::BottomLeft); }
   BoundingBoxLinker BoundingBoxLinker::atBottomRight() { return BoundingBoxLinker(Anchor::BottomRight); }
+
+  QPointF Linkable::getAnchorPoint(const QRectF &rect, const Anchor &anchor) {
+    switch (anchor) {
+      case Anchor::Center: return rect.center();
+      case Anchor::BottomLeft: return rect.bottomLeft();
+      case Anchor::BottomRight: return rect.bottomRight();
+      case Anchor::TopLeft: return rect.topLeft();
+      case Anchor::TopRight: return rect.topRight();
+      case Anchor::Bottom: return (rect.bottomLeft() + rect.bottomRight())/2.;
+      case Anchor::Left: return (rect.topLeft() + rect.bottomLeft())/2.;
+      case Anchor::Right: return (rect.topRight() + rect.bottomRight())/2.;
+      case Anchor::Top: return (rect.topLeft() + rect.topRight())/2.;
+    }
+  }
+
 } // namespace Molsketch
