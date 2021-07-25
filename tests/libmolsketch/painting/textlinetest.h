@@ -16,7 +16,7 @@ class TestTextBox : public TextBox, public ForTesting<TextBox> {
 public:
   TestTextBox() : TextBox(QPointF(), QFont()) {}
   MOCK_CONST(QRectF, boundingRect, , )
-  VOID_MOCK_CONST(render, QPainter* painter, painter)
+  VOID_MOCK_CONST(paint, QPainter* painter, painter)
   static std::function<void(const int&)> destructorCallback;
 };
 
@@ -33,7 +33,7 @@ public:
     TS_ASSERT_EQUALS(TestTextBox::instanceCounter, 1)
     center->boundingRectCallback = []() {return QRectF(9, 10, 11, 12); };
     TextLine tl(center);
-    QS_ASSERT_EQUALS(tl.boundingBox(), QRectF(-5.5, -6, 11, 12));
+    QS_ASSERT_EQUALS(tl.boundingRect(), QRectF(-5.5, -6, 11, 12));
   }
 
   void testWithLeftBox() {
@@ -42,7 +42,7 @@ public:
     left->boundingRectCallback = []() {return QRectF(9, 10, 4, 12); };
     TextLine tl(center);
     tl.addBoxLeft(left);
-    QS_ASSERT_EQUALS(tl.boundingBox(), QRectF(-9.5, -6, 15, 12));
+    QS_ASSERT_EQUALS(tl.boundingRect(), QRectF(-9.5, -6, 15, 12));
   }
 
   void testWithTwoLeftBoxes() {
@@ -53,7 +53,7 @@ public:
     TextLine tl(center);
     tl.addBoxLeft(left1);
     tl.addBoxLeft(left2);
-    QS_ASSERT_EQUALS(tl.boundingBox(), QRectF(-15.5, -6, 21, 12));
+    QS_ASSERT_EQUALS(tl.boundingRect(), QRectF(-15.5, -6, 21, 12));
   }
 
   void testWithRightBox() {
@@ -62,7 +62,7 @@ public:
     right->boundingRectCallback = []() {return QRectF(9, 10, 4, 12); };
     TextLine tl(center);
     tl.addBoxRight(right);
-    QS_ASSERT_EQUALS(tl.boundingBox(), QRectF(-5.5, -6, 15, 12));
+    QS_ASSERT_EQUALS(tl.boundingRect(), QRectF(-5.5, -6, 15, 12));
   }
 
   void testWithTwoRightBoxes() {
@@ -73,7 +73,7 @@ public:
     TextLine tl(center);
     tl.addBoxRight(right1);
     tl.addBoxRight(right2);
-    QS_ASSERT_EQUALS(tl.boundingBox(), QRectF(-5.5, -6, 21, 12));
+    QS_ASSERT_EQUALS(tl.boundingRect(), QRectF(-5.5, -6, 21, 12));
   }
 
   // TODO: test rendering (assert transform is applied)

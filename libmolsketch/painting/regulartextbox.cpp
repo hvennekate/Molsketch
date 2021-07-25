@@ -11,7 +11,7 @@ QRectF RegularTextBox::boundingRect() const {
   return metrics.boundingRect(text);
 }
 
-void RegularTextBox::render(QPainter *painter) const {
+void RegularTextBox::paint(QPainter *painter) const {
   painter->save();
   painter->setFont(font);
   painter->drawText(offset, text);

@@ -14,7 +14,7 @@ public:
                  const QString &bottomText,
                  const QPointF &offset, // TODO remove
                  const QFont & font);
-  void render(QPainter *painter) const override;
+  void paint(QPainter *painter) const override;
   QRectF boundingRect() const override;
 };
 } // namespace Molsketch

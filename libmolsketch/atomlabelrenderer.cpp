@@ -71,7 +71,7 @@ namespace Molsketch {
   {
     auto boxes = generateTextBoxes(alignment, lbl, fonts);
     painter->save(); // TODO unite with computeBoundingRect
-    std::for_each(boxes.begin(), boxes.end(), [&](const TextBox *box){ box->render(painter); });
+    std::for_each(boxes.begin(), boxes.end(), [&](const TextBox *box){ box->paint(painter); });
     painter->restore();
   }
 

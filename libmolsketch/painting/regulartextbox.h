@@ -14,7 +14,7 @@ public:
   RegularTextBox(const QString &text, const QPointF &offset, const QFont &font);
 
   QRectF boundingRect() const override;
-  void render(QPainter *painter) const override;
+  void paint(QPainter *painter) const override;
 };
 
 

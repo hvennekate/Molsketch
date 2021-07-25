@@ -22,7 +22,7 @@ namespace Molsketch {
       shiftDown(getMiddle(originalFontMetrics) - originalFontMetrics.descent())
   {}
 
-  void StackedTextBox::render(QPainter *painter) const {
+  void StackedTextBox::paint(QPainter *painter) const {
     painter->save();
     painter->setFont(font);
     painter->drawText(offset + QPointF(0, shiftDown), bottomText);
