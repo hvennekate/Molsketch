@@ -27,6 +27,7 @@
 #include <QRectF>
 #include <QString>
 #include <QFontMetricsF>
+#include <alignment.h>
 
 #include "alignment.h"
 
@@ -37,12 +38,12 @@ namespace Molsketch {
 
   class AtomLabelRenderer {
   public:
-    void drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, int alignment);
+    void drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, Alignment alignment);
     QRectF computeBoundingRect(const QString &lbl, const QPair<QFont, QFont>& fonts, Alignment alignment);
   private:
     qreal computeTotalWdith(const int &alignment, const QString &lbl, const QFontMetricsF &fmSymbol, const QFontMetricsF &fmScript);
     qreal computeXOffset(int alignment, const QFontMetricsF &fmSymbol, const QString &lbl, const qreal &totalWidth);
-    QVector<Molsketch::TextBox *> generateTextBoxes(int alignment, const QString &lbl, const QPair<QFont, QFont>& fonts);
+    QVector<Molsketch::TextBox *> generateTextBoxes(Alignment alignment, const QString &lbl, const QPair<QFont, QFont>& fonts);
   };
 
 } // namespace Molsketch

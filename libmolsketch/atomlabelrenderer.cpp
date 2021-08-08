@@ -31,7 +31,7 @@
 
 namespace Molsketch {
 
-  QVector<TextBox*> AtomLabelRenderer::generateTextBoxes(int alignment, const QString &lbl, const QPair<QFont, QFont>& fonts)
+  QVector<TextBox*> AtomLabelRenderer::generateTextBoxes(Alignment alignment, const QString &lbl, const QPair<QFont, QFont>& fonts)
   {
     QFont symbolFont = fonts.first;
     QFont subscriptFont = fonts.second; // TODO get code from atom to fix second font
@@ -67,7 +67,7 @@ namespace Molsketch {
     return boxes;
   }
 
-  void AtomLabelRenderer::drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, int alignment)
+  void AtomLabelRenderer::drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, Alignment alignment)
   {
     auto boxes = generateTextBoxes(alignment, lbl, fonts);
     painter->save(); // TODO unite with computeBoundingRect

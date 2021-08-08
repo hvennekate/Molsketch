@@ -4,27 +4,50 @@
 #include <cxxtest/TestSuite.h>
 #include "painting/stackedtextbox.h"
 #include <QDebug>
+#include <QPicture>
 #include <QRectF>
+#include <qpainter.h>
+#include "utilities.h"
 
 
 using namespace Molsketch;
-const QFont TEST_FONT("Times", 12);
+const QFont FONT("Times", 12);
 
 class StackedTextBoxTest : public CxxTest::TestSuite {
+  StackedTextBox *box;
 public:
-  void testBoundingBox() {
-    // TODO remove offset
-    auto testBox = StackedTextBox("T", "B", {0, 0}, TEST_FONT);
-    qDebug() << testBox.boundingRect();
+
+  void setUp() override {
+    box = new StackedTextBox("T", "B", {0, 0}, FONT);
   }
 
-  void testFontSize() {
-    auto oldMetrics = QFontMetricsF(TEST_FONT);
-    qDebug() << TEST_FONT << oldMetrics.ascent() << oldMetrics.descent();
-    auto newFont = QFont(TEST_FONT);
-    newFont.setPointSizeF(newFont.pointSizeF()/2.2);
-    auto newMetrics = QFontMetricsF(newFont);
-    qDebug() << newFont << newMetrics.ascent() << newMetrics.descent();
+  void tearDown() override {
+    delete box;
+  }
+
+  void testFontProperlyReset() {
+    QPicture picture;
+    QPainter painter(&picture);
+    auto painterFont = painter.font();
+    QS_ASSERT_NOT_EQUALS(painterFont.pointSize(), FONT.pointSize())
+    box->paint(&painter);
+    QS_ASSERT_EQUALS(painterFont.pointSize(), painter.font().pointSize())
+  }
+
+  void testAnchorPoints() {
+    auto bounds = box->boundingRect();
+
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::Center), bounds.center())
+
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::TopLeft), bounds.topLeft())
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::TopRight), bounds.topRight())
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::BottomLeft), bounds.bottomLeft())
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::BottomRight), bounds.bottomRight())
+
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::Top), QPointF(bounds.center().x(), bounds.top()))
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::Bottom), QPointF(bounds.center().x(), bounds.bottom()))
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::Left), QPointF(bounds.left(), bounds.center().y()))
+    QS_ASSERT_EQUALS(box->getAnchorPoint(Anchor::Right), QPointF(bounds.right(), bounds.center().y()))
   }
 };
 

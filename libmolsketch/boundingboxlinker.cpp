@@ -191,7 +191,6 @@ namespace Molsketch {
 
   QPointF Linkable::getAnchorPoint(const QRectF &rect, const Anchor &anchor) {
     switch (anchor) {
-      case Anchor::Center: return rect.center();
       case Anchor::BottomLeft: return rect.bottomLeft();
       case Anchor::BottomRight: return rect.bottomRight();
       case Anchor::TopLeft: return rect.topLeft();
@@ -200,6 +199,8 @@ namespace Molsketch {
       case Anchor::Left: return (rect.topLeft() + rect.bottomLeft())/2.;
       case Anchor::Right: return (rect.topRight() + rect.bottomRight())/2.;
       case Anchor::Top: return (rect.topLeft() + rect.topRight())/2.;
+      case Anchor::Center:
+      default: return rect.center();
     }
   }
 

@@ -7,7 +7,7 @@ RegularTextBox::RegularTextBox(const QString &text, const QPointF &offset, const
   : TextBox(offset, font), text(text) {}
 
 QRectF RegularTextBox::boundingRect() const {
-  // TODO consider tightBoundingRect() (possibly selectable by user
+  // TODO consider tightBoundingRect() (possibly selectable by user)
   return metrics.boundingRect(text);
 }
 
