@@ -19,7 +19,8 @@
 
 #include "utilities.h"
 #include <QGraphicsItem>
-#include <radicalelectron.h>
+#include "radicalelectron.h"
+#include "painting/textline.h"
 namespace Molsketch {
   class Molecule;
   class MoleculeModelItem;
@@ -34,3 +35,4 @@ template<> int ForTesting<QGraphicsItem>::instanceCounter = 0;
 template<> int ForTesting<Molsketch::RadicalElectron>::instanceCounter = 0;
 template<> int ForTesting<Molsketch::PiElectrons>::instanceCounter = 0;
 template<> int ForTesting<Molsketch::TextBox>::instanceCounter = 0;
+template<> int ForTesting<Molsketch::TextLine>::instanceCounter = 0;
