@@ -14,7 +14,7 @@ const QFont TEST_FONT;
 
 class TestTextBox : public TextBox, public ForTesting<TextBox> {
 public:
-  TestTextBox() : TextBox(QPointF(), QFont()) {}
+  TestTextBox() : TextBox(QFont()) {}
   MOCK_CONST(QRectF, boundingRect, , )
   VOID_MOCK_CONST(paint, QPainter* painter, painter)
   static std::function<void(const int&)> destructorCallback;

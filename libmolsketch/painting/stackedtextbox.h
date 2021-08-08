@@ -12,7 +12,6 @@ class StackedTextBox : public TextBox {
 public:
   StackedTextBox(const QString &topText,
                  const QString &bottomText,
-                 const QPointF &offset, // TODO remove
                  const QFont & font);
   void paint(QPainter *painter) const override;
   QRectF boundingRect() const override;

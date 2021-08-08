@@ -55,11 +55,11 @@ namespace Molsketch {
 
       if (character == 'H' && !hydrogens.match(lbl).hasMatch() && (alignment == Up || alignment == Down)) {
         currentPosition = QPointF(xInitial, currentPosition.y() +(alignment == Down ? fmSymbol.ascent() : - fmSymbol.ascent()));
-        boxes << new RegularTextBox(character, currentPosition, symbolFont);
+        boxes << new RegularTextBox(character, symbolFont);
       } else if (number.match(character).hasMatch()) {
-        boxes << new StackedTextBox("", character, currentPosition, symbolFont);
+        boxes << new StackedTextBox("", character, symbolFont);
       } else {
-        boxes << new RegularTextBox(character, currentPosition, symbolFont);
+        boxes << new RegularTextBox(character, symbolFont);
       }
       currentPosition.rx() = boxes.last()->boundingRect().right();
     }

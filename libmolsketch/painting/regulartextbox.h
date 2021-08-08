@@ -11,7 +11,7 @@ namespace Molsketch {
 class RegularTextBox : public TextBox {
   QString text;
 public:
-  RegularTextBox(const QString &text, const QPointF &offset, const QFont &font);
+  RegularTextBox(const QString &text, const QFont &font);
 
   QRectF boundingRect() const override;
   void paint(QPainter *painter) const override;

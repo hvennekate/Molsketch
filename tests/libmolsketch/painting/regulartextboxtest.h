@@ -17,7 +17,7 @@ class RegularTextBoxTest : public CxxTest::TestSuite {
   RegularTextBox *box;
 public:
   void setUp() override {
-    box = new RegularTextBox("Tp", {0, 0}, FONT);
+    box = new RegularTextBox("Tp", FONT);
   }
 
   void tearDown() override {

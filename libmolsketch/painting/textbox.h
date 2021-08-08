@@ -12,10 +12,9 @@ namespace Molsketch {
 
   class TextBox : public Paintable {
   protected:
-    QPointF offset; // TODO remove
     QFont font;
     QFontMetricsF metrics;
-    TextBox(const QPointF &offset, const QFont &font) : offset(offset), font(font), metrics(font) {}
+    TextBox(const QFont &font) : font(font), metrics(font) {}
     // TODO: anchor points
   };
 

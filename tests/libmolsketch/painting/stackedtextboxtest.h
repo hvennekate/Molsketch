@@ -18,7 +18,7 @@ class StackedTextBoxTest : public CxxTest::TestSuite {
 public:
 
   void setUp() override {
-    box = new StackedTextBox("T", "B", {0, 0}, FONT);
+    box = new StackedTextBox("T", "B", FONT);
   }
 
   void tearDown() override {

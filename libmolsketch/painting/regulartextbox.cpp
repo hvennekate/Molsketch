@@ -3,8 +3,8 @@
 
 namespace Molsketch {
 
-RegularTextBox::RegularTextBox(const QString &text, const QPointF &offset, const QFont &font)
-  : TextBox(offset, font), text(text) {}
+RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
+  : TextBox(font), text(text) {}
 
 QRectF RegularTextBox::boundingRect() const {
   // TODO consider tightBoundingRect() (possibly selectable by user)
@@ -14,7 +14,7 @@ QRectF RegularTextBox::boundingRect() const {
 void RegularTextBox::paint(QPainter *painter) const {
   painter->save();
   painter->setFont(font);
-  painter->drawText(offset, text);
+  painter->drawText(0, 0, text);
   painter->restore();
 }
 

@@ -13,8 +13,8 @@ namespace Molsketch {
     return 0.5 * (metrics.ascent() - metrics.descent());
   }
 
-  StackedTextBox::StackedTextBox(const QString &topText, const QString &bottomText, const QPointF &offset, const QFont &font)
-    : TextBox(offset, getSmallFont(font)),
+  StackedTextBox::StackedTextBox(const QString &topText, const QString &bottomText, const QFont &font)
+    : TextBox(getSmallFont(font)),
       topText(topText),
       bottomText(bottomText),
       originalFontMetrics(font),
@@ -25,8 +25,8 @@ namespace Molsketch {
   void StackedTextBox::paint(QPainter *painter) const {
     painter->save();
     painter->setFont(font);
-    painter->drawText(offset + QPointF(0, shiftDown), bottomText);
-    painter->drawText(offset + QPointF(0, shiftUp), topText);
+    painter->drawText(QPointF(0, shiftDown), bottomText);
+    painter->drawText(QPointF(0, shiftUp), topText);
     painter->restore();
   }
 
