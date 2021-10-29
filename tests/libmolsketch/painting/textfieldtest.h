@@ -139,8 +139,6 @@ public:
     QS_ASSERT_EQUALS(translationAbove1, QTransform::fromTranslate(-11, -28))
     QS_ASSERT_EQUALS(translationAbove2, QTransform::fromTranslate(-12, -40))
   }
-
-  // TODO: off-center lines
 };
 
 #endif // TEXTLINETEST_H

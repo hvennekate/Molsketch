@@ -6,3 +6,7 @@ void TestTextBox::storePainterTransform(QTransform &transform) {
     transform = painter->transform();
   };
 }
+
+bool TestTextBox::preferredCenter() const {
+  return true;
+}

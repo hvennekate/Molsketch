@@ -119,6 +119,26 @@ public:
     QS_ASSERT_EQUALS(translationLeft1, QTransform::fromTranslate(-27.5, -16))
     QS_ASSERT_EQUALS(translationLeft2, QTransform::fromTranslate(-42.5, -16))
   }
+
+  void testNullCenterBox() {
+    TextLine tl(nullptr);
+
+    QS_ASSERT_EQUALS(tl.boundingRect(), QRectF());
+    QS_ASSERT_EQUALS(tl.getAnchorPoint(Anchor::Center), QPointF());
+
+    QPicture picture;
+    QPainter painter(&picture);
+    tl.paint(&painter);
+  }
+
+  void testRightNullBox() {
+
+  }
+
+  void testLeftNullBox() {
+
+  }
+
   // TODO: check boxes of differing heights
 };
 

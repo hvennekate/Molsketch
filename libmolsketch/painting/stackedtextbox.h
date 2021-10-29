@@ -15,6 +15,7 @@ public:
                  const QFont & font);
   void paint(QPainter *painter) const override;
   QRectF boundingRect() const override;
+  bool preferredCenter() const override;
 };
 } // namespace Molsketch
 

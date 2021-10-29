@@ -36,6 +36,7 @@ namespace Molsketch {
   }
 
   void PaintableAggregate::paint(QPainter *painter) const {
+    if (!d->center) return;
     auto initialShift = getCenterShift();
 
     painter->save();
@@ -66,6 +67,7 @@ namespace Molsketch {
   }
 
   QRectF PaintableAggregate::boundingRect() const {
+    if (!d->center) return QRectF();
     auto resultBox = std::transform_reduce(d->before.cbegin(), d->before.cend(),
                                            d->center->boundingRect(),
                                            // TODO Method reference?
@@ -80,6 +82,7 @@ namespace Molsketch {
 
   QPointF PaintableAggregate::getAnchorPoint(const Anchor &anchor) const
   {
+    if (!d->center) return QPointF();
     auto subAnchor = d->center->getAnchorPoint(anchor) + getCenterShift();
     switch (anchor) {
       case Anchor::Bottom: return QPointF(subAnchor.x(), boundingRect().bottom());

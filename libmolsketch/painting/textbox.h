@@ -11,6 +11,8 @@
 namespace Molsketch {
 
   class TextBox : public Paintable {
+  public:
+    virtual bool preferredCenter() const = 0;
   protected:
     QFont font;
     QFontMetricsF metrics;

@@ -15,6 +15,7 @@ public:
 
   QRectF boundingRect() const override;
   void paint(QPainter *painter) const override;
+  bool preferredCenter() const override;
 };
 
 

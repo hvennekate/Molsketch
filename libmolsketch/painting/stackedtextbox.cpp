@@ -36,4 +36,8 @@ namespace Molsketch {
         metrics.boundingRect(topText).translated(0, shiftUp);
   }
 
+  bool StackedTextBox::preferredCenter() const {
+    return false;
+  }
+
 } // namespace Molsketch

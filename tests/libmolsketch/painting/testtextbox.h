@@ -14,6 +14,7 @@ public:
   VOID_MOCK_CONST(paint, QPainter* painter, painter)
   static std::function<void(const int&)> destructorCallback;
   void storePainterTransform(QTransform &transform);
+  bool preferredCenter() const override;
 };
 
 #endif // TESTTEXTBOX_H

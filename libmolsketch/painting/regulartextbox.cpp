@@ -18,4 +18,8 @@ void RegularTextBox::paint(QPainter *painter) const {
   painter->restore();
 }
 
+bool RegularTextBox::preferredCenter() const {
+  return true;
+}
+
 } // namespace Molsketch
