@@ -136,13 +136,8 @@ namespace Molsketch {
     if (m_newmanDiameter > 0.) return QRectF(-m_newmanDiameter/2., -m_newmanDiameter/2., m_newmanDiameter, m_newmanDiameter);
     // TODO do proper prepareGeometryChange() call
     // TODO call whenever boundingRect() is called
-    Alignment alignment = labelAlignment();
 
-    QString lbl = composeLabel(Left == alignment);
-
-    QPair<QFont, QFont> fonts = getFonts();
-    if (fonts.first.pointSizeF() < 0) return QRectF();
-    return renderer.computeBoundingRect(lbl, fonts, alignment);
+    return renderer.computeBoundingRect(m_elementSymbol, getSymbolFont(), numImplicitHydrogens(), labelAlignment(), charge());
   }
 
   void Atom::initialize(const QPointF &position,
@@ -414,7 +409,7 @@ namespace Molsketch {
     painter->save();
     painter->setPen(getColor());
 
-    renderer.drawAtomLabel(painter, getLabelWithHydrogens(), getFonts(), labelAlignment());
+    renderer.drawAtomLabel(painter, m_elementSymbol, getSymbolFont(), numImplicitHydrogens(), labelAlignment(), charge());
     drawSelectionHighlight(painter);
     if (molScene->settings()->chargeVisible()->get() && !m_elementSymbol.isEmpty())
       drawCharge(painter); // TODO unite with subscript drawing and align appropriately

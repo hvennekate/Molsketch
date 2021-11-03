@@ -10,7 +10,7 @@ namespace Molsketch {
   }
 
   qreal getMiddle(QFontMetricsF metrics) {
-    return 0.5 * (metrics.ascent() - metrics.descent());
+    return 0.6 * (metrics.ascent() - metrics.descent());
   }
 
   StackedTextBox::StackedTextBox(const QString &topText, const QString &bottomText, const QFont &font)

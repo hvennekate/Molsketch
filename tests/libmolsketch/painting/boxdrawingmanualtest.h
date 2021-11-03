@@ -61,12 +61,32 @@ public:
     dialog.exec();
   }
 
-  void testBothTextBoxDrawing() {
+  void testRegularAndStackedBoxDrawing() {
     QS_MANUAL_TEST
     DrawingTestDialog dialog({
                                createStackedTextBox("ABC", "DEF"),
                                createRegularTextBox("XXX")
                              });
+    dialog.exec();
+  }
+
+  void testStackedAndRegularInLine() {
+    QS_MANUAL_TEST
+    auto line = new TextLine(new RegularTextBox("C", TEST_FONT));
+    line->addBoxLeft(new StackedTextBox("1", "3", TEST_FONT));
+    line->addBoxLeft(new RegularTextBox("H", TEST_FONT));
+    auto field = new TextField(line);
+    DrawingTestDialog dialog(new DelegatingDrawable<TextField>(field, &TextField::paint, &TextField::boundingRect));
+    dialog.exec();
+  }
+
+  void testRegularAndStackedInLine() {
+    QS_MANUAL_TEST
+    auto line = new TextLine(new RegularTextBox("C", TEST_FONT));
+    line->addBoxRight(new RegularTextBox("H", TEST_FONT));
+    line->addBoxRight(new StackedTextBox("3+", "3", TEST_FONT));
+    auto field = new TextField(line);
+    DrawingTestDialog dialog(new DelegatingDrawable<TextField>(field, &TextField::paint, &TextField::boundingRect));
     dialog.exec();
   }
 

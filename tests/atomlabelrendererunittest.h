@@ -57,7 +57,7 @@ private:
     QPainter painter;
     painter.begin(&svgGenerator);
 
-    renderer.drawAtomLabel(&painter, text, FONTS, alignment);
+    renderer.drawAtomLabel(&painter, text, ATOM_FONT, 0, alignment, 0);
 
     painter.end();
     buffer.close();
@@ -73,7 +73,7 @@ private:
     auto svg = getLabelRenderedAsSvg(text, alignment);
     assertThat(svg)->contains(LABEL_POS_AND_FONT_QUERY)->exactly(svgElements);
 
-    auto actualBounds = renderer.computeBoundingRect(text, FONTS, alignment);
+    auto actualBounds = renderer.computeBoundingRect(text, ATOM_FONT, 0, alignment, 0);
     QS_ASSERT_EQUALS(actualBounds, expectedBounds);
   }
 

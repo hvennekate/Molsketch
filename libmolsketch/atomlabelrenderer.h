@@ -35,15 +35,16 @@ class QPainter;
 
 namespace Molsketch {
   class TextBox;
+  class TextField;
 
   class AtomLabelRenderer {
   public:
-    void drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, Alignment alignment);
-    QRectF computeBoundingRect(const QString &lbl, const QPair<QFont, QFont>& fonts, Alignment alignment);
+    void drawAtomLabel(QPainter *painter, const QString &lbl, const QFont &font, int hAtomCount, Alignment alignment, int charge);
+    QRectF computeBoundingRect(const QString &lbl, const QFont &font, int hAtomCount, Alignment alignment, int charge);
   private:
     qreal computeTotalWdith(const int &alignment, const QString &lbl, const QFontMetricsF &fmSymbol, const QFontMetricsF &fmScript);
     qreal computeXOffset(int alignment, const QFontMetricsF &fmSymbol, const QString &lbl, const qreal &totalWidth);
-    QVector<Molsketch::TextBox *> generateTextBoxes(Alignment alignment, const QString &lbl, const QPair<QFont, QFont>& fonts);
+    TextField *generateTextBoxes(const QString &lbl, const QFont &font, Alignment alignment, int hAtomCount, int charge);
   };
 
 } // namespace Molsketch

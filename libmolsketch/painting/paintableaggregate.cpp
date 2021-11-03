@@ -68,8 +68,9 @@ namespace Molsketch {
 
   QRectF PaintableAggregate::boundingRect() const {
     if (!d->center) return QRectF();
+    auto centerBounds = d->center->boundingRect();
     auto resultBox = std::transform_reduce(d->before.cbegin(), d->before.cend(),
-                                           d->center->boundingRect(),
+                                           centerBounds,
                                            // TODO Method reference?
                                            [&](const QRectF &base, QRectF toAdd) { return addRectFBefore(base, toAdd); },
                                            boundingRectFromPointer);
@@ -77,7 +78,7 @@ namespace Molsketch {
                                       resultBox,
                                       [&](const QRectF &base, QRectF toAdd) { return addRectFAfter(base, toAdd); },
                                       boundingRectFromPointer);
-    return resultBox.translated(- d->center->boundingRect().center());
+    return resultBox.translated(- d->center->getAnchorPoint(Anchor::Center));
   }
 
   QPointF PaintableAggregate::getAnchorPoint(const Anchor &anchor) const

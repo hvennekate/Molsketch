@@ -25,60 +25,89 @@
 #include <numeric>
 #include <algorithm>
 
+#include <painting/textfield.h>
+#include <painting/textline.h>
+
 #include "atomlabelrenderer.h"
 #include "painting/regulartextbox.h"
 #include "painting/stackedtextbox.h"
 
 namespace Molsketch {
 
-  QVector<TextBox*> AtomLabelRenderer::generateTextBoxes(Alignment alignment, const QString &lbl, const QPair<QFont, QFont>& fonts)
+  TextLine *hLine(int hAtomCount, const QFont &font) {
+    auto line = new TextLine(new RegularTextBox("H", font));
+    if (hAtomCount > 1) line->addBoxRight(new StackedTextBox("", QString::number(hAtomCount), font));
+    return line;
+  }
+
+  TextField *AtomLabelRenderer::generateTextBoxes(const QString &lbl, const QFont &font, Alignment alignment, int hAtomCount, int charge)
   {
-    QFont symbolFont = fonts.first;
-    QFont subscriptFont = fonts.second; // TODO get code from atom to fix second font
-    QFontMetricsF fmSymbol(symbolFont);
-    QFontMetricsF fmScript(subscriptFont);
+    QRegularExpression number{"([0-9]+)"};
+    QRegularExpression numberOrNonNumber("([0-9]+|[^0-9]+)");
 
-    // compute the horizontal starting position
-    qreal totalWidth = computeTotalWdith(alignment, lbl, fmSymbol, fmScript);
-    qreal xOffset = computeXOffset(alignment, fmSymbol, lbl, totalWidth),
-        yOffset = 0.5 * (fmSymbol.ascent() - fmSymbol.descent());
-    QPointF currentPosition{xOffset, yOffset};
-    qreal xInitial = xOffset;
-
-    QRegularExpression boxContent{(alignment == Up || alignment == Down) ? "H?[A-GI-Za-z]+|[0-9]+|H" : "[A-Za-z]+|[0-9]+"};
-    auto matches = boxContent.globalMatch(lbl);
-    QVector<TextBox*> boxes;
-    while (matches.hasNext()) {
-      auto character = matches.next().captured();
-      QRegularExpression number{"[0-9]+"};
-      QRegularExpression hydrogens("^H[0-9]*$");
-
-      if (character == 'H' && !hydrogens.match(lbl).hasMatch() && (alignment == Up || alignment == Down)) {
-        currentPosition = QPointF(xInitial, currentPosition.y() +(alignment == Down ? fmSymbol.ascent() : - fmSymbol.ascent()));
-        boxes << new RegularTextBox(character, symbolFont);
-      } else if (number.match(character).hasMatch()) {
-        boxes << new StackedTextBox("", character, symbolFont);
-      } else {
-        boxes << new RegularTextBox(character, symbolFont);
-      }
-      currentPosition.rx() = boxes.last()->boundingRect().right();
+    QVector<TextBox *> boxes;
+    auto boxTexts = numberOrNonNumber.globalMatch(lbl);
+    while (boxTexts.hasNext()) {
+      auto boxText = boxTexts.next().captured(1);
+      if (number.match(boxText).hasMatch())
+        boxes << new StackedTextBox("", boxText, font);
+      else
+        boxes << new RegularTextBox(boxText, font);
     }
 
-    return boxes;
+    if (boxes.empty()) return new TextField(nullptr); // TODO default constructor
+
+    auto centerIterator = std::find_if(boxes.cbegin(), boxes.cend(), [](TextBox *box) { return box->preferredCenter(); });
+    if (centerIterator == boxes.cend()) centerIterator = boxes.cbegin();
+
+    auto line = new TextLine(*centerIterator);
+    if (centerIterator != boxes.cbegin())
+      for (auto leftBoxIterator = centerIterator - 1; leftBoxIterator != boxes.cbegin(); --leftBoxIterator)
+        line->addBoxLeft(*leftBoxIterator);
+    for (auto rightBoxIterator = centerIterator + 1; rightBoxIterator != boxes.cend(); ++rightBoxIterator)
+      line->addBoxRight(*rightBoxIterator);
+
+    auto field = new TextField(line);
+
+    auto topLine = line;
+    if (hAtomCount >= 1) {
+      switch(alignment) {
+        case Alignment::Up: field->addLineAbove(topLine = hLine(hAtomCount, font)); break;
+        case Alignment::Down: field->addLineBelow(hLine(hAtomCount, font)); break;
+        case Alignment::Left: {
+            if (hAtomCount > 1) line->addBoxLeft(new StackedTextBox("", QString::number(hAtomCount), font));
+            line->addBoxLeft(new RegularTextBox("H", font)); break;
+          }
+        case Alignment::Right: {
+            line->addBoxRight(new RegularTextBox("H", font));
+            if (hAtomCount > 1) line->addBoxRight(new StackedTextBox("", QString::number(hAtomCount), font)); break;
+          }
+      }
+    }
+
+    if (!charge) return field;
+
+    QString chargeLabel;
+    if (qAbs(charge) != 1) chargeLabel += QString::number(charge);
+    chargeLabel += (charge > 0) ? "+" : "-";
+    topLine->addBoxRight(new StackedTextBox(chargeLabel, "", font)); // TODO should be part of last label/stacked text box
+
+    return field;
   }
 
-  void AtomLabelRenderer::drawAtomLabel(QPainter *painter, const QString &lbl, const QPair<QFont, QFont>& fonts, Alignment alignment)
+  void AtomLabelRenderer::drawAtomLabel(QPainter *painter, const QString &lbl, const QFont &font, int hAtomCount, Alignment alignment, int charge)
   {
-    auto boxes = generateTextBoxes(alignment, lbl, fonts);
+    auto field = generateTextBoxes(lbl, font, alignment, hAtomCount, charge);
     painter->save(); // TODO unite with computeBoundingRect
-    std::for_each(boxes.begin(), boxes.end(), [&](const TextBox *box){ box->paint(painter); });
+    field->paint(painter);
     painter->restore();
+    delete field;
   }
 
-  QRectF AtomLabelRenderer::computeBoundingRect(const QString &lbl, const QPair<QFont, QFont> &fonts, Alignment alignment) {
-    auto boxes = generateTextBoxes(alignment, lbl, fonts);
-    QRectF result;
-    std::for_each(boxes.begin(), boxes.end(), [&](const TextBox *box) { result |= box->boundingRect(); });
+  QRectF AtomLabelRenderer::computeBoundingRect(const QString &lbl, const QFont &font, int hAtomCount, Alignment alignment, int charge) {
+    auto field = generateTextBoxes(lbl, font, alignment, hAtomCount, charge);
+    auto result = field->boundingRect();
+    delete field;
     return result;
   }
 

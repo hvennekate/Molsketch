@@ -34,15 +34,18 @@ const QByteArray TWO_ATOMS_XML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                "<atom id=\"\" elementType=\"B\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"4,5\"/>"
                                "</molsketchItems>\n"
                                );
-const Atom atomA(QPointF(3,3), "A");
-const Atom atomB(QPointF(4,5), "B");
 
 class GraphicsItemUnitTest : public CxxTest::TestSuite {
+  Atom *atomA, *atomB;
 public:
   void setUp() {
+    atomA = new Atom(QPointF(3,3), "A");
+    atomB = new Atom(QPointF(4,5), "B");
   }
 
   void tearDown() {
+    delete atomA;
+    delete atomB;
   }
 
   void testSerializingEmptyListOfGraphicsItems() {
@@ -51,7 +54,7 @@ public:
 
   void testSerializingListOfGraphicsItems() {
     QList<const graphicsItem*> items;
-    items << &atomA << &atomB;
+    items << atomA << atomB;
     QS_ASSERT_EQUALS(graphicsItem::serialize(items), TWO_ATOMS_XML);
   }
 
@@ -71,7 +74,7 @@ public:
   }
 
   void testSerializingSingleAtom() {
-    QS_ASSERT_EQUALS(graphicsItem::serialize(QList<const graphicsItem*>() << &atomA), ONE_ATOM_XML);
+    QS_ASSERT_EQUALS(graphicsItem::serialize(QList<const graphicsItem*>() << atomA), ONE_ATOM_XML);
   }
 
   void testDeserializingSingleAtom() {
