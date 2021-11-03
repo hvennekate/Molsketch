@@ -14,7 +14,7 @@ INCLUDEPATH += $$CXXTEST_PATH \
     ../molsketch \
     ../obabeliface
 
-TEMPLATE = app
+TEMPLATE = lib
 
 TARGET = msktests
 
@@ -30,14 +30,6 @@ changelogSyntax.commands = xmllint --noout $$PWD/../CHANGELOG && touch $$changel
 changelogSyntax.depends = $$PWD/../CHANGELOG
 QMAKE_EXTRA_TARGETS += changelogSyntax
 POST_TARGETDEPS += $$changelogSyntax.target
-
-CXXRUNNER_TEMPLATE = $$PWD/runnerTemplate.tpl
-cxxrunner.output = cxxrunner.cpp
-cxxrunner.commands = $$CXXTEST_PATH/bin/cxxtestgen --have-eh --xunit-printer --root -o ${QMAKE_FILE_OUT} --template ${QMAKE_FILE_NAME}
-cxxrunner.dependency_type = TYPE_C
-cxxrunner.input = CXXRUNNER_TEMPLATE
-cxxrunner.variable_out = SOURCES
-QMAKE_EXTRA_COMPILERS += cxxrunner
 
 OTHER_FILES += \
     runnerTemplate.tpl \

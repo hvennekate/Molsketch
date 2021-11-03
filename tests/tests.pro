@@ -1,6 +1,8 @@
 TEMPLATE = subdirs
-SUBDIRS = main test
+SUBDIRS = main tests runner
 
 main.file = maincode.pro
-test.file = testcode.pro
-test.depends = main
+tests.file = testcode.pro
+tests.depends = main
+runner.file = testrunner.pro
+runner.depends = tests
