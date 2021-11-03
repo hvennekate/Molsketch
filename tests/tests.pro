@@ -49,9 +49,12 @@ OTHER_FILES += \
     legacy/Carbon-0.2.msk \
     legacy/Carbon-0.2.svg
 
-legacy_files.commands = ${COPY_DIR} $$_PRO_FILE_PWD_/legacy ./legacy
-QMAKE_EXTRA_TARGETS += legacy_files
-PRE_TARGETDEPS += legacy_files
+LEGACY_FILE_NAMES += $$files($$PWD/legacy/*, false)
+legacy_files.input = LEGACY_FILE_NAMES
+legacy_files.output = legacy/${QMAKE_FILE_IN_BASE}${QMAKE_FILE_EXT}
+legacy_files.commands = ${COPY} ${QMAKE_FILE_NAME} ${QMAKE_FILE_OUT}
+legacy_files.CONFIG = target_predeps
+QMAKE_EXTRA_COMPILERS += legacy_files
 
 QMAKE_CXXFLAGS += -g -Wall -fprofile-arcs -ftest-coverage -O0
 QMAKE_LFLAGS += -g -Wall -fprofile-arcs -ftest-coverage  -O0
