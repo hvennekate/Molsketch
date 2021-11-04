@@ -593,10 +593,10 @@ namespace Molsketch {
     m_beginAtom = A ;
     m_endAtom = B ;
     if (m_beginAtom) {
-      m_beginAtom->updateShape();
+      m_beginAtom->updateLabel();
       setPos(m_beginAtom->scenePos()) ;
     }
-    if (m_endAtom) m_endAtom->updateShape();
+    if (m_endAtom) m_endAtom->updateLabel();
   }
 
   void Bond::setAtoms(const QPair<Atom *, Atom *> &atoms) {

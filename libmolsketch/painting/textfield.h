@@ -2,6 +2,7 @@
 #define MOLSKETCH_TEXTFIELD_H
 
 #include "paintableaggregate.h"
+#include "alignment.h"
 
 namespace Molsketch {
 
@@ -18,6 +19,11 @@ namespace Molsketch {
     explicit TextField(const TextLine *centerLine);
     void addLineAbove(const TextLine *newLine);
     void addLineBelow(const TextLine *newLine);
+    static TextField *generateLabelForAtom(const QString &lbl,
+                                           const QFont &font,
+                                           Alignment alignment = Alignment::Right,
+                                           quint8 hAtomCount = 0,
+                                           int charge = 0);
   };
 
 } // namespace Molsketch

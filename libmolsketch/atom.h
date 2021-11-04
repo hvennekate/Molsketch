@@ -24,7 +24,6 @@
 
 #include <QList>
 
-#include "atomlabelrenderer.h"
 #include "graphicsitem.h"
 #include "sumformula.h"
 #include "alignment.h"
@@ -33,6 +32,7 @@ namespace Molsketch {
 
   class Bond;
   class Molecule;
+  class TextField;
 
   /// Atom class
   class Atom : public graphicsItem
@@ -85,7 +85,7 @@ namespace Molsketch {
     int bondOrderSum() const;
     /// Get the number of non-bonding electrons (e.g. 4 for O=, 2 for NH3, 1 for radicals).
     int numNonBondingElectrons() const;
-    int numImplicitHydrogens() const;
+    quint8 numImplicitHydrogens() const;
 
     QList<Bond*> bonds() const;
     QList<Atom*> neighbours() const;
@@ -93,7 +93,7 @@ namespace Molsketch {
       * Changing the number of implicit hydrogens will also effect the number
       * of free valency electrons and hence the charge of the atom.
       */
-    void setNumImplicitHydrogens(const int &number);
+    void setNumImplicitHydrogens(const quint8 &number);
 
     QString xmlName() const override;
     static QString xmlClassName();
@@ -104,7 +104,7 @@ namespace Molsketch {
     bool contains(const QPointF &point) const override;
     QPolygonF moveablePoints() const override;
 
-    void updateShape();
+    void updateLabel();
     void setIndex(const QString& index); // TODO this should be the responsibility of the molecule
     QString index() const;
     qreal getBondExtent(const QLineF &outer1, const QLineF &outer2, qreal lineWidth) const;
@@ -122,7 +122,7 @@ namespace Molsketch {
     XmlObjectInterface* produceChild(const QString &name, const QXmlStreamAttributes &attributes) override;
 
   private:
-    AtomLabelRenderer renderer;
+    QScopedPointer<TextField> label;
 
     void initialize(const QPointF & position,
                     const QString & element,
@@ -136,7 +136,6 @@ namespace Molsketch {
 
     int m_userImplicitHydrogens;
     bool m_implicitHydrogens;
-    QRectF m_shape;
     QRectF computeBoundingRect();
     QFont getSymbolFont() const;
     void drawElectrons(QPainter* painter);

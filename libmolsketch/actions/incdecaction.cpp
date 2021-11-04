@@ -26,19 +26,19 @@
 
 namespace Molsketch {
 
-  template<class T>
+  template<class T, typename I>
   class incDecCommand : public QUndoCommand
   {
   private:
     T* t ;
     bool plus ;
-    int (T::*getFunction)()const ;
-    void (T::*setFunction)(const int&) ;
+    I (T::*getFunction)()const ;
+    void (T::*setFunction)(const I&) ;
   public:
     incDecCommand(T* a,
                   bool increment,
-                  int (T::*gf)()const,
-                  void (T::*sf)(const int&),
+                  I (T::*gf)()const,
+                  void (T::*sf)(const I&),
                   QString text,
                   QUndoCommand* parent = 0)
       : QUndoCommand(text, parent),
@@ -60,8 +60,8 @@ namespace Molsketch {
     // TODO mergeable
   };
 
-  template <class T>
-  struct incDecAction<T>::privateData
+  template <class T, typename I>
+  struct incDecAction<T, I>::privateData
   {
     privateData() :
       plusAction(0),
@@ -76,24 +76,24 @@ namespace Molsketch {
     }
     QAction *plusAction ;
     QAction *minusAction ;
-    int (T::*getFunction)() const;
-    void (T::*setFunction)(const int&) ;
+    I (T::*getFunction)() const;
+    void (T::*setFunction)(const I&) ;
   };
 
-  template <class T>
-  incDecAction<T>::incDecAction(MolScene *scene)
+  template <class T, typename I>
+  incDecAction<T, I>::incDecAction(MolScene *scene)
     : multiAction(scene),
       d(new privateData)
   {}
 
-  template <class T>
-  incDecAction<T>::~incDecAction()
+  template <class T, typename I>
+  incDecAction<T, I>::~incDecAction()
   {
     delete d ;
   }
 
-  template <class T>
-  void incDecAction<T>::mousePressEvent(QGraphicsSceneMouseEvent *event)
+  template <class T, typename I>
+  void incDecAction<T, I>::mousePressEvent(QGraphicsSceneMouseEvent *event)
   {
     if (event->button() != Qt::LeftButton || event->modifiers()) return;
     event->accept();
@@ -101,20 +101,20 @@ namespace Molsketch {
     T* t = getItem(event->buttonDownScenePos(event->button()));
     if (!t) return;
 
-    undoStack()->push(new incDecCommand<T>(t,
+    undoStack()->push(new incDecCommand<T, I>(t,
                                         activeSubAction() == d->plusAction,
                                         d->getFunction,
                                         d->setFunction,
                                         activeSubAction()->text())) ;
   }
 
-  template <class T>
-  void incDecAction<T>::initialize(QIcon UpIcon,
+  template <class T, typename I>
+  void incDecAction<T, I>::initialize(QIcon UpIcon,
                                    QIcon DownIcon,
                                    QString UpText,
                                    QString DownText,
-                                   int (T::*getFunction)()const,
-                                   void (T::*setFunction)(const int&))
+                                   I (T::*getFunction)()const,
+                                   void (T::*setFunction)(const I&))
   {
     // TODO remove old actions
     d->clear();
@@ -138,8 +138,8 @@ namespace Molsketch {
     return scene()->bondAt(p);
   }
 
-  template <class T>
-  T *incDecAction<T>::getItem(const QPointF &p)
+  template <class T, typename I>
+  T *incDecAction<T, I>::getItem(const QPointF &p)
   {
     return 0 ;
   }
@@ -168,15 +168,14 @@ namespace Molsketch {
                &Atom::setNumImplicitHydrogens);
   }
 
-  template <class T>
-
-  QAction *incDecAction<T>::decrementAction() const
+  template <class T, typename I>
+  QAction *incDecAction<T, I>::decrementAction() const
   {
     return d->minusAction;
   }
 
-  template <class T>
-  QAction *incDecAction<T>::incrementAction() const
+  template <class T, typename I>
+  QAction *incDecAction<T, I>::incrementAction() const
   {
     return d->plusAction;
   }

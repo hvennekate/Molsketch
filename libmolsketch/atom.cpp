@@ -45,6 +45,7 @@
 #include "scenesettings.h"
 #include "settingsitem.h"
 #include <QDebug>
+#include "painting/textfield.h"
 
 #define REQ_MOLECULE auto m_molecule = molecule(); if (!m_molecule) return
 
@@ -105,7 +106,7 @@ namespace Molsketch {
     // TODO do proper prepareGeometryChange() call
     // TODO call whenever boundingRect() is called
 
-    return renderer.computeBoundingRect(m_elementSymbol, getSymbolFont(), numImplicitHydrogens(), labelAlignment(), charge());
+    return label->boundingRect();
   }
 
   void Atom::initialize(const QPointF &position,
@@ -137,7 +138,9 @@ namespace Molsketch {
     m_userImplicitHydrogens =  0;
     m_newmanDiameter = 0;
     m_implicitHydrogens = implicitHydrogens;
-    updateShape();
+    setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
+    updateLabel();
   }
 
   QRectF Atom::boundingRect() const
@@ -146,7 +149,7 @@ namespace Molsketch {
       auto centeringDistance = QPointF(pointSelectionDistance(), pointSelectionDistance());
       return QRectF(-centeringDistance, centeringDistance);
     }
-    return m_shape;
+    return label->boundingRect();
   }
 
   void Atom::drawElectrons(QPainter* painter)
@@ -284,7 +287,7 @@ namespace Molsketch {
     if (this->isSelected()) {
       painter->save();
       painter->setPen(Qt::blue);
-      painter->drawRect(m_shape); // TODO draw rectangle around this and children rectangle to include electrons (possibly move this method to graphicsItem)
+      painter->drawRect(label->boundingRect());
       painter->restore();
     }
   }
@@ -322,7 +325,7 @@ namespace Molsketch {
     painter->save();
     painter->setPen(getColor());
 
-    renderer.drawAtomLabel(painter, m_elementSymbol, getSymbolFont(), numImplicitHydrogens(), labelAlignment(), charge());
+    label->paint(painter);
     drawSelectionHighlight(painter);
     if (molScene->settings()->lonePairsVisible()->get()) drawElectrons(painter);
     painter->restore();
@@ -343,11 +346,15 @@ namespace Molsketch {
 
   QVariant Atom::itemChange(GraphicsItemChange change, const QVariant &value)
   {
-    if (change == ItemPositionChange && parentItem()) {
-      parentItem()->update();
-      dynamic_cast<Molecule*>(parentItem())->rebuild();
-    };
-    updateShape();
+    updateLabel();
+    if (change == ItemPositionChange) {
+      for (auto neighbor : neighbours())
+        neighbor->updateLabel();
+      if (parentItem()) {
+        parentItem()->update();
+        dynamic_cast<Molecule*>(parentItem())->rebuild();
+      }
+    }
     return graphicsItem::itemChange(change, value);
   }
 
@@ -377,7 +384,7 @@ namespace Molsketch {
     m_userImplicitHydrogens = attributes.value(HYDROGEN_COUNT_ATTRIBUTE).toInt();
     m_implicitHydrogens = !attributes.value(DISABLE_HYDROGENS_ATTRIBUTE).toInt();
     m_userCharge = attributes.value(CHARGE_ATTRIBUTE).toInt();
-    updateShape();
+    updateLabel();
   }
 
   QXmlStreamAttributes Atom::graphicAttributes() const
@@ -395,7 +402,7 @@ namespace Molsketch {
   void Atom::setElement(const QString &element)
   {
     m_elementSymbol = element;
-    updateShape();
+    updateLabel();
     if (Molecule *m = molecule()) {
       m->invalidateElectronSystems();
       m->updateTooltip();
@@ -404,7 +411,7 @@ namespace Molsketch {
 
   void Atom::setNewmanDiameter(const qreal &diameter) {
     m_newmanDiameter = diameter;
-    updateShape();
+    updateLabel();
   }
 
   qreal Atom::getNewmanDiameter() const {
@@ -422,7 +429,7 @@ namespace Molsketch {
     return  result;
   }
 
-  void Atom::setNumImplicitHydrogens(const int& number)
+  void Atom::setNumImplicitHydrogens(const quint8 &number)
   {
     m_implicitHydrogens = true;
 
@@ -481,7 +488,7 @@ namespace Molsketch {
     }
   }
 
-  int Atom::numImplicitHydrogens() const {
+  quint8 Atom::numImplicitHydrogens() const {
     if (!m_implicitHydrogens) return 0;
     int bosum = 0;
     foreach (Bond *bond, bonds())
@@ -702,9 +709,9 @@ namespace Molsketch {
     return coordinates();
   }
 
-  void Atom::updateShape() {
+  void Atom::updateLabel() {
     prepareGeometryChange();
-    m_shape = computeBoundingRect();
+    label.reset(TextField::generateLabelForAtom(m_elementSymbol, getSymbolFont(), labelAlignment(), numImplicitHydrogens(), charge()));
   }
 
   void Atom::setIndex(const QString &index) {
@@ -771,7 +778,7 @@ namespace Molsketch {
     m_elementSymbol = attributes.value(ELEMENT_ATTRIBUTE).toString();
     m_index = attributes.value(ID_ATTRIBUTE).toString();
     m_newmanDiameter = qAbs(attributes.value(NEWMAN_DIAMETER_ATTRIBUTE).toDouble());
-    updateShape();
+    updateLabel();
   }
 
   void LegacyAtom::afterMoleculeReadFinalization() {
