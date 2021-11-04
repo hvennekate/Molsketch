@@ -42,8 +42,6 @@ namespace Molsketch {
     void drawAtomLabel(QPainter *painter, const QString &lbl, const QFont &font, int hAtomCount, Alignment alignment, int charge);
     QRectF computeBoundingRect(const QString &lbl, const QFont &font, int hAtomCount, Alignment alignment, int charge);
   private:
-    qreal computeTotalWdith(const int &alignment, const QString &lbl, const QFontMetricsF &fmSymbol, const QFontMetricsF &fmScript);
-    qreal computeXOffset(int alignment, const QFontMetricsF &fmSymbol, const QString &lbl, const qreal &totalWidth);
     TextField *generateTextBoxes(const QString &lbl, const QFont &font, Alignment alignment, int hAtomCount, int charge);
   };
 

@@ -56,7 +56,6 @@ namespace Molsketch {
     ~Atom() ;
     virtual QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    qreal annotationDirection() const ;
 
     bool isDrawn() const;
     void setCoordinates(const QVector<QPointF> &c) override;
@@ -77,25 +76,10 @@ namespace Molsketch {
       * FC = # valency electrons - 0.5 * # shared electrons - # unpaired electrons + user specified contribution
       */
     void setCharge(const int &charge);
-    /**
-       * @return The number of unpaired electrons (radicals).
-       */
-    int numUnpairedElectrons() const
-    {
-      return m_userElectrons;
-    }
     void setNumUnpairedElectrons(int n) // TODO this seems unused
     {
       m_userElectrons = n;
     }
-
-    /// Returns the string for the superscript charge (e.g. "3-", "2-", "-", "", "+", "2+", ...).
-    QString chargeString() const;
-
-
-    bool hasLabel() const;
-    QString string ()const;
-
 
     int numBonds() const;
     int bondOrderSum() const;
@@ -116,13 +100,12 @@ namespace Molsketch {
     Molsketch::Alignment labelAlignment() const;
     Bond *bondTo(Atom *other) const;
     QWidget* getPropertiesWidget() override;
-    void propertiesWidgetDestroyed();
     QPointF bondDrawingStart(const Atom *other, qreal bondLineWidth) const;
     bool contains(const QPointF &point) const override;
     QPolygonF moveablePoints() const override;
 
     void updateShape();
-    void setIndex(const QString& index);
+    void setIndex(const QString& index); // TODO this should be the responsibility of the molecule
     QString index() const;
     qreal getBondExtent(const QLineF &outer1, const QLineF &outer2, qreal lineWidth) const;
     virtual void afterMoleculeReadFinalization() {}
@@ -156,16 +139,11 @@ namespace Molsketch {
     QRectF m_shape;
     QRectF computeBoundingRect();
     QFont getSymbolFont() const;
-    QFont getSubscriptFont(const QFont &symbolFont) const;
-    QPair<QFont, QFont> getFonts() const;
-    QString composeLabel(bool leftAligned) const;
     void drawElectrons(QPainter* painter);
-    void drawCharge(QPainter* painter);
     void renderColoredSquare(QPainter* painter);
     void renderColoredCircle(QPainter* painter);
     void renderColoredShape(QPainter *painter, void (QPainter::*drawMethod)(int, int, int, int));
     void drawSelectionHighlight(QPainter* painter);
-    QString getLabelWithHydrogens();
     void drawNewman(QPainter *painter);
     QPointF getBondDrawingStartFromBoundingBox(const QLineF &connection, qreal bondLineWidth) const;
     bool showHoverPoint() const override { return false; }

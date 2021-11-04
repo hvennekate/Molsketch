@@ -89,12 +89,6 @@ namespace Molsketch {
 
   Atom::~Atom() {}
 
-  QPair<QFont, QFont> Atom::getFonts() const
-  {
-    QFont symbolFont = getSymbolFont();
-    return qMakePair(symbolFont, getSubscriptFont(symbolFont));
-  }
-
   QFont Atom::getSymbolFont() const
   {
     QFont symbolFont;
@@ -103,32 +97,6 @@ namespace Molsketch {
     if (symbolFont.pointSizeF() > 0)
       symbolFont.setPointSizeF(symbolFont.pointSizeF() * relativeWidth());
     return symbolFont;
-  }
-
-  QFont Atom::getSubscriptFont(const QFont& symbolFont) const
-  {
-    QFont subscriptFont = symbolFont;
-    if (symbolFont.pointSizeF() > 0)
-      subscriptFont.setPointSizeF(0.75 * symbolFont.pointSizeF());
-    return subscriptFont;
-  }
-
-  QString Atom::composeLabel(bool leftAligned) const
-  {
-    int hCount = numImplicitHydrogens();
-    QString lbl;
-    if (hCount && leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && leftAligned)
-      lbl += QString::number(hCount);
-
-    lbl += m_elementSymbol;
-
-    if (hCount && !leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && !leftAligned)
-      lbl += QString::number(hCount);
-    return lbl;
   }
 
   QRectF Atom::computeBoundingRect()
@@ -179,20 +147,6 @@ namespace Molsketch {
       return QRectF(-centeringDistance, centeringDistance);
     }
     return m_shape;
-  }
-
-  bool Atom::hasLabel() const
-  { // TODO what is the difference between this and isDrawn() ?
-    MolScene* molScene = dynamic_cast<MolScene*>(scene());
-    if (!molScene) return true ;
-
-    if ((m_elementSymbol == "C")
-        && !molScene->settings()->carbonVisible()->get()
-        && (numBonds() > 1 || (numBonds() == 1 && !molScene->settings()->showTerminalMethyls()->get()))
-        && ((charge() == 0) || !molScene->settings()->chargeVisible()->get()))
-      return false;
-
-    return true;
   }
 
   void Atom::drawElectrons(QPainter* painter)
@@ -304,19 +258,6 @@ namespace Molsketch {
     painter->restore();
   }
 
-  void Atom::drawCharge(QPainter* painter)
-  {
-    QString chargeId = chargeString();
-    QFont superscriptFont = getSymbolFont();
-    superscriptFont.setPointSize(0.75 * superscriptFont.pointSize());
-    QFontMetrics fmSymbol(superscriptFont);
-    int offset = 0.5 * fmSymbol.width("+");
-    painter->save();
-    painter->setFont(superscriptFont);
-    painter->drawText(m_shape.right() - offset, m_shape.top() + offset, chargeId);
-    painter->restore();
-  }
-
   void Atom::renderColoredSquare(QPainter* painter) {
     renderColoredShape(painter, &QPainter::drawRect);
   }
@@ -346,34 +287,6 @@ namespace Molsketch {
       painter->drawRect(m_shape); // TODO draw rectangle around this and children rectangle to include electrons (possibly move this method to graphicsItem)
       painter->restore();
     }
-  }
-
-  QString Atom::getLabelWithHydrogens()
-  {
-    bool leftAligned = false;
-    switch (labelAlignment()) {
-      case Left:
-        leftAligned = true;
-      default:
-        break;
-    }
-
-    int hCount = numImplicitHydrogens();
-
-    QString lbl;
-    if (hCount && leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && leftAligned)
-      lbl += QString::number(hCount);
-
-    lbl += m_elementSymbol;
-
-    if (hCount && !leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && !leftAligned)
-      lbl += QString::number(hCount);
-
-    return lbl;
   }
 
   void Atom::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -411,8 +324,6 @@ namespace Molsketch {
 
     renderer.drawAtomLabel(painter, m_elementSymbol, getSymbolFont(), numImplicitHydrogens(), labelAlignment(), charge());
     drawSelectionHighlight(painter);
-    if (molScene->settings()->chargeVisible()->get() && !m_elementSymbol.isEmpty())
-      drawCharge(painter); // TODO unite with subscript drawing and align appropriately
     if (molScene->settings()->lonePairsVisible()->get()) drawElectrons(painter);
     painter->restore();
 
@@ -428,34 +339,6 @@ namespace Molsketch {
     qreal half = m_newmanDiameter/2.;
     painter->drawEllipse(mapFromScene(pos()), half, half);
     painter->restore();
-  }
-
-  qreal Atom::annotationDirection() const
-  {
-    // Determine optimum direction if angleDirection negative
-    auto m_bonds = bonds();
-    //   No preference & no bonds => downward
-    if (m_bonds.isEmpty())
-      return 270 ;
-    if (m_bonds.size() == 1)
-      return Molecule::toDegrees(m_bonds.first()->bondAngle(this)+180.) ;
-    //   Have bonds? determine largest free angle
-    QVector<qreal> angles ;
-    foreach (Bond *bond, m_bonds)
-      angles << bond->bondAngle(this) ;
-    qSort(angles) ;
-    angles << angles.first() + 360. ;
-    qreal maxAngleGap = -1, result = 270 ;
-    for (int i = 0 ; i < angles.size()-1 ; ++i)
-    {
-      qreal gap = angles[i+1] - angles[i] ;
-      if (gap > maxAngleGap)
-      {
-        maxAngleGap = gap ;
-        result = (angles[i+1]+angles[i]) / 2. ;
-      }
-    }
-    return Molecule::toDegrees(result) ;
   }
 
   QVariant Atom::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -598,20 +481,6 @@ namespace Molsketch {
     }
   }
 
-  QString Atom::string () const {
-    QString el = element ();
-    int n = numImplicitHydrogens();
-    QString hs;
-    QString num = "";
-    if (n) {
-      if (n > 1) num.setNum (n);
-      hs = QString ("H") + num;
-    }
-    else hs = QString ("");
-    QString q = chargeString();
-    return el+hs+q;
-  }
-
   int Atom::numImplicitHydrogens() const {
     if (!m_implicitHydrogens) return 0;
     int bosum = 0;
@@ -645,27 +514,6 @@ namespace Molsketch {
     int computedCharge = charge() - m_userCharge;
     m_userCharge = requiredCharge - computedCharge;
     if (auto m = molecule()) m->updateTooltip();
-  }
-
-  QString Atom::chargeString() const
-  {
-    int c = charge();
-
-    // Drawing text
-    QString string;
-    string.setNum(c);
-    if (c < -1) // ..., "3-", "2-"
-      string =  string.remove(0,1) + "-";
-    if (c == -1) // "-"
-      string = "-";
-    if (c == 0) // ""
-      string = "";
-    if (c == 1) // "+"
-      string = "+";
-    if (c > 1) // "2+", "3+", ...
-      string = string + "+";
-
-    return string;
   }
 
   Molecule * Atom::molecule() const
