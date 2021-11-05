@@ -49,12 +49,11 @@ namespace Molsketch {
     {
     }
 
-    void redo() override
-    {
+    void redo() override {
       (t->*setFunction)((t->*getFunction)() + (plus ? 1 : -1)) ;
     }
-    void undo() override
-    {
+
+    void undo() override {
       (t->*setFunction)((t->*getFunction)() + (plus ? -1 : 1)) ;
     }
     // TODO mergeable
@@ -127,21 +126,26 @@ namespace Molsketch {
     d->getFunction = getFunction ;
   }
 
-  template<>
-  Atom *incDecAction<Atom>::getItem(const QPointF &p)
-  {
-    return scene()->atomNear(p) ;
+  template<class T>
+  T *getItemAt(MolScene *scene, const QPointF &p) {
+    Q_UNUSED(scene)
+    Q_UNUSED(p)
+    return nullptr;
   }
 
   template<>
-  Bond *incDecAction<Bond>::getItem(const QPointF &p) {
-    return scene()->bondAt(p);
+  Atom *getItemAt(MolScene *scene, const QPointF &p) {
+    return scene->atomNear(p) ;
+  }
+
+  template<>
+  Bond *getItemAt(MolScene *scene, const QPointF &p) {
+    return scene->bondAt(p);
   }
 
   template <class T, typename I>
-  T *incDecAction<T, I>::getItem(const QPointF &p)
-  {
-    return 0 ;
+  T *incDecAction<T, I>::getItem(const QPointF &p){
+    return getItemAt<T>(scene(), p);
   }
 
   chargeAction::chargeAction(MolScene *scene)
