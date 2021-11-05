@@ -405,7 +405,6 @@ namespace Molsketch {
     updateLabel();
     if (Molecule *m = molecule()) {
       m->invalidateElectronSystems();
-      m->updateTooltip();
     }
   }
 
@@ -437,7 +436,7 @@ namespace Molsketch {
     int deltaH = number - numImplicitHydrogens();
 
     m_userImplicitHydrogens = deltaH;
-    if (auto m = molecule()) m->updateTooltip();
+    updateLabel();
   }
 
   int Atom::numBonds() const {
@@ -520,7 +519,7 @@ namespace Molsketch {
   {
     int computedCharge = charge() - m_userCharge;
     m_userCharge = requiredCharge - computedCharge;
-    if (auto m = molecule()) m->updateTooltip();
+    updateLabel();
   }
 
   Molecule * Atom::molecule() const
@@ -712,6 +711,7 @@ namespace Molsketch {
   void Atom::updateLabel() {
     prepareGeometryChange();
     label.reset(TextField::generateLabelForAtom(m_elementSymbol, getSymbolFont(), labelAlignment(), numImplicitHydrogens(), charge()));
+    if (auto m = molecule()) m->updateTooltip();
   }
 
   void Atom::setIndex(const QString &index) {

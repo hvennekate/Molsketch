@@ -103,8 +103,8 @@ namespace Molsketch {
     if (!charge) return field;
 
     QString chargeLabel;
-    if (qAbs(charge) != 1) chargeLabel += QString::number(charge);
-    chargeLabel += (charge > 0) ? "+" : "-";
+    if (qAbs(charge) != 1) chargeLabel += QString::number(qAbs(charge));
+    chargeLabel += (charge > 0) ? QChar('+') : QChar(0x2212);
     topLine->addBoxRight(new StackedTextBox(chargeLabel, "", font)); // TODO should be part of last label/stacked text box
 
     return field;
