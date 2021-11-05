@@ -40,4 +40,12 @@ namespace Molsketch {
     return false;
   }
 
+  QString StackedTextBox::getTopText() const {
+    return topText;
+  }
+
+  QString StackedTextBox::getBottomText() const {
+    return bottomText;
+  }
+
 } // namespace Molsketch

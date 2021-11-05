@@ -21,11 +21,11 @@ namespace Molsketch {
   }
 
   void PaintableAggregate::addBefore(const Paintable *p) {
-    d->before << p;
+    if (p) d->before << p;
   }
 
   void PaintableAggregate::addAfter(const Paintable *p) {
-    d->after << p;
+    if (p) d->after << p;
   }
 
   PaintableAggregate::PaintableAggregate(const Paintable *center)

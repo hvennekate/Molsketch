@@ -16,6 +16,8 @@ public:
   void paint(QPainter *painter) const override;
   QRectF boundingRect() const override;
   bool preferredCenter() const override;
+  QString getTopText() const;
+  QString getBottomText() const;
 };
 } // namespace Molsketch
 

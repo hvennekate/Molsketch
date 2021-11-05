@@ -76,11 +76,14 @@ namespace Molsketch {
     if (centerIterator == boxes.cend()) centerIterator = boxes.cbegin();
 
     auto line = new TextLine(*centerIterator);
+    StackedTextBox *lastBox = nullptr;
     if (centerIterator != boxes.cbegin())
       for (auto leftBoxIterator = centerIterator - 1; leftBoxIterator != boxes.cbegin(); --leftBoxIterator)
         line->addBoxLeft(*leftBoxIterator);
-    for (auto rightBoxIterator = centerIterator + 1; rightBoxIterator != boxes.cend(); ++rightBoxIterator)
-      line->addBoxRight(*rightBoxIterator);
+    for (auto rightBoxIterator = centerIterator + 1; rightBoxIterator != boxes.cend(); ++rightBoxIterator) {
+      if (boxes.cend() - rightBoxIterator != 1 || !(lastBox = dynamic_cast<StackedTextBox*>(*rightBoxIterator)))
+        line->addBoxRight(*rightBoxIterator);
+    }
 
     auto field = new TextField(line);
 
@@ -91,21 +94,35 @@ namespace Molsketch {
         case Alignment::Down: field->addLineBelow(hLine(hAtomCount, font)); break;
         case Alignment::Left: {
             if (hAtomCount > 1) line->addBoxLeft(new StackedTextBox("", QString::number(hAtomCount), font));
-            line->addBoxLeft(new RegularTextBox("H", font)); break;
+            line->addBoxLeft(new RegularTextBox("H", font));
+            break;
           }
         case Alignment::Right: {
+            if (lastBox) {
+              line->addBoxRight(lastBox);
+              lastBox = nullptr;
+            }
             line->addBoxRight(new RegularTextBox("H", font));
-            if (hAtomCount > 1) line->addBoxRight(new StackedTextBox("", QString::number(hAtomCount), font)); break;
+            if (hAtomCount > 1) {
+              lastBox = new StackedTextBox("", QString::number(hAtomCount), font);
+            }
+            break;
           }
       }
     }
 
-    if (!charge) return field;
+    if (!charge) {
+      if (lastBox) line->addBoxRight(lastBox);
+      return field;
+    }
 
     QString chargeLabel;
     if (qAbs(charge) != 1) chargeLabel += QString::number(qAbs(charge));
     chargeLabel += (charge > 0) ? QChar('+') : QChar(0x2212);
-    topLine->addBoxRight(new StackedTextBox(chargeLabel, "", font)); // TODO should be part of last label/stacked text box
+    auto boxToAddWithChargeString = lastBox ? new StackedTextBox(chargeLabel, lastBox->getBottomText(), font)
+                                            : new StackedTextBox(chargeLabel, "", font);
+    delete lastBox;
+    line->addBoxRight(boxToAddWithChargeString);
 
     return field;
   }
