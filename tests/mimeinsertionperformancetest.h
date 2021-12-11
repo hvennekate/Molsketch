@@ -114,6 +114,6 @@ public:
     QTime stopwatch;
     stopwatch.start();
     scene->sendDragEnterEvent(event);
-    TSM_ASSERT_LESS_THAN("Inserting complex molecule took too long!", stopwatch.elapsed(), 150); // TODO limit should be 100
+    TSM_ASSERT_LESS_THAN("Inserting complex molecule took too long!", stopwatch.elapsed(), 500); // TODO limit should be 100
   }
 };
