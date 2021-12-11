@@ -3,11 +3,13 @@
 
 #include "boundingboxlinker.h"
 
+#include <debuggable.h>
+
 class QPainter;
 
 namespace Molsketch {
 
-  class Paintable : public Linkable {
+  class Paintable : public Linkable, public Debuggable {
   public:
     virtual ~Paintable() {}
     virtual void paint(QPainter *painter) const = 0;

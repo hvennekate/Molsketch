@@ -1,6 +1,7 @@
 #include "stackedtextbox.h"
 
 #include <QPainter>
+#include <QDebug>
 
 namespace Molsketch {
 
@@ -11,6 +12,10 @@ namespace Molsketch {
 
   qreal getMiddle(QFontMetricsF metrics) {
     return 0.6 * (metrics.ascent() - metrics.descent());
+  }
+
+  QDebug StackedTextBox::debug(QDebug debug) const {
+    return debug << "StackedTextBox(" << topText << ", " << bottomText << ", " << font << ")";
   }
 
   StackedTextBox::StackedTextBox(const QString &topText, const QString &bottomText, const QFont &font)

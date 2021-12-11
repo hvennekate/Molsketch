@@ -149,6 +149,8 @@ namespace Molsketch {
       auto centeringDistance = QPointF(pointSelectionDistance(), pointSelectionDistance());
       return QRectF(-centeringDistance, centeringDistance);
     }
+    if (m_newmanDiameter > 0.)
+      return QRectF(-m_newmanDiameter/2., -m_newmanDiameter/2., m_newmanDiameter, m_newmanDiameter);
     return label->boundingRect();
   }
 

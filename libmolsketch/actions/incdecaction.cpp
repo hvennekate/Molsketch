@@ -198,6 +198,7 @@ namespace Molsketch {
 
   // instantiation
   template class incDecAction<Atom>;
+  template class incDecAction<Atom, quint8>;
   template class incDecAction<Bond>;
 
 } // namespace

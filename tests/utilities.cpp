@@ -56,9 +56,7 @@ void enterDataIntoCell(QTableView *table, const QString& data, int row, int colu
   TS_ASSERT(editor);
   if (editor) {
     QTest::keyClicks(editor, data);
-    QTest::keyClick(editor, Qt::Key_Tab); // TODO find out how to use Key_Return here
-//      editor = table->viewport()->focusWidget(); // TODO
-//      TS_ASSERT(!editor);
+    QTest::mouseClick(table->viewport(), Qt::LeftButton);
   }
 }
 

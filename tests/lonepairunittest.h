@@ -24,7 +24,7 @@
 
 using namespace Molsketch;
 
-const qreal DELTA = 1e-4;
+const qreal DELTA = 3e-4;
 const qreal LENGTH = 10;
 const qreal ANGLE = 45;
 const qreal LINE_WIDTH = 1.5;

@@ -19,6 +19,10 @@ public:
   TestTextLine() : TextLine(new RegularTextBox(QString(), QFont())) {}
   MOCK_CONST(QRectF, boundingRect, , )
   VOID_MOCK_CONST(paint, QPainter* painter, painter)
+  QPointF getAnchorPoint(const Anchor &anchor) const override {
+    if (anchor == Anchor::Center) return boundingRect().center();
+    return QPointF();
+  }
   static std::function<void(const int&)> destructorCallback;
 };
 

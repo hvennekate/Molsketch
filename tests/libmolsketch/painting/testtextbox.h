@@ -8,6 +8,7 @@
 using namespace Molsketch;
 
 class TestTextBox : public TextBox, public ForTesting<TextBox> {
+  QDebug debug(QDebug debug) const override;
 public:
   TestTextBox() : TextBox(QFont()) {}
   MOCK_CONST(QRectF, boundingRect, , )

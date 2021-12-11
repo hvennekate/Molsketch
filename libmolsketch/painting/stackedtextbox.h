@@ -2,6 +2,7 @@
 #define MOLSKETCH_STACKEDTEXTBOX_H
 
 #include "textbox.h"
+#include "debuggable.h"
 
 namespace Molsketch {
 
@@ -9,6 +10,7 @@ class StackedTextBox : public TextBox {
   QString topText, bottomText;
   QFontMetricsF originalFontMetrics;
   qreal shiftUp, shiftDown;
+  QDebug debug(QDebug debug) const override;
 public:
   StackedTextBox(const QString &topText,
                  const QString &bottomText,
@@ -19,6 +21,7 @@ public:
   QString getTopText() const;
   QString getBottomText() const;
 };
+
 } // namespace Molsketch
 
 #endif // MOLSKETCH_STACKEDTEXTBOX_H

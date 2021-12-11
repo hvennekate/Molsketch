@@ -1,25 +1,30 @@
 #include "regulartextbox.h"
 #include <QPainter>
+#include <QDebug>
 
 namespace Molsketch {
 
-RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
-  : TextBox(font), text(text) {}
+  QDebug RegularTextBox::debug(QDebug debug) const {
+    return debug << "Regular text box(" << text << ", " << font << ")";
+  }
 
-QRectF RegularTextBox::boundingRect() const {
-  // TODO consider tightBoundingRect() (possibly selectable by user)
-  return metrics.boundingRect(text);
-}
+  RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
+    : TextBox(font), text(text) {}
 
-void RegularTextBox::paint(QPainter *painter) const {
-  painter->save();
-  painter->setFont(font);
-  painter->drawText(0, 0, text);
-  painter->restore();
-}
+  QRectF RegularTextBox::boundingRect() const {
+    // TODO consider tightBoundingRect() (possibly selectable by user)
+    return metrics.boundingRect(text);
+  }
 
-bool RegularTextBox::preferredCenter() const {
-  return true;
-}
+  void RegularTextBox::paint(QPainter *painter) const {
+    painter->save();
+    painter->setFont(font);
+    painter->drawText(0, 0, text);
+    painter->restore();
+  }
+
+  bool RegularTextBox::preferredCenter() const {
+    return true;
+  }
 
 } // namespace Molsketch

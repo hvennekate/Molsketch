@@ -2,6 +2,7 @@
 #define MOLSKETCH_PAINTABLEAGGREGATE_H
 
 #include "paintable.h"
+#include "debuggable.h"
 
 namespace Molsketch {
 
@@ -9,6 +10,7 @@ namespace Molsketch {
     class PaintableAggregatePrivate;
     PaintableAggregatePrivate *d;
     QPointF getCenterShift() const;
+    QDebug debug(QDebug debug) const override;
   protected:
     void addBefore(const Paintable *p);
     void addAfter(const Paintable *p);

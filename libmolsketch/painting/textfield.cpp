@@ -4,11 +4,12 @@
 #include "stackedtextbox.h"
 #include "textfield.h"
 #include "textline.h"
+#include <QDebug>
 
 namespace Molsketch {
 
   const QRegularExpression NUMBER{"([0-9]+)"}; // TODO constants
-  const QRegularExpression NUMBER_OR_NON_NUMBER("([0-9]+|[^0-9]+)");
+  const QRegularExpression NUMBER_OR_NON_NUMBER("([0-9]+|[A-Z][a-z]*|[^0-9]+)");
 
   // TODO align horizontally
   QRectF TextField::addRectFBefore(const QRectF &base, QRectF toAdd) const {
@@ -35,7 +36,7 @@ namespace Molsketch {
 
   QPointF TextField::afterItemPreShift(const Paintable *item) const {
     auto bounds = item->boundingRect();
-    return QPointF(0, -bounds.center().y() + bounds.height()); //-item->boundingRect().top());
+    return QPointF(0, -bounds.center().y() + bounds.height());
   }
 
   QPointF TextField::afterItemPostShift(const Paintable *item) const {
@@ -92,9 +93,11 @@ namespace Molsketch {
     if (centerIterator == boxes.cend()) centerIterator = boxes.cbegin();
 
     auto line = new TextLine(*centerIterator);
-    if (centerIterator != boxes.cbegin())
-      for (auto leftBoxIterator = centerIterator - 1; leftBoxIterator != boxes.cbegin(); --leftBoxIterator)
-        line->addBoxLeft(*leftBoxIterator);
+    if (centerIterator != boxes.cbegin()) {
+      QVector<TextBox *> leftBoxes(centerIterator - boxes.cbegin());
+      std::copy_backward(boxes.cbegin(), centerIterator, leftBoxes.end());
+      for (auto leftBox : leftBoxes) line->addBoxLeft(leftBox);
+    }
     for (auto rightBoxIterator = centerIterator + 1; rightBoxIterator != boxes.cend(); ++rightBoxIterator) {
         line->addBoxRight(*rightBoxIterator);
     }
@@ -112,8 +115,9 @@ namespace Molsketch {
           }
         case Alignment::Right: {
             line->addBoxRight(new RegularTextBox("H", font));
-            line->addBoxRight(new StackedTextBox(chargeLabel,
-                                                 hAtomCount > 1 ? QString::number(hAtomCount) : "", font));
+            if (hAtomCount > 1 || !chargeLabel.isEmpty())
+              line->addBoxRight(new StackedTextBox(chargeLabel,
+                                                   hAtomCount > 1 ? QString::number(hAtomCount) : "", font));
             break;
           }
       }

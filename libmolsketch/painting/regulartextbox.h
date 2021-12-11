@@ -5,11 +5,13 @@
 #include <QPointF>
 #include <QString>
 #include "textbox.h"
+#include "debuggable.h"
 
 namespace Molsketch {
 
 class RegularTextBox : public TextBox {
   QString text;
+  QDebug debug(QDebug debug) const override;
 public:
   RegularTextBox(const QString &text, const QFont &font);
 
@@ -17,7 +19,6 @@ public:
   void paint(QPainter *painter) const override;
   bool preferredCenter() const override;
 };
-
 
 } // namespace Molsketch
 

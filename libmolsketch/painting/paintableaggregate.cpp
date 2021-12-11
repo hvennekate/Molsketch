@@ -1,4 +1,6 @@
 #include "paintableaggregate.h"
+#include <QDebug>
+#include <QDebug>
 #include <QPainter>
 #include <algorithm>
 
@@ -18,6 +20,16 @@ namespace Molsketch {
 
   QPointF PaintableAggregate::getCenterShift() const {
     return -d->center->getAnchorPoint(Anchor::Center);
+  }
+
+  QDebug PaintableAggregate::debug(QDebug debug) const {
+    debug << typeid(*this).name() << "[[ ";
+    for (const Debuggable *deb : d->before)
+      debug << deb << " ";
+    debug << "] " << d->center.data() << " [ ";
+    for (const Debuggable *deb : d->after)
+      debug << deb << " ";
+    return debug << "]]";
   }
 
   void PaintableAggregate::addBefore(const Paintable *p) {
