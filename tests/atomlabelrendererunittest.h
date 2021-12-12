@@ -64,8 +64,9 @@ private:
   }
 
   void assertLabelAndBoundingBox(const QString &text, const QStringList &svgElements,
-                                 const QRectF &expectedBounds, const Alignment &alignment = Alignment::Right, int hAtomCount = 0) {
-    auto field = TextField::generateLabelForAtom(text, ATOM_FONT, alignment, hAtomCount);
+                                 const QRectF &expectedBounds, const Alignment &alignment = Alignment::Right,
+                                 int hAtomCount = 0, int charge = 0) {
+    auto field = TextField::generateLabelForAtom(text, ATOM_FONT, alignment, hAtomCount, charge);
 
     auto svg = getLabelRenderedAsSvg(field);
     assertThat(svg)->contains(LABEL_POS_AND_FONT_QUERY)->exactly(svgElements);
@@ -153,5 +154,54 @@ public:
                                      {-5.5, -28.5, 20, 38}, Alignment::Up, 1);
   }
 
-  // TODO charges
+  void testWithCharge() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 6), "A", "+"},
+                              {-5.5, -10.1, 16, 19.6}, Alignment::Right, 0, 1);
+  }
+
+  void testWithMultipleCharges() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 6), "A", "2+"},
+                              {-5.5, -10.1, 20, 19.6}, Alignment::Right, 0, 2);
+  }
+
+  void testWithNegativeCharge() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 6), "A", QChar(0x2212)},
+                              {-5.5, -10.1, 16, 19.6}, Alignment::Right, 0, -1);
+  }
+
+  void testWithMultipleNegativeCharges() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 6), "A", QString::number(2) + QChar(0x2212)},
+                              {-5.5, -10.1, 20, 19.6}, Alignment::Right, 0, -2);
+  }
+
+  void testWithMultipleElementsAndCharge() {
+    assertLabelAndBoundingBox("AcBe", {svgDimensions(-8, 5.5, 10), svgDimensions(8, 5.5, 10), svgDimensions(24, 5.5, 6), "Ac", "Be", "+"},
+                              {-8, -10.1, 37, 19.6}, Alignment::Right, 0, 1);
+  }
+
+  void testWithHatomRightAndCharge() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 10), svgDimensions(15.5, 5.5, 6), "A", "H", "+"},
+                              {-5.5, -10.1, 26, 19.6}, Alignment::Right, 1, 1);
+  }
+
+
+  void testWithHatomsRightAndCharges() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 10), svgDimensions(15.5, 5.5, 6), svgDimensions(15.5, 5.5, 6), "A", "H", "2", "2+"},
+                              {-5.5, -10.1, 30, 21.2}, Alignment::Right, 2, 2);
+  }
+
+  void testWithHatomLeftAndCharge() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 6), svgDimensions(-15.5, 5.5, 10), "A", "+", "H"},
+                              {-15.5, -10.1, 26, 19.6}, Alignment::Left, 1, 1);
+  }
+
+  void testWithHatomUpAndCharge() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 6), svgDimensions(-5, -13.5, 10), "A", "+", "H"},
+                              {-5.5, -29.1, 16, 38.6}, Alignment::Up, 1, 1);
+  } //TODO: why is the left coordinate of H not -5.5? Align on bottom left/top left corner instead?
+
+  void testWithHatomDownAndCharge() {
+    assertLabelAndBoundingBox("A", {svgDimensions(-5.5, 5.5, 10), svgDimensions(5.5, 5.5, 6), svgDimensions(-5, 24.5, 10), "A", "+", "H"},
+                              {-5.5, -10.1, 16, 38.6}, Alignment::Down, 1, 1);
+  }
 };
