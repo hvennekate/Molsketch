@@ -46,11 +46,9 @@ namespace Molsketch {
 
   void PropertiesDock::selectionChanged() {
     Q_D(PropertiesDock);
-    // TODO ideally, the signal should probably send the selected items/current item directly
     MolScene *scene = qobject_cast<MolScene*>(sender());
     if (!scene) return;
     auto selectedItems = scene->selectedItems();
-    // TODO there should be a better way of determining the "current item"
 
     if (auto currentItem = getCurrentItem(selectedItems))
       d->scrollArea->setWidget(currentItem->getPropertiesWidget());

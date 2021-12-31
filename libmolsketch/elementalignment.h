@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Igor Filippov                                   *
- *   Copyright (C) 2009 Tim Vandermeersch                                  *
+ *   Copyright (C) 2020 Hendrik Vennekate                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,19 +17,35 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#if QT_VERSION < 0x050000
-#define STRINGCONVERSION toAscii()
-#else
-#define STRINGCONVERSION toLatin1()
-#endif
+#ifndef ELEMENTALIGNMENT_H
+#define ELEMENTALIGNMENT_H
 
-#if QT_VERSION < 0x050000
-#define GRAPHICSSCENEHEADER , QGraphicsScene * scene = 0
-#define GRAPHICSSCENESOURCE , QGraphicsScene *scene
-#define GRAPHICSSCENEINIT , scene
-#else
-#define GRAPHICSSCENEHEADER
-#define GRAPHICSSCENESOURCE
-#define GRAPHICSSCENEINIT
-#endif
+#include <QWidget>
+#include "neighboralignment.h"
 
+namespace Molsketch {
+  class ElementAlignmentPrivate;
+
+  class ElementAlignment : public QWidget {
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(ElementAlignment)
+    QScopedPointer<ElementAlignmentPrivate> d_ptr;
+  public:
+    explicit ElementAlignment(QWidget *parent = nullptr);
+    ~ElementAlignment();
+    NeighborAlignment getAlignment() const;
+  signals:
+    void alignmentChanged(const NeighborAlignment &newAlignment);
+  public slots:
+    void setAlignment(const NeighborAlignment &newAlignment);
+    void setElement(const QString &elementSymbol);
+  private slots:
+    void on_automatic_toggled(bool on);
+    void on_east_toggled(bool on);
+    void on_west_toggled(bool on);
+    void on_north_toggled(bool on);
+    void on_south_toggled(bool on);
+  };
+} // namespace
+
+#endif // ELEMENTALIGNMENT_H

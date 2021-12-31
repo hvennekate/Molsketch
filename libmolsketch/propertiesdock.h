@@ -27,12 +27,12 @@ namespace Molsketch {
     Q_OBJECT
     Q_DECLARE_PRIVATE(PropertiesDock)
     QScopedPointer<PropertiesDockPrivate> d_ptr;
-	public:
+  public:
     explicit PropertiesDock(QWidget *parent = 0);
     ~PropertiesDock();
   public slots:
     void selectionChanged();
-	};
+  };
 
 } // namespace Molsketch
 

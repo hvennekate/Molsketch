@@ -21,7 +21,7 @@
 /** @file
  * This file is part of molsKetch and contains the lineWidthAction class.
  *
- * @author Hendrik Vennekate <HVennekate@gmx.de>
+ * @author Hendrik Vennekate <Hendrik.Vennekate@posteo.de>
  * @since Lithium
  */
 

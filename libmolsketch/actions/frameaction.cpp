@@ -139,7 +139,6 @@ namespace Molsketch {
   void FrameAction::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
   {
     if (!d->currentFrame) return ;
-    if (!scene() || !scene()->stack()) return ; // TODO
     Commands::ItemAction::addItemToScene(d->currentFrame, scene(), tr("Add frame or brackets"));
     d->currentFrame = 0 ;
     event->accept();

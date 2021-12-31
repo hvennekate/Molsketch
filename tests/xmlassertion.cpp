@@ -143,28 +143,32 @@ XmlAssertion *XmlAssertion::exactlyOnceWithContent(const QString &expected) {
 }
 
 XmlAssertion *XmlAssertion::exactlyOnce() {
+  return exactlyTimes(1);
+}
+
+XmlAssertion *XmlAssertion::exactlyTimes(const int &expectedCount)
+{
   Q_D(XmlAssertion);
   QXmlResultItems results;
   d->query.evaluateTo(&results);
   if (results.hasError())
     d->printStackTraceAndThrow("Error in query!");
+  QList<QXmlItem> items;
   QXmlItem item = results.next();
-  if (item.isNull())
-    d->printStackTraceAndThrow("Expected exactly one result from query");
-  if (!results.next().isNull())
-    d->printStackTraceAndThrow("More than one match to query found!");
+  while (!item.isNull()) {
+    items << item;
+    item = results.next();
+  }
+  if (items.size() != expectedCount)
+    d->printStackTraceAndThrow(
+          QString("Expected exactly %1 results from query. Actual count: %2.")
+          .arg(expectedCount)
+          .arg(items.size()));
   return this;
 }
 
 XmlAssertion *XmlAssertion::never() {
-  Q_D(XmlAssertion);
-  QXmlResultItems results;
-  d->query.evaluateTo(&results);
-  if (results.hasError())
-    d->printStackTraceAndThrow("Error in query!");
-  if (!results.next().isNull())
-    d->printStackTraceAndThrow("No match for query expected!");
-  return this;
+  return exactlyTimes(0);
 }
 
 XmlAssertion::XmlAssertion(const QString &xml)

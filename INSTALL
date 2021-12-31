@@ -10,7 +10,6 @@ Short instructions for building the source with CMake:
 cmake -G "MinGW Makefiles" ..
 instead)
 - make
-(using Qt5, if available, see below)
 1.1 Install the binary (if desired)
 - make install
 1.2 Make a package (if desired)
@@ -31,16 +30,8 @@ The binary will be in the bin/ subdirectory, the library part in the lib/ subdir
 - make install
 Files will be copied into "bin", "doc", "include", and "lib" directories, relative to PREFIX.
 
-3. Notes on Qt5 vs. Qt4
-If Qt5 is used, library and executable names will be appended with "-qt5" (both cmake and qmake).
-With qmake, one can choose the version by picking the appropriate version of qmake.
-With cmake, Qt5 is automatically selected, if available, otherwise Qt4. If you have both versions
-and want to force the usage of Qt4, use
-- cmake -D FORCEQt4=TRUE ..
-in the cmake step above.
-
-4. Notes on OpenBabel (esp. Windows)
-If you have difficulties making qmake or cmake find openbabel, you might want to set the variables OPENBABEL2_LIBRARIES and OPENBABEL2_INCLUDE_DIR:
-cmake -DOPENBABEL2_LIBRARIES=<path of openbabel.dll/libopenbabel.so> -DOPENBABEL_INCLUDE_DIR=<directory containing babelconfig.h> <path to Molsketch sources>
+3. Notes on OpenBabel (esp. Windows)
+If you have difficulties making qmake or cmake find openbabel, you might want to set the variables OB_LIBRARY_DIRS and OB_INCLUDE_DIRS:
+cmake -DOB_LIBRARY_DIRS=<path of openbabel.dll/libopenbabel.so> -DOB_INCLUDE_DIRS=<directory containing babelconfig.h> <path to Molsketch sources>
 or
-qmake OPENBABEL2_LIBRARIES=<openbabel.dll/libopenbabel.so directory> OPENBABEL_INCLUDE_DIR=<directory containing babelconfig.h> <path to Molsketch sources>
+qmake OB_LIBRARY_DIRS=<openbabel.dll/libopenbabel.so directory> OB_INCLUDE_DIRS=<directory containing babelconfig.h> <path to Molsketch sources>

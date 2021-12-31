@@ -67,15 +67,15 @@ namespace Molsketch {
 
     static qreal toDegrees(const qreal& angle) ;
 
-    Molecule(QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER ) ;
-    Molecule(QSet<Atom*>, QSet<Bond*>, QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER ) ;
+    Molecule(QGraphicsItem* parent = 0) ;
+    Molecule(QSet<Atom*>, QSet<Bond*>, QGraphicsItem* parent = 0) ;
     // TODO get bonds from atoms or atoms from bonds, but don't take both
     /** Creates a copy of molecule @p mol with @p parent on MolScene @p scene. */
     Molecule(const Molecule& mol) ;
 
     /** Creates a copy of molecule @p mol, but clones @p atoms as the new molecule's
          * atoms, and any bonds where both atoms  are in @p atoms. */
-    Molecule(const Molecule& mol, const QSet<Atom*>& atoms, QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER);
+    Molecule(const Molecule& mol, const QSet<Atom*>& atoms, QGraphicsItem* parent = 0);
     // TODO constructor with initializer block
 
     ~Molecule();
@@ -150,8 +150,8 @@ namespace Molsketch {
     /// @return @c true if the molecule exists of two seperate submolecules, and @c false otherwise.
     bool canSplit() const;
 
-    QList<Atom*> atoms() const;
-    QList<Bond*> bonds() const;
+    QList<Atom*> atoms() const; // TODO return set
+    QList<Bond*> bonds() const; // TODO return set
     SumFormula sumFormula() const;
 
     QWidget *getPropertiesWidget() override;

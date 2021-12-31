@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 Tim Vandermeersch                                  *
+ *   Copyright (C) 2020 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,22 +16,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
-#include "mimemolecule.h"
+#ifndef NEIGHBORALIGNMENT_H
+#define NEIGHBORALIGNMENT_H
 
 namespace Molsketch {
-
-  MimeMolecule::MimeMolecule()
-  {
-  }
-
-  void MimeMolecule::setMolecule(Molecule *molecule)
-  {
-    m_molecule = molecule;
-  }
-
-  Molecule* MimeMolecule::molecule() const
-  {
-    return m_molecule;
-  }
-
+  enum NeighborAlignment {
+    automatic = 0,
+    north = 1,
+    west = 2,
+    east = 3,
+    south = 4
+  };
 }
+
+#endif // NEIGHBORALIGNMENT_H

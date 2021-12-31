@@ -35,7 +35,8 @@ using Molsketch::Molecule;
 using namespace Molsketch::Commands;
 
 ItemAction::ItemAction(QGraphicsItem* newItem, MolScene* addScene, const QString & text)
-  : ItemCommand(newItem, text), m_scene(addScene), owning(!newItem->scene())
+  : ItemCommand(newItem, text), m_scene(addScene), owning(!newItem->scene()),
+    parent(newItem->parentItem())
 {}
 
 ItemAction::~ItemAction() {
@@ -44,8 +45,14 @@ ItemAction::~ItemAction() {
 
 void ItemAction::redo() {
   if (!getItem() || !m_scene) return;
-  if (owning) m_scene->addItem(getItem());
-  else m_scene->removeItem(getItem());
+  auto item = getItem();
+  if (owning) {
+    m_scene->addItem(item);
+    item->setParentItem(parent);
+  } else {
+    parent = item->parentItem();
+    m_scene->removeItem(item);
+  }
   owning = !owning;
 }
 

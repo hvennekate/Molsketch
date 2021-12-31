@@ -1,12 +1,6 @@
 CONFIG += silent
 CONFIG += c++14
 
-qtVersionSuffix=""
-equals(QT_MAJOR_VERSION, 5) {
-    qtVersionSuffix= -qt5
-}
-DEFINES += "QTVERSIONSUFFIX=\"\\\"$$qtVersionSuffix\\\"\""
-
 DEFINES += QMAKEBUILD
 
 sourceDir = $$_PRO_FILE_PWD_

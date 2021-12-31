@@ -87,13 +87,13 @@ namespace Molsketch
     }
   }
 
-  bool exportFile(const QString &fileName, MolScene * scene) // TODO make part of scene
+  bool exportFile(const QString &fileName, MolScene * scene, const qreal &scaling) // TODO make part of scene
   {
     // Clear selection
     QList<QGraphicsItem*> selList(scene->selectedItems());
     scene->clearSelection();
 
-    QImage image = scene->renderImage(scene->itemsBoundingRect());
+    QImage image = scene->renderImage(scene->itemsBoundingRect(), scaling);
 
     // Restore selection
     foreach(QGraphicsItem* item, selList) item->setSelected(true);
@@ -113,7 +113,7 @@ namespace Molsketch
 
     // Rendering on the printer
     QRectF rect(scene->itemsBoundingRect());
-    scene->render(&painter,printer.pageRect(),rect);
+    scene->render(&painter, printer.pageRect(QPrinter::Point), rect); // TODO the scene rect is actually usually too large
 
     // Restore selection
     foreach(QGraphicsItem* item, selList) item->setSelected(true);

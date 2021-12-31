@@ -51,7 +51,7 @@
   <url type="homepage">http://molsketch.sourceforge.net/</url>
 
   <provides>
-    <binary>molsketch-qt5</binary>
+    <binary>molsketch</binary>
   </provides>
 
 </component>

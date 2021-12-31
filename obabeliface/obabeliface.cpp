@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2014 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2014 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,11 +23,7 @@
 #include <QGraphicsItem>
 #include <QProcess>
 #include <QDir>
-#if QT_VERSION < 0x050000
-#include <QDesktopServices>
-#else
 #include <QStandardPaths>
-#endif
 
 #include "obabeliface.h"
 #include "molecule.h"
@@ -38,15 +34,13 @@
 #include "scenesettings.h"
 #include "settingsitem.h"
 
-#ifdef OPENBABEL2_TRUNK
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wdeprecated-copy" // OpenBabel 2 only
+
 #include <openbabel/graphsym.h>
 #include <openbabel/stereo/stereo.h>
-#include <openbabel/graphsym.h>
-#else
-#include <openbabel/alias.h>
-#include <openbabel/bitvec.h>
-#include <openbabel/canon.h>
-#endif
 
 #include <openbabel/mol.h>
 #include <openbabel/data.h>
@@ -55,7 +49,17 @@
 #include <openbabel/op.h>
 #include <openbabel/stereo/stereo.h>
 
-OpenBabel::OBElementTable eTable ;
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+#include <openbabel/obiter.h>
+#include <openbabel/bond.h>
+#include <openbabel/elements.h>
+#endif
+
+#pragma GCC diagnostic pop
+
+#if (OB_VERSION < OB_VERSION_CHECK(3, 0, 0))
+OpenBabel::OBElementTable elementTable;
+#endif
 
 namespace Molsketch
 {
@@ -63,12 +67,20 @@ namespace Molsketch
 
   QString number2symbol( int number )
   {
-    return eTable.GetSymbol(number);
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+    return OpenBabel::OBElements::GetSymbol(number);
+#else
+    return elementTable.OBElementTable::GetSymbol(number);
+#endif
   }
 
   int symbol2number( const QString &symbol )
   {
-    return eTable.GetAtomicNum(symbol.STRINGCONVERSION) ;
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+    return OpenBabel::OBElements::GetAtomicNum(symbol.toLatin1()) ;
+#else
+    return elementTable.GetAtomicNum(symbol.toLatin1()) ;
+#endif
   }
 
   OpenBabel::OBMol toOBMolecule(const Molsketch::Molecule* originalMolecule, unsigned short int dim = 2)
@@ -127,7 +139,7 @@ namespace Molsketch
     using namespace OpenBabel;
     OBConversion conversion;
 
-    if (!conversion.SetOutFormat(QFileInfo(fileName).suffix(). STRINGCONVERSION))
+    if (!conversion.SetOutFormat(QFileInfo(fileName).suffix().toLatin1()))
     {
       qDebug() << "Error while saving #1";
       return false;
@@ -219,28 +231,8 @@ namespace Molsketch
     symmetry_classes.clear() ;
     if (!molecule) return ;
     OpenBabel::OBMol obmol(toOBMolecule(molecule)) ;
-#ifdef OPENBABEL2_TRUNK
     OpenBabel::OBGraphSym graphsym(&obmol);
     graphsym.GetSymmetry(symmetry_classes);
-#else
-    OpenBabel::OBBitVec fragatoms(obmol.NumAtoms());
-
-    using OpenBabel::OBMolAtomIter;
-    FOR_ATOMS_OF_MOL(a, &obmol)
-      fragatoms.SetBitOn(a->GetIdx());
-    std::vector<unsigned int> canonical_labels;
-#ifndef OB_VERSION
-    OpenBabel::OBBitVec fragAtoms;
-    OpenBabel::CanonicalLabels(&obmol, fragAtoms, symmetry_classes, canonical_labels);
-#else
-#if (OB_VERSION_CHECK(2,3,0) > OB_VERSION)
-    OpenBabel::OBBitVec fragAtoms;
-    OpenBabel::CanonicalLabels(&obmol, fragAtoms, symmetry_classes, canonical_labels);
-#else
-    OpenBabel::CanonicalLabels(&obmol, symmetry_classes, canonical_labels);
-#endif
-#endif
-#endif
   }
 
   QList<Atom*> chiralAtoms(const Molecule* molecule)
@@ -250,7 +242,6 @@ namespace Molsketch
 
     QList<Atom*> atoms(molecule->atoms()) ;
     OpenBabel::OBMol obmol(toOBMolecule(molecule)) ;
-#ifdef OPENBABEL2_TRUNK
     // need to calculate symmetry first
     std::vector<unsigned int> symmetry_classes;
     OpenBabel::OBGraphSym graphsym(&obmol);
@@ -272,23 +263,13 @@ namespace Molsketch
                << atoms[obatom2->GetIndex()] ;
       }
     }
-#else
-    using OpenBabel::OBMolAtomIter;
-    FOR_ATOMS_OF_MOL(atom, obmol)
-      if (atom->IsChiral())
-        result << atoms[atom->GetIdx()-1] ;
-#endif
     return result ;
   }
 
   Molecule* call_osra(QString fileName)
   {
     int n=0;
-#if QT_VERSION < 0x050000
-    QString tmpresult = QDesktopServices::storageLocation(QDesktopServices::TempLocation) + QDir::separator() + "osra";
-#else
     QString tmpresult = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QDir::separator() + "osra";
-#endif
     tmpresult += ".sdf";
     QString command;
     char *env = getenv("OSRA");
@@ -353,8 +334,13 @@ namespace Molsketch
       using namespace OpenBabel;
     // Remove any existing wedge and hash bonds
     FOR_BONDS_OF_MOL(b, &mol)  {
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+      b->SetWedge(false);
+      b->SetHash(false);
+#else
       b->UnsetWedge();
       b->UnsetHash();
+#endif
     }
 
     std::map<OBBond*, enum OBStereo::BondDirection> updown;

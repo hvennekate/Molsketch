@@ -25,8 +25,8 @@ class QGraphicsScene;
 
 namespace Molsketch {
 
-class ItemTypeSelectionAction : public AbstractItemAction
-{
+class ItemTypeSelectionAction : public AbstractItemAction {
+  Q_OBJECT
 public:
     ItemTypeSelectionAction(MolScene *parent);
     void execute() override;

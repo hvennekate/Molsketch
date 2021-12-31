@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2018 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2018 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -64,6 +64,8 @@ QString makeComparisonString(const char *first, const char *second, T expected, 
       << "\n" << actualIntro << actual;
   return comparison;
 }
+
+#define QSM_ASSERT(MESSAGE, VAL){QString __comparison("\n    "); QDebug __out(&__comparison); __out << VAL; TSM_ASSERT((MESSAGE + __comparison).toStdString().data(), VAL)}
 
 #define QSM_ASSERT_EQUALS(MESSAGE, VAL1, VAL2) {QString __comparison("\n    "); QDebug __out(&__comparison); __out << VAL1; __comparison += "\n != "; __out << VAL2; TSM_ASSERT_EQUALS((MESSAGE + __comparison).toStdString().data(), VAL1, VAL2)}
 
@@ -134,14 +136,25 @@ QXmlStreamAttributes getAttributesOfParentElement(QXmlStreamReader& reader, cons
 void clickMenuEntry(const QStringList& names, QMainWindow* mainWindow);
 
 template<typename T, typename U>
-T* findByType(QList<U*> items) {
+T* findFirstByType(const QList<U*>& items) {
   for (auto item : items)
     if (T* result = dynamic_cast<T*>(item))
       return result;
   return nullptr;
 }
 
+template<typename T, typename U>
+QList<T*> findByType(const QList<U*>& items) {
+  QList<T*> result;
+  for (auto item : items)
+    if (T* t = dynamic_cast<T*>(item))
+      result += t;
+  return result;
+}
+
 void leftMouseClick(QWidget* w, QPoint p = QPoint());
 void leftMouseClick(QWindow* w, QPoint p = QPoint());
+void doubleClick(QWidget* w, QPoint p = QPoint());
+void doubleClick(QWindow* w, QPoint p = QPoint());
 
 #endif // UTILITIES_H

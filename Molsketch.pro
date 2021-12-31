@@ -1,4 +1,6 @@
 message("======= Welcome to Molsketch build =======")
+REQUIRED_QT_VERSION=5
+lessThan(QT_MAJOR_VERSION, $$REQUIRED_QT_VERSION) : error("Molsketch requires at least Qt version $${REQUIRED_QT_VERSION}.")
 include(variables.pri)
 ############## SETTINGS
 

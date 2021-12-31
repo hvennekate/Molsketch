@@ -44,11 +44,7 @@ namespace Molsketch {
     // Get items (from selection or by being clicked on
     QList<QGraphicsItem*> items = scene()->selectedItems();
     if (items.isEmpty())
-      items << scene()->itemAt(event->buttonDownScenePos(Qt::LeftButton)
-                                       #if QT_VERSION >= 0x050000
-                                           , QTransform()
-                                       #endif
-                                           );
+      items << scene()->itemAt(event->buttonDownScenePos(Qt::LeftButton), QTransform());
     // Get items we actually care about
     d->transformItems.clear();
     foreach(QGraphicsItem* item, items)

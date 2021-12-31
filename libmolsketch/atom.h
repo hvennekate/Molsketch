@@ -27,6 +27,7 @@
 #include "graphicsitem.h"
 #include "sumformula.h"
 #include "alignment.h"
+#include "neighboralignment.h"
 
 namespace Molsketch {
 
@@ -43,6 +44,8 @@ namespace Molsketch {
     enum { Type = AtomType };
     int type() const override { return Type; }
 
+    enum ShapeType { Rectangle = 0, Circle = 1 };
+
     /**
        * Creates a new atom.
        *
@@ -51,8 +54,8 @@ namespace Molsketch {
        * @param invisible makes the atom invisible if @c true
        */
     Atom(const QPointF & position = QPointF(), const QString & element = QString(),
-         bool implicitHydrogens = true, QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER ) ;
-    Atom(const Atom& other GRAPHICSSCENEHEADER);
+         bool implicitHydrogens = true, QGraphicsItem* parent = 0) ;
+    Atom(const Atom& other);
     ~Atom() ;
     virtual QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -64,8 +67,12 @@ namespace Molsketch {
     void setMolecule(Molecule *molecule);
     QString element() const;
     void setElement(const QString & element);
+    ShapeType shapeType() const;
+    void setShapeType(const ShapeType& shapeType);
     void setNewmanDiameter(const qreal& diameter);
     qreal getNewmanDiameter() const;
+    void setHAlignment(const Molsketch::NeighborAlignment &);
+    Molsketch::NeighborAlignment hAlignment() const;
     void disableNewman();
     SumFormula sumFormula() const;
     /** Returns the charge of the atom.
@@ -123,6 +130,7 @@ namespace Molsketch {
 
   private:
     QScopedPointer<TextField> label;
+    Alignment autoLabelAlignment() const;
 
     void initialize(const QPointF & position,
                     const QString & element,
@@ -133,6 +141,8 @@ namespace Molsketch {
     int m_userElectrons;
     qreal m_newmanDiameter;
     QString m_index;
+    ShapeType m_shapeType;
+    NeighborAlignment hydrogenAlignment;
 
     int m_userImplicitHydrogens;
     bool m_implicitHydrogens;
@@ -143,6 +153,7 @@ namespace Molsketch {
     void renderColoredCircle(QPainter* painter);
     void renderColoredShape(QPainter *painter, void (QPainter::*drawMethod)(int, int, int, int));
     void drawSelectionHighlight(QPainter* painter);
+    qreal diameterForCircularShape() const;
     void drawNewman(QPainter *painter);
     QPointF getBondDrawingStartFromBoundingBox(const QLineF &connection, qreal bondLineWidth) const;
     bool showHoverPoint() const override { return false; }

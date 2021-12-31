@@ -34,7 +34,7 @@ namespace Molsketch {
       : parent(p), minItemCount(0) {}
     void checkItems()
     {
-      itemList.remove(0) ;
+      itemList.remove(0) ; // TODO this seems wrong!
       parent->setEnabled(itemList.size() >= minItemCount);
       emit parent->itemsChanged();
     }
@@ -106,7 +106,7 @@ namespace Molsketch {
 
   QList<graphicsItem *> AbstractItemAction::items() const
   {
-    return d->itemList.toList() ;
+    return d->itemList.values();
   }
 
   void AbstractItemAction::gotTrigger()

@@ -27,10 +27,7 @@
 #include <QProgressBar>
 #include <QPrintPreviewDialog>
 #include <QMenuBar>
-#include <lineupaction.h>
-#if QT_VERSION <= 0x040603
-#include <QAssistantClient>
-#endif
+#include <actions/lineupaction.h>
 
 #include <QToolTip>
 #include <propertiesdock.h>
@@ -59,12 +56,13 @@
 
 #define PROGRAM_NAME "Molsketch"
 
-#define MSK_DEFAULT_FORMAT "MolsKetch default (*.msk *.msm)"
+#define MSK_MSM_FORMATS "Molsketch (*.msk *.msm)"
+#define MSK_FORMAT "Molsketch (*.msk)"
 #define GRAPHIC_FILE_FORMATS "Scalable Vector Graphics (*.svg);;Portable Network Graphics (*.png);;Windows Bitmap (*.bmp);;Joint Photo Expert Group (*.jpeg)"
 #define GRAPHIC_DEFAULT_FORMAT "Portable Network Graphics (*.png)"
 #define OSRA_GRAPHIC_FILE_FORMATS "All supported types (*.*);;Images (*.png *.bmp *.jpg *.jpeg *.gif *.tif *.tiff);;Documents (*.pdf *.ps)"
 
-#ifdef _WIN32
+#ifdef Q_OS_WINDOWS
 #define OBABELOSSUFFIX ".dll"
 #else
 #define OBABELOSSUFFIX
@@ -125,7 +123,9 @@ MainWindow::MainWindow(ApplicationSettings *appSetttings)
   connect(settings->libraries(), SIGNAL(updated(QStringList)), libraryDock, SLOT(rebuildLibraries(QStringList)));
   addDockWidget(Qt::LeftDockWidgetArea, libraryDock);
 
-  addDockWidget(Qt::LeftDockWidgetArea, new WikiQueryWidget(obabelLoader, this));
+  auto wikiQueryWidget = new WikiQueryWidget(obabelLoader, settings->wikiQueryUrl()->get(), this);
+  addDockWidget(Qt::LeftDockWidgetArea, wikiQueryWidget);
+  connect(settings->wikiQueryUrl(), &StringSettingsItem::updated, wikiQueryWidget, &WikiQueryWidget::setQueryUrl);
 
   auto propertiesDock = new Molsketch::PropertiesDock(m_molView);
   addDockWidget(Qt::LeftDockWidgetArea, propertiesDock);
@@ -162,11 +162,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
   }
   saveWindowProperties();
   if (assistantClient) {
-#if QT_VERSION <= 0x040603
-    assistantClient->closeAssistant();
-#else
     assistantClient->terminate();
-#endif
   }
   event->accept();
   deleteLater();
@@ -179,9 +175,9 @@ void MainWindow::newFile() {
 void MainWindow::open()
 {
   QStringList readableFormats;
-  readableFormats << MSK_DEFAULT_FORMAT << obabelLoader->inputFormats();
+  readableFormats << MSK_MSM_FORMATS << obabelLoader->inputFormats();
   QString fileName = QFileDialog::getOpenFileName(this,
-                                                  tr("Open - Molsketch"),
+                                                  tr("Open"),
                                                   settings->lastPath(),
                                                   readableFormats.join(";;"));
   if (fileName.isEmpty()) return;
@@ -223,13 +219,13 @@ void MainWindow::openFile(const QString& fileName) {
 bool MainWindow::saveFile(const QString& fileName) {
   if (fileName.endsWith(".msk")) {
       if (!writeMskFile(fileName, m_molView->scene())) {
-        QMessageBox::warning(this, tr("Saving file failed!"), tr("Could not save file ") + fileName);
+        QMessageBox::warning(this, tr("Saving file failed!"), tr("Could not save file '%1'.").arg(fileName));
         return false;
       }
   } else {
     bool threeD = QMessageBox::question(this, tr("Save as 3D?"), tr("Save as three dimensional coordinates?")) == QMessageBox::Yes;
     if (!obabelLoader->saveFile(fileName, m_molView->scene(), threeD)) {
-      QMessageBox::warning(0, tr("Could not save"), tr("Could not save file using OpenBabel: ") + fileName);
+      QMessageBox::warning(0, tr("Could not save"), tr("Could not save file '%1' using OpenBabel.").arg(fileName));
       return false ;
     }
   }
@@ -271,16 +267,16 @@ bool MainWindow::autoSave()
 }
 
 bool MainWindow::saveAs() {
-  QString filter = MSK_DEFAULT_FORMAT;
+  QString filter = MSK_FORMAT;
   QStringList supportedFormats;
-  supportedFormats << MSK_DEFAULT_FORMAT << obabelLoader->outputFormats();
+  supportedFormats << MSK_FORMAT << obabelLoader->outputFormats();
   QString fileName = QFileDialog::getSaveFileName(this,
-                                                  tr("Save as - Molsketch"),
+                                                  tr("Save as"),
                                                   settings->lastPath(),
                                                   supportedFormats.join(";;"),
                                                   &filter);
   if (fileName.isEmpty()) return false;
-  if (MSK_DEFAULT_FORMAT == filter
+  if (MSK_FORMAT == filter
       && QFileInfo(fileName).suffix().isEmpty()
       && !QFileInfo(fileName + MSK_NATIVE_FORMAT).exists())
     fileName += MSK_NATIVE_FORMAT;
@@ -296,7 +292,7 @@ bool MainWindow::saveAs() {
 
   bool MainWindow::importDoc()
   {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Import - molsKetch"), settings->lastPath(), tr(OSRA_GRAPHIC_FILE_FORMATS));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Import"), settings->lastPath(), tr(OSRA_GRAPHIC_FILE_FORMATS));
 
     if (!fileName.isEmpty()) {
       // Save accessed path
@@ -332,7 +328,7 @@ bool MainWindow::exportDoc()
 {
   // Getting the filename
   QString filter = GRAPHIC_DEFAULT_FORMAT;
-  QString fileName = QFileDialog::getSaveFileName(this,tr("Export - Molsketch"), settings->lastPath(), tr(GRAPHIC_FILE_FORMATS), &filter);
+  QString fileName = QFileDialog::getSaveFileName(this,tr("Export"), settings->lastPath(), tr(GRAPHIC_FILE_FORMATS), &filter);
 
   // Abort if filename is empty
   if (fileName.isEmpty()) return false;
@@ -356,7 +352,7 @@ bool MainWindow::exportDoc()
   // Try to export the file
   if (fileName.endsWith(".svg")) return Molsketch::saveToSVG(fileName, m_molView->scene());
 
-  if (!Molsketch::exportFile(fileName,m_molView->scene())) {
+  if (!Molsketch::exportFile(fileName,m_molView->scene(), settings->pixelScalingFactor())) {
     QMessageBox::critical(this,tr(PROGRAM_NAME),tr("Error while exporting file"),QMessageBox::Ok,QMessageBox::Ok);
     return false;
   }
@@ -391,37 +387,39 @@ void MainWindow::openAssistant()
   QFileInfo file(MSK_INSTALL_DOCS + QString("/index.html"));
   if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/doc/en/index.html");
   if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/../share/doc/molsketch/doc/en/index.html");
-#if QT_VERSION <= 0x040603
-  assistantClient->showPage(file.absoluteFilePath());
-#else
   qDebug() << "Opening help:" << file.absoluteFilePath() ;
   QTextStream stream(assistantClient) ;
   stream << QLatin1String("setSource ")
          << file.absoluteFilePath()
          << QLatin1Char('\0')
-         << endl;
-#endif
+         << ('\n');
 }
 
 void MainWindow::about()
 {
   QString version(settings->currentVersion().toString()), versionNick(settings->versionNick());
   QMessageBox::about(this, tr("About"),
-                     tr("<H3>About Molsketch</H3>"
-                        "<H4>Version: ") + version + " -- " + versionNick + tr("</H4>"
-                        "<P> Molsketch is a program for drawing molecular structures developed by Harm van Eersel at the "
-                        "<A href=\"http://www.tue.nl\">Eindhoven University of Technology</A>."
-                        "<P> For more info check <A href=\"http://molsketch.sourceforge.net\">http://molsketch.sourceforge.net</A>"
-                        "<P> It is <A href=\"http://www.gnu.org/philosophy/free-sw.html\">free software</A> and available under the "
-                        "<A>GPL</A>."
-                        "<P> Special thanks to: <UL>"
-                        "<LI>Prof. Dr. H. Zantema (coach of the initial version)</LI>"
-                        "<LI>Davy van der Vaart (tester)</LI>"
-                        "<LI>Frans Visscher (tester)</LI>"
-                        "<LI>Carsten Niehaus (reviewer)</LI>"
-                        "</UL>Copyright 2007 - 2008, Harm van Eersel"
-                        "<P>Copyright 2009 Tim Vandermeersch"
-                        "<P>Maintenance since 12/2014: Hendrik Vennekate"));
+                     tr("<h3>About Molsketch</h3>\n"
+                        "<h4>Version: %1 -- %2</h4>\n"
+                        "<p>Molsketch is a program for drawing molecular structures developed by Harm van Eersel at the "
+                        "<a href=\"http://www.tue.nl\">Eindhoven University of Technology</a>.</p>\n"
+                        "<p>For more info check <A href=\"http://molsketch.sourceforge.net\">http://molsketch.sourceforge.net</a>.</p>\n"
+                        "<p>It is <a href=\"http://www.gnu.org/philosophy/free-sw.html\">free software</a> and available under "
+                        "the <a href=\"https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\">GNU GPL version 2</a> or later versions of the GPL.</p>\n"
+                        "<p>Special thanks to: <ul>\n"
+                        "<li>Prof. Dr. H. Zantema (coach of the initial version)</li>\n"
+                        "<li>Davy van der Vaart (tester)</li>\n"
+                        "<li>Frans Visscher (tester)</li>\n"
+                        "<li>Carsten Niehaus (reviewer)</li>\n"
+                        "</ul></p>\n"
+                        "<p>Copyright 2007 - 2008, Harm van Eersel</p>\n"
+                        "<p>Copyright 2009 Tim Vandermeersch</p>\n"
+                        "<p>Maintenance since 12/2014: Hendrik Vennekate</p>"
+                        "<h3>Translations</h3>"
+                        "<table>"
+                        "<tr><td>Greek</td><td> - </td><td>Alexander Ploumistos</td></tr>"
+                        "<tr><td>Chinese</td><td> - </td><td>Wensi Vennekate</td></tr>"
+                        "</table>").arg(version).arg(versionNick));
 }
 
 void MainWindow::showReleaseNotes() {
@@ -533,36 +531,21 @@ void MainWindow::createToolBarContextMenuOptions()
 
 void MainWindow::initializeAssistant()
 {
-#if QT_VERSION <= 0x040603
-  assistantClient = new QAssistantClient("", this);
-  QString docfile("molsketch.adp") ;
-  QStringList arguments;
-#else
   assistantClient = new QProcess(this) ;
   QString app = QLibraryInfo::location(QLibraryInfo::BinariesPath)
-               + QLatin1String("/assistant");
-#if QT_VERSION >= 0x050000
-  app += QLatin1String("-qt5") ;
-#endif
+               + QLatin1String("/assistant-qt5"); // TODO the "-qt5" suffix might be specific to some Linux distros
   QString docfile("molsketch.qhp") ;
-#endif
 
   QFileInfo file(MSK_INSTALL_DOCS + QString("/molsketch.adp"));
   if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/doc/en/" + docfile );
   if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/../share/doc/molsketch/doc/en/" + docfile);
 
-#if QT_VERSION <= 0x040603
-  arguments << "-profile" << file.absoluteFilePath();
-  assistantClient->setArguments(arguments);
-#else
   qDebug() << "Starting assistant with arguments:" << file.absoluteFilePath() << app ;
-//  assistantClient->start(app, QStringList() << QLatin1String("-enableRemoteControl")) ;
   QTextStream stream(assistantClient) ;
   stream << QLatin1String("register ")
          << file.absoluteFilePath()
          << QLatin1Char('\0')
-         << endl;
-#endif
+         << ('\n');
 }
 
 void MainWindow::readSettings()

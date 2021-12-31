@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Molsketch</Name>
+    <Version>0.7.2</Version>
+    <Title>Molsketch Installer</Title>
+    <Publisher>Hendrik Vennekate</Publisher>
+    <ProductUrl>http://molsketch.sourceforge.net/</ProductUrl>
+    <InstallerApplicationIcon>molsketch</InstallerApplicationIcon>
+    <InstallerWindowIcon>molsketch.png</InstallerWindowIcon>
+    <WizardStyle>Classic</WizardStyle>
+    <RunProgram>@TargetDir@/molsketch.exe</RunProgram>
+    <StartMenuDir>Molsketch</StartMenuDir>
+    <TargetDir>@ApplicationsDir@/Molsketch</TargetDir>
+    <RemoteRepositories>
+        <Repository>
+            <DisplayName>Molsketch 0.7.1</DisplayName>
+            <Url>https://raw.githubusercontent.com/hvennekate/molsketch-repository/main/windows/0.7.1</Url>
+        </Repository>
+    </RemoteRepositories>
+    <ControlScript>controllerscript.qs</ControlScript>
+    <WizardDefaultHeight>400</WizardDefaultHeight>
+</Installer>

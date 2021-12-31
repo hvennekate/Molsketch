@@ -158,6 +158,20 @@ public:
     TS_ASSERT_EQUALS(atom->charge(), newCharge);
   }
 
+  void testHydrogenCountTransferFromCommand() {
+    int newHydrogenCount(5);
+    popup->connectAtom(atom);
+    scene->stack()->push(new Commands::setImplicitHydrogensCommand(atom, newHydrogenCount));
+    TS_ASSERT_EQUALS(hydrogenBox->value(), newHydrogenCount);
+  }
+
+  void testHydrogenCountTransferFromGui() {
+    int newHydrogenCount = 5;
+    popup->connectAtom(atom);
+    hydrogenBox->setValue(newHydrogenCount);
+    TS_ASSERT_EQUALS(atom->numImplicitHydrogens(), newHydrogenCount);
+  }
+
   void testCoordinateTransferFromCommand() {
     QPointF originalPosition(5,5), shift(3,4);
     atom->setCoordinate(0, originalPosition);
@@ -378,7 +392,7 @@ public:
   }
 
   void testElementSymbolInLonePairAndRadicalWidget() {
-
+    // TODO implement
   }
 
 // TODO when opening edit mode, selection is lost

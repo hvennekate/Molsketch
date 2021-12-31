@@ -70,8 +70,7 @@ namespace Molsketch {
     Q_UNUSED(widget)
     Q_D(const RadicalElectron);
     if (!parentItem()) return;
-    painter->save(); // TODO write test for this
-    // TODO maybe use offset if atom not shown or force rendering of atom if it has children?
+    painter->save();
     painter->setBrush(d->color);
     painter->drawEllipse(boundingRect());
     painter->restore();

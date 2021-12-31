@@ -68,7 +68,7 @@ public:
     Atom *atom = new Atom(originalAtom, "C");
     Molecule *molecule = new Molecule(QSet<Atom*>() << atom, QSet<Bond*>());
     action->setChecked(true);
-    scene->addMolecule(molecule);
+    scene->addItem(molecule);
 
     view->show();
 

@@ -25,6 +25,7 @@
 #include <settingsfacade.h>
 #include <QSettings>
 #include <QCommandLineParser>
+#include <QDebug>
 
 #include "applicationsettings.h"
 #include "mainwindow.h"
@@ -61,11 +62,12 @@ int main(int argc, char *argv[])
   QCoreApplication::setOrganizationDomain("sourceforge.net");
   QCoreApplication::setApplicationName("Molsketch");
 
-  // Add support for i18n
-  QString locale = QLocale::system().name();
-  QTranslator translator;
-  translator.load(QString("molsketch_") + locale);
-  app.installTranslator(&translator);
+  QTranslator molsketchTranslator, libraryTranslator;
+  auto molsketchTranslationsLoaded = molsketchTranslator.load(QLocale::system(), "molsketch", "_", ":/i18n"); // TODO also load Qt module translations
+  auto libraryTranslationsLoaded = libraryTranslator.load(QLocale::system(), "libmolsketch", "_", ":/i18n");
+  app.installTranslator(&molsketchTranslator);
+  app.installTranslator(&libraryTranslator);
+  qDebug() << "System locale:" << QLocale::system() << "Translation loaded:" << molsketchTranslationsLoaded << "for library:" << libraryTranslationsLoaded;
 
   QCommandLineParser parser;
   parser.addPositionalArgument("files", QApplication::translate("main", "Files to open, optionally."), "[files...]");
@@ -77,10 +79,9 @@ int main(int argc, char *argv[])
   ApplicationSettings appSettings(Molsketch::SettingsFacade::persistedSettings(new QSettings));
 
   if (appSettings.latestReleaseNotesVersionShown() < appSettings.currentVersion()) {
-    ReleaseNotesDialog().exec(); // TODO check that this still works
+    ReleaseNotesDialog().exec();
     appSettings.updateReleaseNotesShownVersion();
   }
 
   return app.exec();
 }
-

@@ -115,7 +115,6 @@ namespace Molsketch {
                                    I (T::*getFunction)()const,
                                    void (T::*setFunction)(const I&))
   {
-    // TODO remove old actions
     d->clear();
     d->plusAction = new QAction(UpIcon, UpText, this) ;
     d->minusAction = new QAction(DownIcon, DownText, this) ;

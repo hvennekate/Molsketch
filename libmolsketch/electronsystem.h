@@ -54,7 +54,7 @@ namespace Molsketch {
 
 
       int numAtoms() const;
-      QList<Atom*> atoms() const;
+      QList<Atom*> atoms() const; // TODO return set
       void setAtoms(const QList<Atom*> &atoms);
       void setAtoms(const QPair<Atom*, Atom*> &atoms);
 

@@ -23,8 +23,10 @@
 #include "utilities.h"
 #include <scenesettings.h>
 #include <settingsitem.h>
+#include "xmlassertion.h"
 
 using namespace Molsketch;
+using XmlAssert::assertThat;
 
 CLASS_FOR_TESTING_WITH_FUNCTIONS(RadicalElectron, \
                                  public: \

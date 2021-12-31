@@ -147,6 +147,7 @@ void OBabelIfaceLoader::reloadObabelIface (const QString& path) {
   Q_D (OBabelIfaceLoader);
   d->openBabelInterface.unload ();
   d->openBabelInterface.setFileName (path);
+  d->openBabelInterface.setLoadHints(QLibrary::ExportExternalSymbolsHint);
   d->loadFunctions ();
   d->emitSignals ();
 }

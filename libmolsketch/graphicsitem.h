@@ -22,8 +22,6 @@
 #include <QGraphicsItem>
 #include "abstractxmlobject.h"
 
-#include "qtversionmacros.h"
-
 class QUndoCommand ;
 
 namespace Molsketch {
@@ -45,8 +43,8 @@ namespace Molsketch {
       RadicalType = QGraphicsItem::UserType + 11
     };
 
-    graphicsItem(QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER);
-    graphicsItem(const graphicsItem& other GRAPHICSSCENEHEADER);
+    explicit graphicsItem(QGraphicsItem* parent = 0);
+    explicit graphicsItem(const graphicsItem& other);
     ~graphicsItem();
     // TODO XML i/o
     void setColor(const QColor &color) ;
@@ -129,6 +127,10 @@ namespace Molsketch {
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
     // TODO automatically return item children from graphicsitem as xmlitem
   };
+
+#ifdef QT_DEBUG
+  QDebug operator <<(QDebug debug, const graphicsItem &item);
+#endif
 
 } // namespace
 

@@ -65,8 +65,6 @@ namespace Molsketch {
 
       SceneSettings* settings() const;
 
-      QFont getAtomFont() const;
-
       static QString mimeType();
 
       qreal bondAngle() const;
@@ -82,7 +80,7 @@ namespace Molsketch {
 
       // Commands
       /** Renders the @p rect on the scene in a image. */
-      QImage renderImage(const QRectF &rect);
+      QImage renderImage(const QRectF &rect, const qreal &scalingFactor = 10);
 
       QByteArray toSvg();
 
@@ -122,7 +120,6 @@ namespace Molsketch {
       void clear();
       /** Slot to select all contents of the scene. */
       void selectAll();
-      void addMolecule(Molecule* mol);
       void setGrid(bool on = true);
       void clipboardChanged();
 
@@ -168,15 +165,13 @@ namespace Molsketch {
         }
         return result;
       }
-      qreal getRadicalDiameter() const;
-      qreal getLonePairLength() const;
-      qreal getLonePairLineWidth() const;
       QWidget *getPropertiesWidget(); // TODO there should be an intgerface for this
   protected:
       XmlObjectInterface *produceChild(const QString &childName, const QXmlStreamAttributes &attributes) override;
       QList<const XmlObjectInterface *> children() const override;
       void readAttributes(const QXmlStreamAttributes &attributes) override;
       QXmlStreamAttributes xmlAttributes() const override;
+      void afterReadFinalization() override;
 
   private:
 

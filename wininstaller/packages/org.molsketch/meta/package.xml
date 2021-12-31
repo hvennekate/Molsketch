@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<Package>
+  <DisplayName>Molsketch</DisplayName>
+  <Description>Molsketch main component</Description>
+  <Version>0.7.2</Version>
+  <ReleaseDate>2021-03-08</ReleaseDate>
+  <Licenses>
+    <License name="GNU Public License Version 2" file="gpl-2-0.txt"/>
+  </Licenses>
+  <ForcedInstallation>true</ForcedInstallation>
+  <ExpandedByDefault>true</ExpandedByDefault>
+  <Script>molsketch-setup-actions.qs</Script>
+  <UserInterfaces>
+      <UserInterface>AssociateFileSuffixes.ui</UserInterface>
+      <UserInterface>CreateDesktopLink.ui</UserInterface>
+  </UserInterfaces>
+</Package>

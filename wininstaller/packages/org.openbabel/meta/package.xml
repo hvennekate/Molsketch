@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<Package>
+  <DisplayName>OpenBabel</DisplayName>
+  <Description>OpenBabel chemical toolbox. This component is required in order to import or export drawings from or to other chemical file formats and for cleaning up structures or importing structures from WikiData.
+    See: {external-link}='https://github.com/openbabel/openbabel'</Description>
+  <Version>3.1.1</Version>
+  <ReleaseDate>2020-05-08</ReleaseDate>
+  <Licenses>
+    <License name="GCC Runtime Exception" file="gcc-runtime-exception.txt"/>
+    <License name="Zope Public License" file="zpl.txt"/>
+  </Licenses>
+  <Dependencies>org.molsketch</Dependencies>
+  <ExpandedByDefault>true</ExpandedByDefault>
+  <Default>true</Default>
+</Package>

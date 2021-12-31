@@ -23,7 +23,8 @@
 
 namespace Molsketch {
 
-struct LonePairPrivate {
+class LonePairPrivate {
+public:
   BoundingBoxLinker linker;
 };
 
@@ -112,7 +113,6 @@ XmlObjectInterface* LonePair::produceChild (const QString& name, const QXmlStrea
 }
 
 void LonePair::readAttributes (const QXmlStreamAttributes& attributes) {
-  Q_D(LonePair);
   QPen newPen = pen();
   newPen.setWidthF(attributes.value("lineWidth").toDouble());
   newPen.setColor(graphicsItem::extractColor(attributes));
@@ -127,7 +127,6 @@ QList<const XmlObjectInterface*> LonePair::children () const {
 }
 
 QXmlStreamAttributes LonePair::xmlAttributes () const {
-  Q_D(const LonePair);
   QXmlStreamAttributes attributes;
   attributes.append("angle", QString::number(line().angle()));
   attributes.append("length", QString::number(line().length()));

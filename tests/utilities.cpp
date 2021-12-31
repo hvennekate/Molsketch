@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2018 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2018 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -47,21 +47,25 @@ void mouseMoveEvent(QWidget *widget, Qt::MouseButton button, Qt::KeyboardModifie
     }
 }
 
+QWidget* focusTableCell(QTableView *table, int row, int column) {
+  QPoint position(table->columnViewportPosition(column) + .5 * table->columnWidth(column),
+                  table->rowViewportPosition(row) + .5 * table->rowHeight(row));
+  leftMouseClick(table->viewport(), position);
+  doubleClick(table->viewport(), position);
+  return table->viewport()->focusWidget();
+}
 
 void enterDataIntoCell(QTableView *table, const QString& data, int row, int column) {
-  QPoint position(table->columnViewportPosition(column), table->rowViewportPosition(row));
-  QTest::mouseClick(table->viewport(), Qt::LeftButton, Qt::NoModifier, position);
-  QTest::mouseDClick(table->viewport(), Qt::LeftButton, Qt::NoModifier, position);
-  QWidget* editor = table->viewport()->focusWidget();
-  TS_ASSERT(editor);
+  QWidget* editor = focusTableCell(table, row, column);
+  QSM_ASSERT(QString("No editor for cell %1, %2").arg(row).arg(column), editor);
   if (editor) {
     QTest::keyClicks(editor, data);
-    QTest::mouseClick(table->viewport(), Qt::LeftButton);
   }
+  focusTableCell(table, 0, 0);
 }
 
 void enterTextIntoInputWidget(QLineEdit *editor, const QString& text, int position) {
-  QTest::mouseClick(editor, Qt::LeftButton);
+  leftMouseClick(editor);
   QTest::keyClick(editor, Qt::Key_Home);
   for (int i = 0 ; i < position ; ++i)
     QTest::keyClick(editor, Qt::Key_Right);
@@ -76,8 +80,8 @@ void assertTrue(bool input, QString message) {
 }
 
 void clickCheckBox(QCheckBox *checkBox) {
-//  QTest::mouseClick((QWidget*) checkBox, Qt::LeftButton, Qt::NoModifier, QPoint(10,10)); // offset for QCheckBox
-  checkBox->toggle(); // TODO genuinely click on the checkbox
+  auto minimumSize = checkBox->minimumSizeHint();
+  leftMouseClick(checkBox, {minimumSize.width()/2, minimumSize.height()/2});
 }
 
 int xmlElementCount(const QString& xml, const QString& element) {
@@ -129,13 +133,13 @@ T *findItem(const QList<T*> &items, const QString& text) {
 void clickMenuEntry(const QStringList &names, QMainWindow *mainWindow) {
   auto menuBar = mainWindow->menuBar();
   auto menu = findItem<QMenu, &QMenu::title>(menuBar->findChildren<QMenu*>(QString(), Qt::FindDirectChildrenOnly), names.first());
-  QTest::mouseClick(menuBar, Qt::LeftButton, Qt::KeyboardModifiers(), menuBar->actionGeometry(menu->menuAction()).center());
+  leftMouseClick(menuBar, menuBar->actionGeometry(menu->menuAction()).center());
 
   for (auto subMenuName : names.mid(1, names.size() -2)) {
     qFatal("Clicking on submenus is not yet implemented!"); // TODO
   }
   auto action = findItem<QAction, &QAction::text>(menu->actions(), names.last());
-  QTest::mouseClick(menu, Qt::LeftButton, Qt::KeyboardModifiers(), menu->actionGeometry(action).center());
+  leftMouseClick(menu, menu->actionGeometry(action).center());
 }
 
 void leftMouseClick(QWidget *w, QPoint p) {
@@ -144,4 +148,12 @@ void leftMouseClick(QWidget *w, QPoint p) {
 
 void leftMouseClick(QWindow *w, QPoint p) {
   QTest::mouseClick(w, Qt::LeftButton, Qt::KeyboardModifiers(), p);
+}
+
+void doubleClick(QWidget *w, QPoint p) {
+  QTest::mouseDClick(w, Qt::LeftButton, Qt::KeyboardModifiers(), p);
+}
+
+void doubleClick(QWindow *w, QPoint p) {
+  QTest::mouseDClick(w, Qt::LeftButton, Qt::KeyboardModifiers(), p);
 }

@@ -49,8 +49,8 @@
 #include <actions/flipbondaction.h>
 #include <actions/frametypeaction.h>
 #include <actions/zlevelaction.h>
+#include <actions/lineupaction.h>
 #include <constants.h>
-#include <lineupaction.h>
 
 struct ActionContainerPrivate {
   Q_DISABLE_COPY(ActionContainerPrivate)
@@ -139,9 +139,8 @@ ActionContainer::ActionContainer(Molsketch::MolView *view, QObject *parent)
   : QObject(parent),
     d_ptr(new ActionContainerPrivate(view))
 {
-  Q_D(ActionContainer);
-
 #ifdef QT_DEBUG
+  Q_D(ActionContainer);
   d->debugAction = new QAction("debug scene", this);
   connect(d->debugAction, &QAction::triggered, view->scene(), &Molsketch::MolScene::debugScene);
 #endif
@@ -199,7 +198,7 @@ QToolBar *ActionContainer::createDrawingToolBar(Molsketch::MolScene *scene, QWid
   using namespace Molsketch;
   auto drawToolBar = new QToolBar(QObject::tr("Drawing"), parent);
   drawToolBar->setObjectName("drawing-toolbar");
-  drawToolBar->addActions({new drawAction(scene), // TODO add these actions to the view widget?
+  drawToolBar->addActions({new drawAction(scene),
                            new ringAction(scene),
                            new reactionArrowAction(scene),
                            new mechanismArrowAction(scene),

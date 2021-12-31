@@ -24,8 +24,8 @@
 
 class OBabelIfaceLoader;
 
-class OptimizeStructureAction : public Molsketch::FilteredItemAction<Molsketch::Molecule>
-{
+class OptimizeStructureAction : public Molsketch::FilteredItemAction<Molsketch::Molecule> {
+  Q_OBJECT
 public:
   explicit OptimizeStructureAction(OBabelIfaceLoader *obabelLoader, Molsketch::MolScene *scene = 0);
 private:

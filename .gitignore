@@ -1,2 +1,25 @@
 *.user*
+library/
+GTAGS
+GRTAGS
+GPATH
+*.orig
+*.kdev4
+/build/
+.cproject
+
+# Eclipse
+.project
+.settings
+
+# Kate
+*kate-swp
+
+# For Windows builds/installer
 /wininstaller/packages/*
+*.exe
+*.obf
+*.dll
+*.7z
+*.sha1
+Updates.xml

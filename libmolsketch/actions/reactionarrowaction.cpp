@@ -94,8 +94,7 @@ namespace Molsketch {
   void reactionArrowAction::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
   {
     if (!d->currentArrow) return ;
-    if (!scene() || !scene()->stack()) return ; // TODO
-    Commands::ItemAction::addItemToScene(d->currentArrow, scene(), tr("draw arrow")) ; // TODO this might be problematic: the code assumes that an item will be added to the scene regardless -- right now we're just not doing anything in that case.
+    Commands::ItemAction::addItemToScene(d->currentArrow, scene(), tr("draw arrow")) ;
     d->currentArrow = 0 ;
     event->accept();
   }

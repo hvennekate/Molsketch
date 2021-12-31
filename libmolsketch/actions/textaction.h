@@ -30,6 +30,7 @@ namespace Molsketch {
   class TextAction : public genericAction // TODO extract commonalities with draw action as abstract "insert item action"
       // (also: RingAction, ArrowAction etc.)
   {
+    Q_OBJECT
   public:
     explicit TextAction(MolScene *scene);
     ~TextAction();

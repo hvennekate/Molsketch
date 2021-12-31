@@ -26,8 +26,7 @@ namespace Molsketch {
   class Bond;
 
   template <class T, typename I = int>
-  class incDecAction : public multiAction
-  {
+  class incDecAction : public multiAction {
   public:
     explicit incDecAction(MolScene* scene);
     ~incDecAction() ;
@@ -47,19 +46,20 @@ namespace Molsketch {
     T* getItem(const QPointF& p) ;
   };
 
-  class chargeAction : public incDecAction<Atom>
-  {
+  class chargeAction : public incDecAction<Atom> {
+    Q_OBJECT
   public:
     explicit chargeAction(MolScene *scene) ;
   } ;
 
-  class hydrogenAction : public incDecAction<Atom, quint8>
-  {
+  class hydrogenAction : public incDecAction<Atom, quint8> {
+    Q_OBJECT
   public:
     explicit hydrogenAction(MolScene *scene) ;
   } ;
 
   class ZLevelStepAction : public incDecAction<Bond> {
+    Q_OBJECT
   public:
     explicit ZLevelStepAction(MolScene *scene);
   };

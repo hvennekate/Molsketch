@@ -54,6 +54,9 @@ SettingsDialog::SettingsDialog(ApplicationSettings *settings, QWidget * parent, 
     sceneSettingsFacade(const_cast<const ApplicationSettings*>(settings)->settingsFacade().cloneTransiently()) // TODO ownership?
 {
   ui.setupUi(this);
+  for (auto mainIcon : ui.listWidget->findItems("", Qt::MatchContains))
+    mainIcon->setSizeHint(QSize(100, 60)); // TODO fix in ui XML
+
   QWidget *drawingPage = findChild<QWidget*>("drawingPage");
   setupDrawingSettings(new Molsketch::SceneSettings(sceneSettingsFacade, drawingPage), drawingPage);
 
@@ -72,16 +75,19 @@ SettingsDialog::~SettingsDialog(){}
 void SettingsDialog::setInitialValues()
 {
   ui.spinBoxAutoSave->setValue(settings->autoSaveInterval()/60000);
-
-  ui.libraries->clear();
-  ui.libraries->addItems(settings->libraries()->get());
+  // TODO image format setting!
+  ui.pixelScalingFactor->setValue(settings->pixelScalingFactor());
 
   Molsketch::SceneSettings::MouseWheelMode mouseWheelForTools = settings->getMouseWheelMode();
   ui.mouseWheelCycleTools->setChecked(Molsketch::SceneSettings::CycleTools == mouseWheelForTools);
   ui.mouseWheelCycleTools->setChecked(Molsketch::SceneSettings::Zoom == mouseWheelForTools);
 
+  ui.libraries->clear();
+  ui.libraries->addItems(settings->libraries()->get());
+
   ui.libraryPath->setText(settings->obabelIfacePath());
   ui.obfPath->setText(settings->obabelFormatsPath());
+  ui.wikidataQueryUrl->setText(settings->wikiQueryUrl()->get());
   // TODO accceptance test
 }
 
@@ -94,6 +100,7 @@ void SettingsDialog::accept()
 void SettingsDialog::applyChanges()
 {
   settings->setAutoSaveInterval(ui.spinBoxAutoSave->value()*60000);
+  settings->setPixelScalingFactor(ui.pixelScalingFactor->value());
 
   // Library settings
   QStringList libraries;
@@ -110,6 +117,7 @@ void SettingsDialog::applyChanges()
 
   settings->setObabelIfacePath(ui.libraryPath->text());
   settings->setObabelFormatsPath(ui.obfPath->text());
+  settings->wikiQueryUrl()->set(ui.wikidataQueryUrl->text());
 
   settings->transferFrom(*sceneSettingsFacade);
 
@@ -156,6 +164,14 @@ void SettingsDialog::on_obfPathButton_clicked() {
 }
 
 void SettingsDialog::on_libraryPathButton_clicked() {
-  QString filename = QFileDialog::getOpenFileName(0, tr("Path to obabelIface"), ui.libraryPath->text(), "*.dll"); // TODO replace dll with appropriate extension
+  QString filename = QFileDialog::getOpenFileName(0, tr("Path to obabelIface"), ui.libraryPath->text(),
+#ifdef Q_OS_WINDOWS
+          "*.dll (*.dll)"
+#elif defined Q_OS_UNIX
+          "*.so (*.so)"
+#else
+          ""
+#endif
+                                                  );
   if (!filename.isEmpty()) ui.libraryPath->setText(filename);
 }

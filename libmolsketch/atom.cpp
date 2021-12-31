@@ -27,6 +27,8 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 
+#include "qtdeprecations.h"
+
 #include "atompopup.h"
 #include "bond.h"
 #include "lonepair.h"
@@ -37,11 +39,7 @@
 #include "molscene.h"
 #include "TextInputItem.h"
 #include <iostream>
-#if QT_VERSION >= 0x050000
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include "scenesettings.h"
 #include "settingsitem.h"
 #include <QDebug>
@@ -57,8 +55,18 @@ namespace Molsketch {
   //                                        //
   //   Left   Right   Down     Up           //
   //                                        //
-  Alignment Atom::labelAlignment() const
-  {
+  Alignment Atom::labelAlignment() const {
+    switch (hydrogenAlignment) {
+      case north: return Up;
+      case south: return Down;
+      case east: return Right;
+      case west: return Left;
+      case automatic: return autoLabelAlignment();
+      default: return autoLabelAlignment();
+    }
+  }
+
+  Alignment Atom::autoLabelAlignment() const {
     // compute the sum of the bond vectors, this gives
     QPointF direction(0.0, 0.0);
     foreach (Atom *nbr, this->neighbours())
@@ -70,16 +78,15 @@ namespace Molsketch {
         ? Left : Right;
   }
 
-
   Atom::Atom(const QPointF &position, const QString &element, bool implicitHydrogens,
-             QGraphicsItem* parent GRAPHICSSCENESOURCE )
-    : graphicsItem (parent GRAPHICSSCENEINIT )
+             QGraphicsItem* parent)
+    : graphicsItem (parent)
   {
     initialize(position, element, implicitHydrogens);
   }
 
-  Atom::Atom(const Atom &other GRAPHICSSCENESOURCE)
-    : graphicsItem (other GRAPHICSSCENEINIT)
+  Atom::Atom(const Atom &other)
+    : graphicsItem (other)
   { // TODO unit test copy constructor
     initialize(other.scenePos(), other.element(), other.m_implicitHydrogens);
     m_newmanDiameter = other.m_newmanDiameter;
@@ -94,7 +101,7 @@ namespace Molsketch {
   {
     QFont symbolFont;
     MolScene *sc = qobject_cast<MolScene*>(scene());
-    if (sc) symbolFont = sc->getAtomFont();
+    if (sc) symbolFont = sc->settings()->atomFont()->get();
     if (symbolFont.pointSizeF() > 0)
       symbolFont.setPointSizeF(symbolFont.pointSizeF() * relativeWidth());
     return symbolFont;
@@ -103,6 +110,11 @@ namespace Molsketch {
   QRectF Atom::computeBoundingRect()
   {
     if (m_newmanDiameter > 0.) return QRectF(-m_newmanDiameter/2., -m_newmanDiameter/2., m_newmanDiameter, m_newmanDiameter);
+
+    if (Circle == m_shapeType) {
+      auto radius = diameterForCircularShape()/2.;
+      return QRectF(-radius, -radius, radius, radius);
+    }
     // TODO do proper prepareGeometryChange() call
     // TODO call whenever boundingRect() is called
 
@@ -113,9 +125,10 @@ namespace Molsketch {
                         const QString &element,
                         bool implicitHydrogens)
   {
-    //pre: position is a valid position in scene coordinates
+    hydrogenAlignment = automatic;
     setPos(position);
     setZValue(3);
+    setShapeType(Rectangle);
 
     MolScene *molScene = qobject_cast<MolScene*>(scene());
 
@@ -124,11 +137,7 @@ namespace Molsketch {
     }
     else setColor (QColor (0, 0, 0));
     // Enabling hovereffects
-#if QT_VERSION < 0x050000
-    setAcceptsHoverEvents(true);
-#else
     setAcceptHoverEvents(true) ;
-#endif
 
     // Setting private fields
     m_elementSymbol = element;
@@ -284,6 +293,11 @@ namespace Molsketch {
     }
   }
 
+  qreal Atom::diameterForCircularShape() const {
+    auto bounds = boundingRect();
+    return QLineF(bounds.center(), bounds.topRight()).length() * 2;
+  }
+
   void Atom::drawSelectionHighlight(QPainter* painter)
   {
     if (this->isSelected()) {
@@ -377,6 +391,8 @@ namespace Molsketch {
   const char *DISABLE_HYDROGENS_ATTRIBUTE = "disableHydrogens";
   const char *HYDROGEN_COUNT_ATTRIBUTE = "hydrogens";
   const char *NEWMAN_DIAMETER_ATTRIBUTE = "newmanDiameter";
+  const char *SHAPE_TYPE_ATTRIBUTE = "shapeType";
+  const char *HYDROGEN_ALIGNMENT = "hydrogenAlignment";
 
   void Atom::readGraphicAttributes(const QXmlStreamAttributes &attributes)
   {
@@ -386,6 +402,9 @@ namespace Molsketch {
     m_userImplicitHydrogens = attributes.value(HYDROGEN_COUNT_ATTRIBUTE).toInt();
     m_implicitHydrogens = !attributes.value(DISABLE_HYDROGENS_ATTRIBUTE).toInt();
     m_userCharge = attributes.value(CHARGE_ATTRIBUTE).toInt();
+    m_shapeType = (ShapeType) attributes.value(SHAPE_TYPE_ATTRIBUTE).toInt();
+    auto hAlignment = attributes.value(HYDROGEN_ALIGNMENT).toInt();
+    hydrogenAlignment = (NeighborAlignment) hAlignment;
     updateLabel();
   }
 
@@ -397,7 +416,9 @@ namespace Molsketch {
     attributes.append(CHARGE_ATTRIBUTE, QString::number(m_userCharge));
     attributes.append(DISABLE_HYDROGENS_ATTRIBUTE, QString::number(!m_implicitHydrogens));
     attributes.append(HYDROGEN_COUNT_ATTRIBUTE, QString::number(m_userImplicitHydrogens));
+    attributes.append(SHAPE_TYPE_ATTRIBUTE, QString::number(m_shapeType));
     if (m_newmanDiameter > 0) attributes.append(NEWMAN_DIAMETER_ATTRIBUTE, QString::number(m_newmanDiameter));
+    attributes.append(HYDROGEN_ALIGNMENT, QString::number(hydrogenAlignment));
     return attributes ;
   }
 
@@ -410,6 +431,15 @@ namespace Molsketch {
     }
   }
 
+  Atom::ShapeType Atom::shapeType() const {
+    return m_shapeType;
+  }
+
+  void Atom::setShapeType(const Atom::ShapeType &shapeType) {
+    m_shapeType = shapeType;
+    updateLabel();
+  }
+
   void Atom::setNewmanDiameter(const qreal &diameter) {
     m_newmanDiameter = diameter;
     updateLabel();
@@ -417,6 +447,15 @@ namespace Molsketch {
 
   qreal Atom::getNewmanDiameter() const {
     return m_newmanDiameter;
+  }
+
+  void Atom::setHAlignment(const NeighborAlignment &hAlignment) {
+    hydrogenAlignment = hAlignment;
+    updateLabel();
+  }
+
+  NeighborAlignment Atom::hAlignment() const {
+    return hydrogenAlignment;
   }
 
   void Atom::disableNewman() {
@@ -601,6 +640,14 @@ namespace Molsketch {
       return connection.p2();
     }
 
+    if (Circle == m_shapeType) {
+      auto bounds = boundingRect();
+      auto circleDiameter = QLineF(bounds.center(), bounds.topRight()).length() * 2;
+      connection.setLength((circleDiameter + qMax(lineWidth(), bondLineWidth))/2. );
+      return connection.p2();
+    }
+
+
     return getBondDrawingStartFromBoundingBox(connection, bondLineWidth/1.5); // TODO: why 1.5?
   }
 
@@ -623,19 +670,19 @@ namespace Molsketch {
     QPointF intersection;
 
     QLineF topEdge{bounds.topLeft(), bounds.topRight()};
-    if (topEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(topEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, topEdge);
 
     QLineF bottomEdge{bounds.bottomLeft(), bounds.bottomRight()};
-    if (bottomEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(bottomEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, bottomEdge);
 
     QLineF leftEdge{bounds.topLeft(), bounds.bottomLeft()};
-    if (leftEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(leftEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, leftEdge);
 
     QLineF rightEdge{bounds.topRight(), bounds.bottomRight()};
-    if (rightEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(rightEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, rightEdge);
     // TODO pick the edge it intersects with first (i.e. closest to the middle)
     return IntersectionData(QPointF(), QLineF());
@@ -672,7 +719,7 @@ namespace Molsketch {
 
   qreal Atom::getExtentForIntersectionOfOuterLineAndEdge(const IntersectionData &edgeIntersection, const QLineF &outer) const {
     QPointF intersectionOfOuterAndEdge;
-    QLineF::IntersectType intersectType = edgeIntersection.getEdge().intersect(outer, &intersectionOfOuterAndEdge);
+    QLineF::IntersectType intersectType = intersectionType( edgeIntersection.getEdge(), outer, &intersectionOfOuterAndEdge);
     return QLineF::BoundedIntersection == intersectType
         ? QLineF(intersectionOfOuterAndEdge, outer.p1()).length() / outer.length()
         : 0;
@@ -686,6 +733,8 @@ namespace Molsketch {
 
     if (m_newmanDiameter > 0) return getBondExtentForNewmanAtom(middleLine, lineWidth, m_newmanDiameter);
 
+    if (Circle == m_shapeType) return getBondExtentForNewmanAtom(middleLine, lineWidth, diameterForCircularShape());
+
     IntersectionData edgeIntersection{intersectedEdge(middleLine, lineWidth)};
 
     QPolygonF fullBondPolygon({outer1.p1(), outer1.p2(), outer2.p2(), outer2.p1(), outer1.p1()});
@@ -696,8 +745,7 @@ namespace Molsketch {
           getExtentForIntersectionOfOuterLineAndEdge(edgeIntersection, outer2)
     };
 
-    qSort(possibleExtents);
-    return possibleExtents.last();
+    return *(std::max_element(possibleExtents.begin(), possibleExtents.end()));
   }
 
   bool Atom::contains(const QPointF &point) const {
@@ -736,7 +784,7 @@ namespace Molsketch {
     {
       QLineF edge(corners[i], corners[i+1]);
       QPointF result;
-      if (connection.intersect(edge, &result) == QLineF::BoundedIntersection)
+      if (intersectionType(connection, edge, &result) == QLineF::BoundedIntersection)
         return result;
     }
     return connection.p1();

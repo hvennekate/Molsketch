@@ -78,7 +78,7 @@ namespace Molsketch {
     explicit Bond(Atom* atomA = 0, // TODO check usage
                   Atom* atomB = 0,
                   Bond::BondType type = Single,
-                  QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER ) ;
+                  QGraphicsItem* parent = 0) ;
     explicit Bond(const Bond& other, Atom *atomA = 0, Atom *atomB = 0);
 
     virtual ~Bond();

@@ -47,6 +47,7 @@ namespace Molsketch {
 
     void getFromAtom() {
       ui->element->setText(atom->element());
+      ui->shapeType->setCurrentIndex(atom->shapeType());
       ui->charge->setValue(atom->charge());
       ui->hydrogens->setValue(atom->numImplicitHydrogens());
       ui->coordinates->model()->setCoordinates(atom->coordinates());
@@ -54,6 +55,7 @@ namespace Molsketch {
       getRadicalsFromAtom();
       getLonePairsFromAtom();
       ui->coordinates->resizeRowsToContents();
+      ui->hydrogenAlignment->setAlignment(atom->hAlignment());
     }
 
     void getRadicalsFromAtom() {
@@ -122,24 +124,24 @@ namespace Molsketch {
     setScene(a ? dynamic_cast<MolScene*>(a->scene()) : 0);
   }
 
-  void AtomPopup::on_element_textChanged(const QString &arg1) {
-    Q_UNUSED(arg1) // TODO why not just use the arg?
-    attemptToPushUndoCommand(new Commands::ChangeElement(d->atom, ui->element->text()));
+  void AtomPopup::on_element_textChanged(const QString &newElementSymbol) {
+    attemptToPushUndoCommand(new Commands::ChangeElement(d->atom, newElementSymbol, tr("Change element")));
   }
 
-  void AtomPopup::on_charge_valueChanged(int arg1) {
-    Q_UNUSED(arg1)
-    attemptToPushUndoCommand(new Commands::setAtomChargeCommand(d->atom, ui->charge->value()));
+  void AtomPopup::on_charge_valueChanged(int newCharge) {
+    attemptToPushUndoCommand(new Commands::setAtomChargeCommand(d->atom, newCharge, tr("Change charge")));
   }
 
-  void AtomPopup::on_hydrogens_valueChanged(int arg1) {
-    Q_UNUSED(arg1)
-    attemptToPushUndoCommand(new Commands::setImplicitHydrogensCommand(d->atom, ui->hydrogens->value(), tr("Change Newman diameter")));
+  void AtomPopup::on_hydrogens_valueChanged(int newHydrogenCount) {
+    attemptToPushUndoCommand(new Commands::setImplicitHydrogensCommand(d->atom, newHydrogenCount, tr("Change number of hydrogens")));
   }
 
   void AtomPopup::on_newmanDiameter_valueChanged(double diameter) {
-    Q_UNUSED(diameter)
-    attemptToPushUndoCommand(new Commands::SetNewmanDiameter(d->atom, ui->newmanDiameter->value()));
+    attemptToPushUndoCommand(new Commands::SetNewmanDiameter(d->atom, diameter, tr("Change Newman diameter")));
+  }
+
+  void AtomPopup::on_shapeType_currentIndexChanged(int newIndex) {
+    attemptToPushUndoCommand(new Commands::SetShapeType(d->atom, (Atom::ShapeType) newIndex));
   }
 
   void AtomPopup::onCoordinatesDatachanged() {
@@ -178,6 +180,11 @@ namespace Molsketch {
     addLonePair(ui->leftLonePair, BoundingBoxLinker::atLeft(), 90);
     addLonePair(ui->rightLonePair, BoundingBoxLinker::atRight(), 270);
     attemptEndMacro();
+  }
+
+  void AtomPopup::updateHAlignment(const NeighborAlignment &newAlignment) {
+    if (!d->atom) return;
+    attemptToPushUndoCommand(new Commands::SetHAlignment(d->atom, newAlignment));
   }
 
   void AtomPopup::propertiesChanged()

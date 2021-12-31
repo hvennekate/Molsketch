@@ -123,9 +123,9 @@ namespace Molsketch {
 
     if (data.isValid() && data.canConvert(QVariant::String))
     {
-      if (itemList.size() == 1 && isFrame(itemList.toList().first()))
+      if (itemList.size() == 1 && isFrame(itemList.values().first()))
       {
-        attemptUndoPush(new Commands::SetFrameTypeString((Frame*) itemList.toList().first(), data.toString(), tr("change decoration")));
+        attemptUndoPush(new Commands::SetFrameTypeString((Frame*) itemList.values().first(), data.toString(), tr("change decoration")));
       }
       else
       {

@@ -23,13 +23,13 @@
 
 namespace Molsketch {
 
-class ZLevelAction : public abstractRecursiveItemAction
-{
-public:
-  explicit ZLevelAction(MolScene *parent = 0);
-private:
-  void execute() override;
-};
+  class ZLevelAction : public abstractRecursiveItemAction {
+    Q_OBJECT
+  public:
+    explicit ZLevelAction(MolScene *parent = 0);
+  private:
+    void execute() override;
+  };
 
 } // namespace Molsketch
 

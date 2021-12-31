@@ -1,13 +1,10 @@
 ## CMakeLists.txt for Molsketch
-cmake_minimum_required(VERSION 2.6.0) # Depend on CMake 2.6 or better
-cmake_policy(SET CMP0005 OLD)
-cmake_policy(SET CMP0020 OLD)
+cmake_minimum_required(VERSION 2.8.12) # Depend on CMake 2.6 or better
+cmake_policy(SET CMP0005 NEW)
+cmake_policy(SET CMP0020 NEW)
 
 # The name of the project
 project(Molsketch)
-
-# Include the extra modules (OpenBabel/uninstall)
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 ###########################################################
 # Here I am adding GCC magic from KDE. With these settings#
@@ -33,7 +30,7 @@ set(CPACK_SOURCE_IGNORE_FILES "/build;/.git")
 include(CPack)
 
 # Add support for the "make uninstall" target
-configure_file("${CMAKE_MODULE_PATH}/cmake_uninstall.cmake.in"
+configure_file("${CMAKE_SOURCE_DIR}/cmake_uninstall.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
                IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
@@ -48,46 +45,31 @@ set(BUILD_SHARED_LIBS ON)
 set(_obIncDir ${CMAKE_SOURCE_DIR}/include)
 set(_obLinkDir ${CMAKE_SOURCE_DIR}/lib)
 
-# Find and setup Qt4 or Qt5
-set(QT_MIN_VERSION "4.5.0") # we need at least version 4.5 of Qt
-if(NOT FORCEQt4)
+# Find and setup Qt5
+set(QT_MIN_VERSION "5.0.0")
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(Qt5RequiredPackages
+        Core
+        Widgets
+        Gui
+        PrintSupport
+        Svg
+        Network
+)
 
-#	CMAKE_MINIMUM_REQUIRED_VERSION(VERSION 2.8.11)
-        set(CMAKE_INCLUDE_CURRENT_DIR ON)
-        set(Qt5RequiredPackages
-                Core
-                Widgets
-                Gui
-                PrintSupport
-                Svg
-                Network
-        )
+find_package(Qt5LinguistTools)
+foreach(package ${Qt5RequiredPackages})
+        find_package(Qt5${package})
+        INCLUDE_DIRECTORIES(${Qt5${package}_INCLUDE_DIRS})
+        add_definitions(${Qt5${package}_DEFINITIONS})
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5${package}_EXECUTABLE_COMPILE_FLAGS}")
+        set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::${package})
+endforeach(package)
 
-        foreach(package ${Qt5RequiredPackages})
-                find_package(Qt5${package})
-                INCLUDE_DIRECTORIES(${Qt5${package}_INCLUDE_DIRS})
-                add_definitions(${Qt5${package}_DEFINITIONS})
-                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5${package}_EXECUTABLE_COMPILE_FLAGS}")
-                set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::${package})
-        endforeach(package)
-
-endif(NOT FORCEQt4)
-# if Qt5 is not available, try Qt4
-if(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND)
-        message(STATUS "Using Qt5. Use option \"-D FORCEQt4=TRUE\" to switch to Qt4.")
-        set(CMAKE_AUTOMOC ON)
-else(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND)
-        find_package(Qt4)
-        if(NOT Qt4_FOUND)
-                message(FATAL_ERROR "Could not find Qt4 or Qt5.")
-        endif(NOT Qt4_FOUND)
-        if(NOT FORCEQt4)
-                message(STATUS "Could not find Qt5.")
-        endif(NOT FORCEQt4)
-        set(FORCEQt4 TRUE)
-        message(STATUS "Using Qt4.")
-endif(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND)
-
+if(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
+        message(FATAL_ERROR "Could not find Qt5. Required parts include: Widgets, Gui, PrintSupport, Svg.")
+endif(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
+set(CMAKE_AUTOMOC ON)
 
 ################ Reading installation settings
 
@@ -118,14 +100,10 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT APPLE )
         set(MSK_INSTALL_LIBS "${MSK_INSTALL_LIBS64}")
 endif( CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT APPLE )
 
-if(NOT FORCEQt4)
-        set(QTVERSIONSUFFIX "-qt5")
-endif(NOT FORCEQt4)
-
-set(OBABEL_IFACE_NAME "libobabeliface${QTVERSIONSUFFIX}.so")
+set(OBABEL_IFACE_NAME "libobabeliface.so")
 
 if(WIN32 OR WIN64)
-        set(OBABEL_IFACE_NAME "obabeliface${QTVERSIONSUFFIX}.dll")
+        set(OBABEL_IFACE_NAME "obabeliface.dll")
 endif(WIN32 OR WIN64)
 
 add_definitions(-DOBABEL_IFACE_LOCATION="\\\"${MSK_INSTALL_LIBS}/${OBABEL_IFACE_NAME}\\\"")
@@ -134,5 +112,7 @@ set(CMAKE_INSTALL_PREFIX ${MSK_PREFIX})
 
 ################ Adding subdirs
 add_subdirectory(libmolsketch)
-add_subdirectory(obabeliface)
 add_subdirectory(molsketch)
+if (MSK_OBABELIFACE)
+    add_subdirectory(obabeliface)
+endif (MSK_OBABELIFACE)

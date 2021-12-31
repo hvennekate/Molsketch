@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
+ *   Copyright (C) 2021 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,29 +16,30 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
-#ifndef LINEUPACTION_H
-#define LINEUPACTION_H
+#ifndef QTDEPRECATIONS_H
+#define QTDEPRECATIONS_H
 
-#include <actions/abstractitemaction.h>
+#include <QSet>
+#include <QList>
+#include <QLineF>
 
 namespace Molsketch {
 
-  class Molecule;
+#if (QT_VERSION < QT_VERSION_CHECK(5, 14, 0))
+template<class T>
+inline QSet<T> toSet(const QList<T>& list) { return QSet<T>::fromList(list); }
+inline QLineF::IntersectType intersectionType(const QLineF& first, const QLineF& second, QPointF *intersectionPoint) {
+  return first.intersect(second, intersectionPoint);
+}
+#else
+template<class T>
+inline QSet<T> toSet(const QList<T>& list) { return QSet<T>(list.cbegin(), list.cend()); }
 
-  class LineUpAction : public TopLevelItemAction { // TODO move to actions folder
-  public:
-    static LineUpAction* horizontal(MolScene *scene = 0);
-    static LineUpAction* vertical(MolScene *scene = 0);
-  private:
-    void execute() override;
-  protected:
-    explicit LineUpAction(MolScene *scene);
-    void spaceItemsEqually(qreal distance, bool distanceBetweenCenters);
-    virtual qreal getOrderingValue(const graphicsItem*) const = 0;
-    virtual QPointF offsetForEdges(const graphicsItem* reference, const graphicsItem *item, qreal distance) const = 0;
-    virtual QPointF offsetForCenters(const graphicsItem* reference, const graphicsItem *item, qreal distance) const = 0;
-  };
-
+inline QLineF::IntersectType intersectionType(const QLineF& first, const QLineF& second, QPointF *intersectionPoint) {
+  return first.intersects(second, intersectionPoint);
+}
+#endif
 } // namespace Molsketch
 
-#endif // LINEUPACTION_H
+
+#endif // QTDEPRECATIONS_H

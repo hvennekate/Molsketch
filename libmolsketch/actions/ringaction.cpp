@@ -25,11 +25,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPen>
 #include <bond.h>
-#if QT_VERSION >= 0x050000
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include <commands.h>
 #include "molscene.h"
 #include "math2d.h"

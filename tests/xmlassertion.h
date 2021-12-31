@@ -38,6 +38,7 @@ public:
   XmlAssertion* contains(const QString& xQuery);
   XmlAssertion* exactlyOnceWithContent(const QString& expected);
   XmlAssertion *exactlyOnce();
+  XmlAssertion *exactlyTimes(const int &expectedCount);
   XmlAssertion *never();
   XmlAssertion *inAnyOrderWithValues(const QStringList &expectedValues);
   XmlAssertion *exactly(const QStringList &expected);

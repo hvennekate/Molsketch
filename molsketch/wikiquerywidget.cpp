@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
- *   HVennekate@gmx.de                                                     *
+ *   Copyright (C) 2017 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -34,7 +33,7 @@
 #include <QDebug>
 #include <QFileDialog>
 
-#ifdef _WIN32
+#ifdef Q_OS_WINDOWS
 #define OBABELOSSUFFIX ".dll"
 #else
 #define OBABELOSSUFFIX
@@ -42,11 +41,12 @@
 
 using namespace Molsketch;
 
-WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, QWidget *parent) :
+WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, const QString &queryUrl, QWidget *parent) :
   QDockWidget(parent),
   ui(new Ui::WikiQueryWidget),
   manager(new QNetworkAccessManager(this)),
-  obloader(loader)
+  obloader(loader),
+  queryUrl(queryUrl)
 {
   setObjectName("wikidata-query-widget");
   ui->setupUi(this);
@@ -62,6 +62,10 @@ WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, QWidget *parent) :
 WikiQueryWidget::~WikiQueryWidget()
 {
   delete ui;
+}
+
+void WikiQueryWidget::setQueryUrl(const QString &newQueryUrl) {
+  queryUrl = newQueryUrl;
 }
 
 void WikiQueryWidget::on_searchButton_clicked() {
@@ -113,7 +117,7 @@ void WikiQueryWidget::processMoleculeQuery(QNetworkReply *reply) {
     qInfo() << "obtained molecule from wikidata:" << label << smiles << inchi << isomer;
     namesAndInchiStrings << qMakePair(label, inchi);
   }
-  qSort(namesAndInchiStrings);
+  std::sort(namesAndInchiStrings.begin(), namesAndInchiStrings.end());
   QList<MoleculeModelItem*> items;
   for (auto item : namesAndInchiStrings)
     items << new InChIItem(item.first, item.second, obloader);
@@ -139,7 +143,7 @@ void WikiQueryWidget::startMoleculeQuery(const QString& queryString) {
                                 "} GROUP BY ?qnumber"
 //                                " LIMIT 100 ORDER BY DESC(?label)"
                                 ));
-  QUrl url("https://query.wikidata.org/sparql");
+  QUrl url(queryUrl);
   url.setQuery(query);
   QNetworkRequest request(url);
   request.setRawHeader("Accept", "application/json");

@@ -5,11 +5,6 @@ CONFIG += silent c++17
 lessThan(QT_MAJOR_VERSION,5): QMAKE_CXXFLAGS += -std=c++11
 QMAKE_CXXFLAGS += -Wsuggest-override
 
-qtVersionSuffix=""
-equals(QT_MAJOR_VERSION, 5) {
-    qtVersionSuffix= -qt5
-}
-
 buildVars = $$cat(buildvariables)
 for(line, $$list($$split(buildVars, $$escape_expand(\\n)))) {
   name = $$getVarName(line)
@@ -25,8 +20,8 @@ for(line, $$list($$split(buildVars, $$escape_expand(\\n)))) {
 VERSION = $$cat(version)
 CONFIG(static) : DEFINES += QT_STATIC_BUILD
 contains(QT_ARCH, ".*64.*") : MSK_INSTALL_LIBS = $${MSK_INSTALL_LIBS64}
-OBABEL_IFACE_NAME = libobabeliface$${qtVersionSuffix}.so
-win* : OBABEL_IFACE_NAME = obabeliface$${qtVersionSuffix}.dll
+OBABEL_IFACE_NAME = libobabeliface.so
+win* : OBABEL_IFACE_NAME = obabeliface.dll
 isEmpty(RELATIVE_OBABELIFACE) : DEFINES += "OBABEL_IFACE_LOCATION=\"\\\"$$MSK_INSTALL_LIBS/$$OBABEL_IFACE_NAME\\\"\""
-!isEmpty(RELATIVE_OBABELIFACE) : DEFINES += "OBABEL_IFACE_LOCATION=\"\\\"obabeliface$${qtVersionSuffix}\\\"\""
+!isEmpty(RELATIVE_OBABELIFACE) : DEFINES += "OBABEL_IFACE_LOCATION=\"\\\"obabeliface\\\"\""
 

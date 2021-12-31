@@ -92,7 +92,7 @@ namespace Molsketch {
   void LineUpAction::spaceItemsEqually(qreal distance, bool distanceBetweenCenters) {
     qInfo() << "equally spacing items:" << distance << "between centers?" << distanceBetweenCenters;
     QList<graphicsItem*> items = LineUpAction::items();
-    qStableSort(items.begin(), items.end(), [&](const graphicsItem* a, const graphicsItem* b)
+    std::stable_sort(items.begin(), items.end(), [&](const graphicsItem* a, const graphicsItem* b)
     { return getOrderingValue(a) < getOrderingValue(b); });
     qDebug() << "Sorted items:" << items;
     if (items.size() < 2) return;

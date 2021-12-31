@@ -6,12 +6,12 @@ CONFIG += plugin
 HEADERS += obabeliface.h
 SOURCES += obabeliface.cpp
 INCLUDEPATH += $$MSK_SOURCE_BASE/libmolsketch
-LIBS += -L../lib -lmolsketch$$qtVersionSuffix
+LIBS += -L../lib -lmolsketch
 CONFIG -= static
 CONFIG += shared
 QMAKE_LFLAGS -= -static
 CONFIG += DLLDESTDIR
-TARGET = obabeliface$$qtVersionSuffix
+TARGET = obabeliface
 DESTDIR = ../lib
 win* : VERSION =
 
