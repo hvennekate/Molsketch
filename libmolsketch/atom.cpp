@@ -44,6 +44,7 @@
 #include "settingsitem.h"
 #include <QDebug>
 #include "painting/textfield.h"
+#include "math2d.h"
 
 #define REQ_MOLECULE auto m_molecule = molecule(); if (!m_molecule) return
 
@@ -112,7 +113,7 @@ namespace Molsketch {
     if (m_newmanDiameter > 0.) return QRectF(-m_newmanDiameter/2., -m_newmanDiameter/2., m_newmanDiameter, m_newmanDiameter);
 
     if (Circle == m_shapeType) {
-      auto radius = diameterForCircularShape()/2.;
+      auto radius = radiusForCircularShape();
       return QRectF(-radius, -radius, radius, radius);
     }
     // TODO do proper prepareGeometryChange() call
@@ -293,9 +294,9 @@ namespace Molsketch {
     }
   }
 
-  qreal Atom::diameterForCircularShape() const {
+  qreal Atom::radiusForCircularShape() const {
     auto bounds = boundingRect();
-    return QLineF(bounds.center(), bounds.topRight()).length() * 2;
+    return QLineF(bounds.center(), bounds.topRight()).length();
   }
 
   void Atom::drawSelectionHighlight(QPainter* painter)
@@ -629,6 +630,28 @@ namespace Molsketch {
     return widget;
   }
 
+
+
+  qreal bondExtentForCircularShape(const QLineF &connectionLine,
+                                   const QPointF &circleCenter,
+                                   const qreal &circleRadius) {
+    auto originRelativeToCircle = connectionLine.p1() - circleCenter;
+    auto unitLine = connectionLine.unitVector();
+    QPointF unitVector(unitLine.dx(), unitLine.dy());
+    auto dotProduct = QPointF::dotProduct(unitVector, originRelativeToCircle);
+    auto squaredNorm = QPointF::dotProduct(originRelativeToCircle, originRelativeToCircle);
+    return qMax(0.,
+                qMax(-dotProduct + sqrt(pow(dotProduct, 2) + pow(circleRadius, 2) - squaredNorm),
+                     -dotProduct - sqrt(pow(dotProduct, 2) + pow(circleRadius, 2) - squaredNorm)))
+        / connectionLine.length();
+  }
+
+  QPointF endPointOfBondForCircularShape(const QLineF &connectionLine,
+                                         const QPointF &circleCenter,
+                                         const qreal &circleRadius) {
+    return connectionLine.pointAt(bondExtentForCircularShape(connectionLine, circleCenter, circleRadius));
+  }
+
   QPointF Atom::bondDrawingStart(const Atom *other, qreal bondLineWidth) const
   {
     if (!isDrawn()) return pos();
@@ -642,9 +665,8 @@ namespace Molsketch {
 
     if (Circle == m_shapeType) {
       auto bounds = boundingRect();
-      auto circleDiameter = QLineF(bounds.center(), bounds.topRight()).length() * 2;
-      connection.setLength((circleDiameter + qMax(lineWidth(), bondLineWidth))/2. );
-      return connection.p2();
+      return endPointOfBondForCircularShape(connection, mapToScene(bounds.center()), // TODO why do we need to map here and not in the "extent" functions?
+                                            QLineF(bounds.center(), bounds.topRight()).length() + bondLineWidth/2.);
     }
 
 
@@ -701,12 +723,9 @@ namespace Molsketch {
     return closestPoint;
   }
 
-
+  // TODO inline
   qreal getBondExtentForNewmanAtom(const QLineF &middleLine, qreal lineWidth, qreal newmanDiameter) {
-    qreal f = pow(middleLine.dx(), 2) + pow(middleLine.dy(), 2);
-    qreal p = 2*(middleLine.p1().x() * middleLine.dx() + middleLine.p1().y() * middleLine.dy()) / f / 2.;
-    qreal q = (pow(middleLine.p1().x(), 2) + pow(middleLine.p1().y(), 2) - pow((newmanDiameter + lineWidth)/2., 2))/f;
-    return qMax(-p + sqrt(p*p - q), -p - sqrt(p*p - q));
+    return bondExtentForCircularShape(middleLine, {}, (newmanDiameter + lineWidth)/2.);
   }
 
   qreal Atom::getExtentForEndOnCorner(const QPolygonF &fullBondPolygon, const QLineF& middleLine, const QPointF& corner) const {
@@ -733,7 +752,10 @@ namespace Molsketch {
 
     if (m_newmanDiameter > 0) return getBondExtentForNewmanAtom(middleLine, lineWidth, m_newmanDiameter);
 
-    if (Circle == m_shapeType) return getBondExtentForNewmanAtom(middleLine, lineWidth, diameterForCircularShape());
+    if (Circle == m_shapeType) {
+      auto bounds = boundingRect();
+      return bondExtentForCircularShape(middleLine, bounds.center(), QLineF(bounds.center(), bounds.topRight()).length() + lineWidth/2.);
+    }
 
     IntersectionData edgeIntersection{intersectedEdge(middleLine, lineWidth)};
 
