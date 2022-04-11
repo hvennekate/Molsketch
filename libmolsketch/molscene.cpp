@@ -130,7 +130,7 @@ namespace Molsketch {
       delete stack;
     }
 
-    bool gridOn()const { return grid->scene(); }
+    bool gridOn() const { return grid->scene(); }
 
     void moveDragItem(QGraphicsSceneDragDropEvent* event) {
       if (!dragItem) return;
