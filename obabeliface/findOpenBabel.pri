@@ -36,7 +36,7 @@ defineTest(findOpenBabel) {
         isEmpty(OBINCLUDEPATH) : error("Could not find OpenBabel includes (try setting 'OB_INCLUDE_DIRS=<DIR>' or 'MSK_OBABELIFACE=false')")
         isEmpty(OBLIBS) : error("Could not find OpenBabel libs (try setting 'OB_LIBRARY_DIRS=<DIR>' or 'MSK_OBABELIFACE=false')")
         message("Found OpenBabel.  Includes: $$OBINCLUDEPATH Libs: $$OBLIBS")
-        LIBS += -L$${OBLIBS} -llibopenbabel
+        LIBS += -L$${OBLIBS} -lopenbabel
         INCLUDEPATH += $$OBINCLUDEPATH
         export(LIBS)
         export(INCLUDEPATH)
