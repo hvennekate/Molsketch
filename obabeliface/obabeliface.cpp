@@ -96,11 +96,11 @@ namespace Molsketch
     foreach (Atom* atom, originalMolecule->atoms()) {
       OpenBabel::OBAtom* obatom = obmol.NewAtom();
       obatom->SetVector(atom->scenePos().x()/40,atom->scenePos().y()/40,0);
-      std::string element = atom->element().toStdString();
       obatom->SetAtomicNum(Molsketch::symbol2number(atom->element()));
       hash.insert(atom,obatom);
     }
     foreach (Bond* bond, originalMolecule->bonds()) {
+      if (bond->bondOrder() < 1) continue;
       Atom* a1 = bond->beginAtom();
       Atom* a2 = bond->endAtom();
 

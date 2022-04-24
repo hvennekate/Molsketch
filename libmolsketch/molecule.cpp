@@ -655,12 +655,12 @@ void Molecule::collectElectronSystems() {
   m_electronSystems.clear();
 
   foreach (Bond *bond, bonds()) {
-    int piOrder = bond->bondOrder() - 1;
+    unsigned int piOrder = qMax(bond->bondOrder() - 1, 0);
     while (piOrder--) m_electronSystems << new PiElectrons(bond->atoms(), 2);
   }
 
   foreach (Atom *atom, atoms()) {
-    int unboundElectronPairs = atom->numNonBondingElectrons() / 2;
+    unsigned int unboundElectronPairs = qMax(atom->numNonBondingElectrons() / 2, 0);
     while (unboundElectronPairs--) m_electronSystems << new PiElectrons({atom}, 2);
     if (atom->numNonBondingElectrons() % 2) m_electronSystems << new PiElectrons({atom}, 1);
   }
