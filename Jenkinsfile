@@ -1,53 +1,31 @@
+def obabeldir = '/opt/openbabel-3.1.1-static';
+def mingwdir = '/usr/i686-w64-mingw32/sys-root/mingw/bin'
+def openssldir = '/opt/openssl-1.1.1j-mingw32/bin'
+def blogUrl= ''
+
 pipeline {
-    agent any
+  agent any
+  // TODO determine version and check it does not yet exist
+  // TODO push tag to github
 
-    stages {
-        // stage('Checkout') {
-        //     steps {
-        //         cleanWs()
-        //         git branch: 'main', url: 'https://github.com/hvennekate/Molsketch.git'
-        //     }
-        // }
-        // stage('Tests') {
-        //     steps {
-        //         dir('testbuild') {
-        //             // sh 'qmake-qt5 ../tests -spec linux-g++ CONFIG+=debug CONFIG-=qml_debug CXXTEST_INCLUDE_PATH=/home/hendrik/Programme/cxxtest-4.4 CXXTEST_BIN_PATH=/home/hendrik/Programme/cxxtest-4.4 && /usr/bin/make qmake_all'
-        //             // sh 'make'
-        //             sh 'xvfb-run ./msktests'
-        //         }
-        //     }
-        // }
-        // stage('Package') {
-        //     steps {
-        //         sh 'git archive HEAD -o Molsketch-0.0.1-src.tar.gz'
-        //     }
-        //     post {
-        //         success {
-        //             archiveArtifacts artifacts: '*.tar.gz', followSymlinks: false
-        //         }
-        //     }
-        // }
-        // stage('WinBuild') {
-        //     steps {
-        //         dir("winbuild") {
-        //             sh '/opt/Qt-5.15.1-mingw32-static/bin/qmake DEFINES+=THIRD_PARTY_LICENSES LIBS+=-L/opt/openbabel-3.1.1-static/bin/ INCLUDEPATH+=/opt/openbabel-3.1.1-static/include/openbabel3 ../Molsketch.pro'
-        //             sh 'make'
-        //         }
-        //     }
-        // }
-        stage('WinRepo') {
-
+  stages {
+    stage('Checkout') {
+      steps {
+        // cleanWs()
+        // TODO change branch to main
+        git branch: 'Jenkins_setup', url: 'git@github.com:hvennekate/Molsketch.git', credentialsId: 'github'
+        script {
+          env.msk_version = readFile 'version'
+          env.msk_version -= '\n'
+          env.msk_version_nick = readFile 'versionnick'
+          env.msk_version_nick -= '\n'
         }
-        stage('Sourceforge') {
-            // upload
-            // select default https://sourceforge.net/p/forge/documentation/Using%20the%20Release%20API/
-        }
-        stage('Github') {
-            // update windows repo (adapt files as necessary)
-        }
-        stage('Homepage') {
-            // Update homepage
-            // Add blog post https://anypoint.mulesoft.com/apiplatform/sourceforge/#/portals/organizations/98f11a03-7ec0-4a34-b001-c1ca0e0c45b1/apis/32951/versions/34322
-        }
+      }
     }
+    stage('print') {
+      steps {
+        echo "Build version:  ${env.msk_version_nick} ${env.msk_version}"
+      }
+    }
+  }
 }
