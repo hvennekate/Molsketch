@@ -61,5 +61,15 @@ pipeline {
         }
       }
     }
+    stage('Package') {
+      steps {
+        sh 'git archive HEAD -o Molsketch-0.0.1-src.tar.gz'
+      }
+      post {
+        success {
+          archiveArtifacts artifacts: '*.tar.gz', followSymlinks: false
+        }
+      }
+    }
   }
 }
