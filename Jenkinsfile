@@ -94,5 +94,39 @@ pipeline {
         }
       }
     }
+    stage('WinPackage') {
+      steps {
+        dir("wininstaller/packages/org.molsketch/data") {
+          unstash 'mainExecutable'
+        }
+        dir("wininstaller/packages/org.molsketch.openbabel.adapter/data") {
+          unstash 'obabeliface'
+        }
+        dir(obabeldir) {
+          fileOperations([
+            folderCreateOperation("${WORKSPACE}/wininstaller/packages/org.openbabel.formats/data"),
+            fileCopyOperation(flattenFiles: true, includes: "**/*.obf", targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.formats/data"),
+            folderCreateOperation("${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data"),
+            fileCopyOperation(flattenFiles: true, includes: "**/*.dll", targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data"),
+          ])
+        }
+        dir(mingwdir) {
+          fileOperations([
+            fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_sjlj-1.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data/"),
+          ])
+        }
+        dir(openssldir) {
+          fileOperations([
+            folderCreateOperation("${WORKSPACE}/wininstaller/packages/org.openssl.lib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/*.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openssl.lib/data/")
+          ])
+        }
+        dir("wininstaller") {
+          sh 'binarycreator.exe -c config/config.xml -p packages -f MolsketchInstaller.exe'
+        }
+      }
+    }
   }
 }
