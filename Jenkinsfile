@@ -71,5 +71,28 @@ pipeline {
         }
       }
     }
+    stage('WinBuild') {
+      steps {
+        dir('winbuild') {
+          sh '''
+            /opt/Qt-5.15.2-mingw32-static/bin/qmake \
+            CONFIG-=debug CONFIG+=release \
+            DEFINES+=THIRD_PARTY_LICENSES \
+            OB_LIBRARY_DIRS+=-L/opt/openbabel-3.1.1-static/lib/ \
+            OB_INCLUDE_DIRS+=/opt/openbabel-3.1.1-static/include/openbabel3 \
+            ../Molsketch.pro
+          '''
+          sh 'make'
+        }
+      }
+      post {
+        success {
+          dir('winbuild') {
+            stash includes: 'bin/molsketch.exe', name: 'mainExecutable'
+            stash includes: 'lib/obabeliface.dll', name: 'obabeliface'
+          }
+        }
+      }
+    }
   }
 }
