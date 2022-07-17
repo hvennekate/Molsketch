@@ -14,17 +14,51 @@ pipeline {
         // cleanWs()
         // TODO change branch to main
         git branch: 'Jenkins_setup', url: 'git@github.com:hvennekate/Molsketch.git', credentialsId: 'github'
+      }
+    }
+    stage('Version') {
+      steps {
         script {
           env.msk_version = readFile 'version'
           env.msk_version -= '\n'
           env.msk_version_nick = readFile 'versionnick'
           env.msk_version_nick -= '\n'
         }
+        echo "Build version:  ${env.msk_version_nick} ${env.msk_version}"
       }
     }
-    stage('print') {
+    stage('Build') {
       steps {
-        echo "Build version:  ${env.msk_version_nick} ${env.msk_version}"
+        dir('mainbuild') {
+          sh '''
+            qmake-qt5 ../Molsketch.pro \
+            CONFIG+=release
+          '''
+          sh 'make'
+        }
+      }
+    }
+    stage('Test') {
+      steps {
+        dir('testbuild') {
+          sh '''
+            qmake-qt5 ../tests \
+              -spec linux-g++ \
+              CONFIG+=debug \
+              CONFIG-=qml_debug \
+              CXXTEST_INCLUDE_PATH=/opt/cxxtest-4.4 \
+              CXXTEST_BIN_PATH=/opt/cxxtest-4.4
+          '''
+          sh 'make'
+          sh 'xvfb-run ./msktests TextActionAcceptanceTest'
+        }
+        post {
+          always {
+            dir('testbuild') {
+              junit checksName: 'Test report collection', keepLongStdio: true, testResults: 'TEST-cxxtest.xml'
+            }
+          }
+        }
       }
     }
   }
