@@ -45,13 +45,13 @@ pipeline {
               CXXTEST_BIN_PATH=/opt/cxxtest-4.4
           '''
           sh 'make -j 8'
-          sh 'xvfb-run ./msktests TextActionAcceptanceTest'
+          sh 'xvfb-run ./msktests'
         }
-        post {
-          always {
-            dir('testbuild') {
-              junit checksName: 'Test report collection', keepLongStdio: true, testResults: 'TEST-cxxtest.xml'
-            }
+      }
+      post {
+        always {
+          dir('testbuild') {
+            junit checksName: 'Test report collection', keepLongStdio: true, testResults: 'TEST-cxxtest.xml'
           }
         }
       }
