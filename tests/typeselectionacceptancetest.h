@@ -70,7 +70,7 @@ class TypeSelectionAcceptanceTest : public CxxTest::TestSuite {
 
     QWidget* findOkButton() {
       for(QPushButton *child : findDialog()->findChildren<QPushButton*>())
-	if (child->text() == "&OK") return child;
+        if (child->text().endsWith("OK")) return child;
       TSM_ASSERT("Could not find OK button!", false);
       throw nullptr;
     }
