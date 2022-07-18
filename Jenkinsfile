@@ -29,7 +29,7 @@ pipeline {
             qmake-qt5 ../sources/Molsketch.pro \
             CONFIG+=release
           '''
-          sh 'make'
+          sh 'make -j 8'
         }
       }
     }
@@ -44,7 +44,7 @@ pipeline {
               CXXTEST_INCLUDE_PATH=/opt/cxxtest-4.4 \
               CXXTEST_BIN_PATH=/opt/cxxtest-4.4
           '''
-          sh 'make'
+          sh 'make -j 8'
           sh 'xvfb-run ./msktests TextActionAcceptanceTest'
         }
         post {
@@ -79,7 +79,7 @@ pipeline {
             OB_INCLUDE_DIRS+=/opt/openbabel-3.1.1-static/include/openbabel3 \
             ../sources/Molsketch.pro
           '''
-          sh 'make'
+          sh 'make -j 8'
         }
       }
       post {
