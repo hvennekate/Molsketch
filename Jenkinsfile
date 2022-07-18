@@ -9,29 +9,24 @@ pipeline {
   // TODO push tag to github
 
   stages {
-    stage('Checkout') {
-      steps {
-        // cleanWs()
-        // TODO change branch to main
-        git branch: 'Jenkins_setup', url: 'git@github.com:hvennekate/Molsketch.git', credentialsId: 'github'
-      }
-    }
     stage('Version') {
       steps {
-        script {
-          env.msk_version = readFile 'version'
-          env.msk_version -= '\n'
-          env.msk_version_nick = readFile 'versionnick'
-          env.msk_version_nick -= '\n'
+        dir('sources') {
+          script {
+            env.msk_version = readFile 'version'
+            env.msk_version -= '\n'
+            env.msk_version_nick = readFile 'versionnick'
+            env.msk_version_nick -= '\n'
+          }
+          echo "Build version:  ${env.msk_version_nick} ${env.msk_version}"
         }
-        echo "Build version:  ${env.msk_version_nick} ${env.msk_version}"
       }
     }
     stage('Build') {
       steps {
         dir('mainbuild') {
           sh '''
-            qmake-qt5 ../Molsketch.pro \
+            qmake-qt5 ../sources/Molsketch.pro \
             CONFIG+=release
           '''
           sh 'make'
@@ -42,7 +37,7 @@ pipeline {
       steps {
         dir('testbuild') {
           sh '''
-            qmake-qt5 ../tests \
+            qmake-qt5 ../sources/tests \
               -spec linux-g++ \
               CONFIG+=debug \
               CONFIG-=qml_debug \
@@ -63,7 +58,9 @@ pipeline {
     }
     stage('Package') {
       steps {
-        sh 'git archive HEAD -o Molsketch-0.0.1-src.tar.gz'
+        dir('sources') {
+          sh 'git archive HEAD -o Molsketch-0.0.1-src.tar.gz'
+        }
       }
       post {
         success {
@@ -80,7 +77,7 @@ pipeline {
             DEFINES+=THIRD_PARTY_LICENSES \
             OB_LIBRARY_DIRS+=-L/opt/openbabel-3.1.1-static/lib/ \
             OB_INCLUDE_DIRS+=/opt/openbabel-3.1.1-static/include/openbabel3 \
-            ../Molsketch.pro
+            ../sources/Molsketch.pro
           '''
           sh 'make'
         }
@@ -96,34 +93,34 @@ pipeline {
     }
     stage('WinPackage') {
       steps {
-        dir("wininstaller/packages/org.molsketch/data") {
+        dir('sources/wininstaller/packages/org.molsketch/data') {
           unstash 'mainExecutable'
         }
-        dir("wininstaller/packages/org.molsketch.openbabel.adapter/data") {
+        dir('sources/wininstaller/packages/org.molsketch.openbabel.adapter/data') {
           unstash 'obabeliface'
         }
         dir(obabeldir) {
           fileOperations([
-            folderCreateOperation("${WORKSPACE}/wininstaller/packages/org.openbabel.formats/data"),
-            fileCopyOperation(flattenFiles: true, includes: "**/*.obf", targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.formats/data"),
-            folderCreateOperation("${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data"),
-            fileCopyOperation(flattenFiles: true, includes: "**/*.dll", targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data"),
+            folderCreateOperation("${WORKSPACE}/sources/wininstaller/packages/org.openbabel.formats/data"),
+            fileCopyOperation(flattenFiles: true, includes: "**/*.obf", targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.formats/data"),
+            folderCreateOperation("${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data"),
+            fileCopyOperation(flattenFiles: true, includes: "**/*.dll", targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data"),
           ])
         }
         dir(mingwdir) {
           fileOperations([
-            fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_sjlj-1.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_sjlj-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
           ])
         }
         dir(openssldir) {
           fileOperations([
-            folderCreateOperation("${WORKSPACE}/wininstaller/packages/org.openssl.lib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/*.dll', targetLocation: "${WORKSPACE}/wininstaller/packages/org.openssl.lib/data/")
+            folderCreateOperation("${WORKSPACE}/sources/wininstaller/packages/org.openssl.lib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/*.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openssl.lib/data/")
           ])
         }
-        dir("wininstaller") {
+        dir("sources/wininstaller") {
           sh 'binarycreator.exe -c config/config.xml -p packages -f MolsketchInstaller.exe'
         }
       }
