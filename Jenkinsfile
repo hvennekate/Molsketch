@@ -64,7 +64,7 @@ pipeline {
       }
       post {
         success {
-          archiveArtifacts artifacts: '*.tar.gz', followSymlinks: false
+          archiveArtifacts artifacts: 'sources/*.tar.gz', followSymlinks: false
         }
       }
     }
