@@ -9,6 +9,15 @@ pipeline {
   // TODO push tag to github
 
   stages {
+    stage('Clean') {
+      steps {
+        cleanWs()
+        // TODO change to main branch
+        dir('sources') {
+          git branch: '*/Jenkins_setup', credentialsId: 'github', url: 'git@github.com:hvennekate/Molsketch.git'
+        }
+      }
+    }
     stage('Version') {
       steps {
         dir('sources') {
