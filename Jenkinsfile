@@ -75,7 +75,7 @@ pipeline {
             /opt/Qt-5.15.2-mingw32-static/bin/qmake \
             CONFIG-=debug CONFIG+=release \
             DEFINES+=THIRD_PARTY_LICENSES \
-            OB_LIBRARY_DIRS+=-L/opt/openbabel-3.1.1-static/lib/ \
+            OB_LIBRARY_DIRS+=/opt/openbabel-3.1.1-static/lib/ \
             OB_INCLUDE_DIRS+=/opt/openbabel-3.1.1-static/include/openbabel3 \
             ../sources/Molsketch.pro
           '''
