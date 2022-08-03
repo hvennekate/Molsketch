@@ -1,6 +1,6 @@
 def obabeldir = '/opt/openbabel-3.1.1-static';
 def mingwdir = '/usr/i686-w64-mingw32/sys-root/mingw/bin'
-def openssldir = '/opt/openssl-1.1.1j-mingw32/bin'
+def openssldir = '/opt/openssl-1.1.1n-mingw32/bin'
 def blogUrl= ''
 
 pipeline {
@@ -72,7 +72,7 @@ pipeline {
       steps {
         dir('winbuild') {
           sh '''
-            /opt/Qt-5.15.2-mingw32-static/bin/qmake \
+            /opt/Qt-5.15.5-mingw32-static/bin/qmake \
             CONFIG-=debug CONFIG+=release \
             DEFINES+=THIRD_PARTY_LICENSES \
             OB_LIBRARY_DIRS+=/opt/openbabel-3.1.1-static/lib/ \
