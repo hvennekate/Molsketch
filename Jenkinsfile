@@ -91,7 +91,7 @@ pipeline {
         }
       }
     }
-    stage('WinPackage') {
+    stage('WinInstallerSetup') {
       steps {
         dir('sources/wininstaller/packages/org.molsketch/data') {
           unstash 'mainExecutable'
@@ -120,10 +120,34 @@ pipeline {
             fileCopyOperation(flattenFiles: true, includes: '**/*.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openssl.lib/data/")
           ])
         }
+      }
+    }
+    stage('WinRepoGen') {
+      steps {
         dir("sources/wininstaller") {
-          sh '/opt/qt-installer-fw-win/bin/binarycreator.exe -c config/config.xml -p packages -f MolsketchInstaller.exe'
+          // TODO introduce variable for packages to exclude
+          sh "/opt/qt-installer-fw-win/bin/repogen.exe -p packages -e org.openbabel,org.openbabel.formats,org.openbabel.mainlib,org.openssl.lib --update ${env.msk_version}"
+          sh "xsltproc --stringparam mskversion \"${env.msk_version}\" updatexml.xsl \"${env.msk_version}\"/Updates.xml"
         }
       }
     }
+    stage('WinRepoUpdate') {
+      steps {
+        dir("winrepo") {
+          git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'git@github.com:hvennekate/molsketch-repository.git'
+          fileOperations([folderCopyOperation(destinationFolderPath: "windows/${env.msk_version}", sourceFolderPath: "sources/wininstaller/${env.msk_version}")])
+          sh "xsltproc --stringparam mskversion \"${env.msk_version}\" ../sources/wininstaller/update_old_repo.xsl windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml"
+          sh "git commit -am \"add repo for version ${env.msk_version}\""
+        }
+      }
+    }
+// TODO add toggle to choose update of installer
+//     stage('WinInstaller') {
+//       steps {
+//         dir("sources/wininstaller") {
+//           sh '/opt/qt-installer-fw-win/bin/binarycreator.exe -c config/config.xml -p packages -f MolsketchInstaller.exe'
+//         }
+//       }
+//     }
   }
 }
