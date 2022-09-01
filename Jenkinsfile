@@ -121,7 +121,7 @@ pipeline {
           ])
         }
         dir("sources/wininstaller") {
-          sh 'binarycreator.exe -c config/config.xml -p packages -f MolsketchInstaller.exe'
+          sh '/opt/qt-installer-fw-win/bin/binarycreator.exe -c config/config.xml -p packages -f MolsketchInstaller.exe'
         }
       }
     }
