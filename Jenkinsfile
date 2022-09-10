@@ -127,7 +127,7 @@ pipeline {
         dir("sources/wininstaller") {
           // TODO introduce variable for packages to exclude
           sh "/opt/qt-installer-fw-win/bin/repogen.exe -p packages -e org.openbabel,org.openbabel.formats,org.openbabel.mainlib,org.openssl.lib --update ${env.msk_version}"
-          sh "xsltproc --stringparam mskversion \"${env.msk_version}\" updatexml.xsl \"${env.msk_version}\"/Updates.xml"
+          sh "xsltproc -o Updates-new.xml --stringparam mskversion \"${env.msk_version}\" updatexml.xsl \"${env.msk_version}\"/Updates.xml && mv Updates-new.xml \"${env.msk_version}\"/Updates.xml"
         }
       }
     }
@@ -135,9 +135,12 @@ pipeline {
       steps {
         dir("winrepo") {
           git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'git@github.com:hvennekate/molsketch-repository.git'
-          fileOperations([folderCopyOperation(destinationFolderPath: "windows/${env.msk_version}", sourceFolderPath: "sources/wininstaller/${env.msk_version}")])
-          sh "xsltproc --stringparam mskversion \"${env.msk_version}\" ../sources/wininstaller/update_old_repo.xsl windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml"
-          sh "git commit -am \"add repo for version ${env.msk_version}\""
+        }
+        // fileOperations may be undesirable: does not fail if source does not exist!
+        fileOperations([folderCopyOperation(destinationFolderPath: "winrepo/windows/${env.msk_version}", sourceFolderPath: "sources/wininstaller/${env.msk_version}")])
+        dir("winrepo") {
+          sh "xsltproc -o Updates-old.xml --stringparam mskversion \"${env.msk_version}\" ../sources/wininstaller/update_old_repo.xsl windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml && mv Updates-old.xml windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml"
+          sh "git add . && git commit -m \"add repo for version ${env.msk_version}\""
         }
       }
     }
