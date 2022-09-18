@@ -152,7 +152,7 @@ pipeline {
         withCredentials([sshUserPrivateKey(credentialsId: 'sourceforge_ssh', keyFileVariable: 'sourceForgeKey', passphraseVariable: '', usernameVariable: 'sourceForgeUser')]) {
           sshPut remote: [allowAnyHosts: true, name: 'SourceForge', host: 'frs.sourceforge.net', identityFile: sourceForgeKey, user: sourceForgeUser], from: "sources/Molsketch${env.msk_version}-src.tar.gz", into: '/home/frs/project/molsketch/Molsketch/'
         }
-        withCredentials([string(credentialsId: 'sourceforge-api-token', variable: "apiKey"]) {
+        withCredentials([string(credentialsId: 'sourceforge_api_key', variable: "apiKey"]) {
           httpRequest acceptType: 'APPLICATION_JSON', customHeaders: [[maskValue: false, name: 'Content-Type', value: 'application/x-www-form-urlencoded']], httpMode: 'PUT', consoleLogResponseBody: true, requestBody: "default=linux&default=mac&default=bsd&default=solaris&default=others&api_key=${apiKey}", responseHandle: 'NONE', url: "https://sourceforge.net/projects/molsketch/files/Molsketch/Molsketch-${env.msk_version}-src.tar.gz", wrapAsMultipart: true
         }
       }
