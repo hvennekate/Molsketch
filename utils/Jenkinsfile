@@ -59,7 +59,7 @@ pipeline {
     stage('Package') {
       steps {
         dir('sources') {
-          sh 'git archive HEAD -o Molsketch-${msk_version}-src.tar.gz' // TODO exclude infrastructure files!
+          sh 'git archive HEAD -o Molsketch-${msk_version}-src.tar.gz'
         }
       }
       post {
@@ -175,7 +175,7 @@ pipeline {
         echo "Blog published: ${env.blogUrl}"
         dir('homepage') {
           sh 'wget https://molsketch.sourceforge.io'
-          sh 'xsltproc --stringparam mskversion "${msk_version}" --stringparam mskversionnick "${msk_version_nick}" --stringparam date "$(date --iso-8601)" --stringparam blogpostUrl "${blogpostUrl}" --html ../homepage-update.xsl index.html'
+          sh 'xsltproc --stringparam mskversion "${msk_version}" --stringparam mskversionnick "${msk_version_nick}" --stringparam date "$(date --iso-8601)" --stringparam blogpostUrl "${blogpostUrl}" --html ../utils/homepage-update.xsl index.html'
         }
         withCredentials([sshUserPrivateKey(credentialsId: 'sourceforge_ssh', keyFileVariable: 'sourceForgeKey', passphraseVariable: '', usernameVariable: 'sourceForgeUser')]) {
           sshPut remote: [allowAnyHosts: true, name: 'SourceForge', host: 'web.sourceforge.net', identityFile: sourceForgeKey, user: sourceForgeUser], from: "homepage/index.html", into: '/home/project-web/molsketch/htdocs/index.html'
