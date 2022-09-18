@@ -59,12 +59,12 @@ pipeline {
     stage('Package') {
       steps {
         dir('sources') {
-          sh 'git archive HEAD -o Molsketch-0.0.1-src.tar.gz'
+          sh 'git archive HEAD -o Molsketch-${msk_version}-src.tar.gz' // TODO exclude infrastructure files!
         }
       }
       post {
         success {
-          archiveArtifacts artifacts: 'sources/*.tar.gz', followSymlinks: false
+          archiveArtifacts artifacts: "sources/Molsketch-${env.msk_version}-src.tar.gz", followSymlinks: false
         }
       }
     }
@@ -125,8 +125,8 @@ pipeline {
     stage('WinRepoGen') {
       steps {
         dir("sources/wininstaller") {
-          // TODO introduce variable for packages to exclude
-          sh "/opt/qt-installer-fw-win/bin/repogen.exe -p packages -e org.openbabel,org.openbabel.formats,org.openbabel.mainlib,org.openssl.lib --update ${env.msk_version}"
+          // TODO introduce variable for packages to exclude -e org.openbabel,org.openbabel.formats,org.openbabel.mainlib,org.openssl.lib
+          sh "/opt/qt-installer-fw-win/bin/repogen.exe -p packages --update ${env.msk_version}"
           sh "xsltproc -o Updates-new.xml --stringparam mskversion \"${env.msk_version}\" updatexml.xsl \"${env.msk_version}\"/Updates.xml && mv Updates-new.xml \"${env.msk_version}\"/Updates.xml"
         }
       }
@@ -141,9 +141,48 @@ pipeline {
         dir("winrepo") {
           sh "xsltproc -o Updates-old.xml --stringparam mskversion \"${env.msk_version}\" ../sources/wininstaller/update_old_repo.xsl windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml && mv Updates-old.xml windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml"
           sh "git add . && git commit -m \"add repo for version ${env.msk_version}\""
+          git push
         }
       }
     }
+    stage('Sourceforge') {
+        //     // select default https://sourceforge.net/p/forge/documentation/Using%20the%20Release%20API/
+      steps {
+        unarchive mapping: ["sources/Molsketch-${env.msk_version}-src.tar.gz": "Molsketch-${env.msk_version}-src.tar.gz"]
+        withCredentials([sshUserPrivateKey(credentialsId: 'sourceforge_ssh', keyFileVariable: 'sourceForgeKey', passphraseVariable: '', usernameVariable: 'sourceForgeUser')]) {
+          sshPut remote: [allowAnyHosts: true, name: 'SourceForge', host: 'frs.sourceforge.net', identityFile: sourceForgeKey, user: sourceForgeUser], from: "sources/Molsketch${env.msk_version}-src.tar.gz", into: '/home/frs/project/molsketch/Molsketch/'
+        }
+        withCredentials([string(credentialsId: 'sourceforge-api-token', variable: "apiKey"]) {
+          httpRequest acceptType: 'APPLICATION_JSON', customHeaders: [[maskValue: false, name: 'Content-Type', value: 'application/x-www-form-urlencoded']], httpMode: 'PUT', consoleLogResponseBody: true, requestBody: "default=linux&default=mac&default=bsd&default=solaris&default=others&api_key=${apiKey}", responseHandle: 'NONE', url: "https://sourceforge.net/projects/molsketch/files/Molsketch/Molsketch-${env.msk_version}-src.tar.gz", wrapAsMultipart: true
+        }
+      }
+    }
+    stage('Homepage') {
+      steps {
+        // Add blog post https://anypoint.mulesoft.com/apiplatform/sourceforge/#/portals/organizations/98f11a03-7ec0-4a34-b001-c1ca0e0c45b1/apis/32951/versions/34322
+        input message: 'Blog post', ok: 'Post', parameters: [
+          string(description: 'Title', name: 'title'),
+          text(description: 'Blogpost to be published on the Molsketch project page', name: 'blogpost')
+          ]
+        withCredentials([string(credentialsId: 'sourceforge_bearer', variable: 'bearerToken')]) {
+          httpRequest acceptType: 'APPLICATION_JSON', customHeaders: [[maskValue: false, name: 'Content-Type', value: 'application/x-www-form-urlencoded'], [maskValue: true, name: 'Authorization', value: "Bearer ${bearerToken}"]], httpMode: 'POST', consoleLogResponseBody: true, requestBody: "labels=test1,test2&state=published&text=${java.net.URLEncoder.encode(blogpost, 'UTF-8')}&title=${title}", responseHandle: 'NONE', url: 'https://sourceforge.net/rest/p/molsketch/blog', wrapAsMultipart: false
+          script {
+            def response = httpRequest(acceptType: 'APPLICATION_JSON', customHeaders: [[maskValue: true, name: 'Authorization', value: "Bearer ${bearerToken}"]], httpMode: 'GET', url: 'https://sourceforge.net/rest/p/molsketch/blog')
+            def responseObject = readJson text: response.content
+            env.blogUrl = responseObject.posts[0].url.replaceFirst("/rest", "")
+          }
+        }
+        echo "Blog published: ${env.blogUrl}"
+        dir('homepage') {
+          sh 'wget https://molsketch.sourceforge.io'
+          sh 'xsltproc --stringparam mskversion "${msk_version}" --stringparam mskversionnick "${msk_version_nick}" --stringparam date "$(date --iso-8601)" --stringparam blogpostUrl "${blogpostUrl}" --html ../homepage-update.xsl index.html'
+        }
+        withCredentials([sshUserPrivateKey(credentialsId: 'sourceforge_ssh', keyFileVariable: 'sourceForgeKey', passphraseVariable: '', usernameVariable: 'sourceForgeUser')]) {
+          sshPut remote: [allowAnyHosts: true, name: 'SourceForge', host: 'web.sourceforge.net', identityFile: sourceForgeKey, user: sourceForgeUser], from: "homepage/index.html", into: '/home/project-web/molsketch/htdocs/index.html'
+        }
+      }
+    }
+// TODO update README.md on sourceforge!
 // TODO add toggle to choose update of installer
 //     stage('WinInstaller') {
 //       steps {
