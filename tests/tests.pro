@@ -50,7 +50,7 @@ OTHER_FILES += \
     legacy/Carbon-0.2.msk \
     legacy/Carbon-0.2.svg
 
-legacy_files.commands = ${COPY_DIR} $$_PRO_FILE_PWD_/legacy ./legacy
+legacy_files.commands = ${MKDIR} ./legacy ; ${COPY_DIR} $$_PRO_FILE_PWD_/legacy ./legacy
 QMAKE_EXTRA_TARGETS += legacy_files
 PRE_TARGETDEPS += legacy_files
 

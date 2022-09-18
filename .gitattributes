@@ -1,3 +1,4 @@
-/tests         export-ignore
-/wininstaller  export-ignore
-.gitattributes export-ignore
+/tests          export-ignore
+/wininstaller   export-ignore
+/utils          export-ignore
+.gitattributes  export-ignore
