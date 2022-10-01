@@ -2,3 +2,4 @@
 /wininstaller   export-ignore
 /utils          export-ignore
 .gitattributes  export-ignore
+README.md       export-ignore
