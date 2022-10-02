@@ -6,6 +6,12 @@
     </ul>
 </b>
 
+<h2>0.7.3 Oxygen-18</h2>
+<p>
+    <li>New bond types</li>
+    <li>This release is mainly for testing the automated release pipeline</li>
+</p>
+
 <h2>0.7.2 Oxygen-17</h2>
 <ul>
     <li>Update location of OpenBabel adapter when updating Molsketch</li>

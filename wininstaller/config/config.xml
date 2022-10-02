@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>Molsketch</Name>
-    <Version>0.7.2</Version>
+    <Version>0.7.3</Version>
     <Title>Molsketch Installer</Title>
     <Publisher>Hendrik Vennekate</Publisher>
-    <ProductUrl>http://molsketch.sourceforge.net/</ProductUrl>
+    <ProductUrl>https://molsketch.sourceforge.io/</ProductUrl>
     <InstallerApplicationIcon>molsketch</InstallerApplicationIcon>
     <InstallerWindowIcon>molsketch.png</InstallerWindowIcon>
     <WizardStyle>Classic</WizardStyle>
