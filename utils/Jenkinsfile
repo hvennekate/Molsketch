@@ -84,20 +84,17 @@ pipeline {
       }
       post {
         success {
-          dir('winbuild') {
-            stash includes: 'bin/molsketch.exe', name: 'mainExecutable'
-            stash includes: 'lib/obabeliface.dll', name: 'obabeliface'
-          }
+          archiveArtifacts artifacts: 'winbuild/bin/molsketch.exe, winbuild/lib/obabeliface.dll', followSymlinks: false
         }
       }
     }
     stage('WinInstallerSetup') {
       steps {
         dir('sources/wininstaller/packages/org.molsketch/data') {
-          unstash 'mainExecutable'
+          unarchive mapping: ['winbuild/bin/molsketch.exe': 'molsketch.exe']
         }
         dir('sources/wininstaller/packages/org.molsketch.openbabel.adapter/data') {
-          unstash 'obabeliface'
+          unarchive mapping: ['winbuild/lib/obabeliface.dll': 'obabeliface.dll']
         }
         dir(obabeldir) {
           fileOperations([
@@ -135,11 +132,11 @@ pipeline {
       steps {
         dir("winrepo") {
           git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'git@github.com:hvennekate/molsketch-repository.git'
+          sh "xsltproc -o Updates-old.xml --stringparam mskversion \"${env.msk_version}\" ../sources/wininstaller/update_old_repo.xsl windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml && mv Updates-old.xml windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml"
         }
         // fileOperations may be undesirable: does not fail if source does not exist!
         fileOperations([folderCopyOperation(destinationFolderPath: "winrepo/windows/${env.msk_version}", sourceFolderPath: "sources/wininstaller/${env.msk_version}")])
         dir("winrepo") {
-          sh "xsltproc -o Updates-old.xml --stringparam mskversion \"${env.msk_version}\" ../sources/wininstaller/update_old_repo.xsl windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml && mv Updates-old.xml windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml"
           sh "git add . && git commit -m \"add repo for version ${env.msk_version}\""
           sshagent(['github']) {
             sh "git push origin main"
