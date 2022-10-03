@@ -9,6 +9,14 @@ pipeline {
   // TODO push tag to github
 
   stages {
+    stage('Clean') {
+      steps {
+        cleanWs()
+        dir('sources') {
+          git branch: 'main', credentialsId: 'github', url: 'git@github.com:hvennekate/Molsketch.git'
+        }
+      }
+    }
     stage('Version') {
       steps {
         dir('sources') {
@@ -72,7 +80,7 @@ pipeline {
       steps {
         dir('winbuild') {
           sh '''
-            /opt/Qt-5.15.5-mingw32-static/bin/qmake \
+            /opt/Qt-5.15.6-mingw32-static/bin/qmake \
             CONFIG-=debug CONFIG+=release \
             DEFINES+=THIRD_PARTY_LICENSES \
             OB_LIBRARY_DIRS+=/opt/openbabel-3.1.1-static/lib/ \
