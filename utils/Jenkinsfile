@@ -62,7 +62,7 @@ pipeline {
     stage('Package') {
       steps {
         dir('sources') {
-          sh 'git archive HEAD -o Molsketch-${msk_version}-src.tar.gz'
+          sh 'git archive HEAD --prefix=Molsketch-${msk_version}/ -o Molsketch-${msk_version}-src.tar.gz'
         }
       }
       post {
