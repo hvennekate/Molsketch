@@ -81,7 +81,7 @@ namespace Molsketch {
 
     QToolTip::showText(event->screenPos(),
                        cursorLabel(QLineF(d->originalLine.p1(), event->buttonDownScenePos(Qt::LeftButton)), newLine),
-                       parentWidget(),
+                       qobject_cast<QWidget*>(parent()),
                        QRect());
     transformCommand *cmd = new transformCommand(d->transformItems,
                                                  generateTransform(d->originalLine,

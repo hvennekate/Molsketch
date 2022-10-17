@@ -247,9 +247,9 @@ bool MainWindow::autoSave()
 
 
   if (!fileName.exists())
-    fileName = QDir::homePath() + tr("/untitled.backup.msk");
+    fileName.setFile(QDir::homePath() + tr("/untitled.backup.msk"));
   else
-    fileName = fileName.path() + fileName.baseName() +  ".backup." + fileName.completeSuffix();
+    fileName.setFile(fileName.path() + fileName.baseName() +  ".backup." + fileName.completeSuffix());
   // And save the file
   if (fileName.suffix() == "msk") {
     bool saved = writeMskFile(fileName.absoluteFilePath(), m_molView->scene());
@@ -339,9 +339,9 @@ bool MainWindow::exportDoc()
   // Finding the right extension
   if (QFileInfo(fileName).suffix().isEmpty())
   {
-    int index = filter.indexOf(QRegExp("\\*."));
+    int index = filter.indexOf(QRegularExpression("\\*."));
     filter = filter.remove(0, index + 1);
-    index = filter.indexOf(QRegExp("( \\*.)|(\\))"));
+    index = filter.indexOf(QRegularExpression("( \\*.)|(\\))"));
     if (index > 0) filter.truncate(index);
     fileName = fileName + filter;
   }
@@ -532,7 +532,7 @@ void MainWindow::createToolBarContextMenuOptions()
 void MainWindow::initializeAssistant()
 {
   assistantClient = new QProcess(this) ;
-  QString app = QLibraryInfo::location(QLibraryInfo::BinariesPath)
+  QString app = QLibraryInfo::path(QLibraryInfo::BinariesPath)
                + QLatin1String("/assistant-qt5"); // TODO the "-qt5" suffix might be specific to some Linux distros
   QString docfile("molsketch.qhp") ;
 

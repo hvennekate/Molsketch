@@ -132,7 +132,7 @@ namespace Molsketch
     QXmlStreamReader xml(&file);
     while (xml.readNextStartElement())
     {
-      if(xml.name() != "molecule") continue;
+      if(xml.name() != Molecule::xmlClassName()) continue;
       Molecule *m = new Molecule;
       m->readXml(xml);
       result << m;

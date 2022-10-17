@@ -22,6 +22,7 @@
 
 #include <QAbstractButton>
 #include <QAction>
+#include <QActionGroup>
 #include <QButtonGroup>
 #include <QList>
 
