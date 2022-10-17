@@ -44,7 +44,7 @@ namespace Molsketch {
       button->setAutoRaise(true);
       button->setCheckable(true);
       layout->addWidget(button);
-      layout->setMargin(0);
+      layout->setContentsMargins(0, 0, 0, 0);
     }
 
     privateData(ItemTypeWidget* p)

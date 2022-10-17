@@ -76,7 +76,7 @@ namespace Molsketch {
   {
     if (Qt::EditRole != role) return false;
     if (!d->indexPermissible(index)) return false;
-    if (!value.canConvert(QVariant::Double)) return false;
+    if (!value.canConvert<double>()) return false;
 
     if (index.column() == 0)
       d->coordinates[index.row()].setX(value.toDouble());

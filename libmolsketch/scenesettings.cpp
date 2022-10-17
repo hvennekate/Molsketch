@@ -143,7 +143,7 @@ namespace Molsketch {
 
   SceneSettings::~SceneSettings() {}
 
-  QString dashifyCamelCaseAttributeName(const QStringRef &originalName) {
+  QString dashifyCamelCaseAttributeName(const QStringView &originalName) {
     return originalName.toString().replace(QRegularExpression("([A-Z])"), "-\\1").toLower().remove("-molscene-");
   }
 

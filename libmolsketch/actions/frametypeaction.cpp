@@ -121,7 +121,7 @@ namespace Molsketch {
     auto itemList = onlyTopLevelItems(items());
     if (itemList.isEmpty()) return;
 
-    if (data.isValid() && data.canConvert(QVariant::String))
+    if (data.isValid() && data.canConvert<QString>())
     {
       if (itemList.size() == 1 && isFrame(itemList.values().first()))
       {
