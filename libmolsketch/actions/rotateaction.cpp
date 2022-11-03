@@ -20,6 +20,7 @@
 #include "QUndoCommand"
 #include "molscene.h"
 #include "transformcommand.h"
+#include "iconutils.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QToolTip>
@@ -110,7 +111,7 @@ namespace Molsketch {
   rotateAction::rotateAction(MolScene *scene)
     : transformAction(scene)
   {
-    setIcon(QIcon(":images/rotate.svg")) ;
+    setIcon(getInternalIcon("rotate")) ;
     setText(tr("Rotate")) ;
   }
 
@@ -134,7 +135,7 @@ namespace Molsketch {
   translateAction::translateAction(MolScene *scene)
     : transformAction(scene)
   {
-    setIcon(QIcon(":images/translate.svg")) ;
+    setIcon(getInternalIcon("translate")) ;
     setText(tr("Move")) ;
   }
 

@@ -23,6 +23,7 @@
 #include "atom.h"
 #include "bond.h"
 #include "molscene.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
@@ -151,8 +152,8 @@ namespace Molsketch {
     : incDecAction(scene)
   {
     setText(tr("Charge"));
-    initialize(QIcon(":images/incCharge.svg"),
-               QIcon(":images/decCharge.svg"),
+    initialize(getInternalIcon("incCharge"),
+               getInternalIcon("decCharge"),
                tr("Increase charge"),
                tr("Decrease charge"),
                &Atom::charge,
@@ -163,8 +164,8 @@ namespace Molsketch {
     : incDecAction(scene)
   {
     setText(tr("Hydrogens"));
-    initialize(QIcon(":images/incHydrogens.svg"),
-               QIcon(":images/decHydrogens.svg"),
+    initialize(getInternalIcon("incHydrogens"),
+               getInternalIcon("decHydrogens"),
                tr("Add implicit hydrogen"),
                tr("Remove implicit hydrogen"),
                &Atom::numImplicitHydrogens,
@@ -187,8 +188,8 @@ namespace Molsketch {
     : incDecAction(scene)
   {
     setText(tr("Drawing Level"));
-    initialize(QIcon(":images/layerup.svg"),
-               QIcon(":images/layerdown.svg"),
+    initialize(getInternalIcon("layerup"),
+               getInternalIcon("layerdown"),
                tr("Move up"),
                tr("Move down"),
                &Bond::roundedZValue,

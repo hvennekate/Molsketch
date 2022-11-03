@@ -21,6 +21,7 @@
 #include <QInputDialog>
 #include "linewidthaction.h"
 #include "commands.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
@@ -28,7 +29,7 @@ namespace Molsketch {
     abstractRecursiveItemAction(parent)
   {
     setText(tr("Text/line width scaling...")) ;
-    setIcon(QIcon(":images/linewidth.svg"));
+    setIcon(getInternalIcon("linewidth"));
     setToolTip(tr("Set line width")) ;
     setWhatsThis(tr("Set the relative line width for the selected item(s)"));
     setCheckable(false);
