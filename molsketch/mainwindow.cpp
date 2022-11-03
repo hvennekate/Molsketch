@@ -532,7 +532,14 @@ void MainWindow::createToolBarContextMenuOptions()
 void MainWindow::initializeAssistant()
 {
   assistantClient = new QProcess(this) ;
-  QString app = QLibraryInfo::path(QLibraryInfo::BinariesPath)
+  QString app =
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+      QLibraryInfo::location
+#else
+      QLibraryInfo::path
+#endif
+      (QLibraryInfo::BinariesPath)
+
                + QLatin1String("/assistant-qt5"); // TODO the "-qt5" suffix might be specific to some Linux distros
   QString docfile("molsketch.qhp") ;
 

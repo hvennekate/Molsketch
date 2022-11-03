@@ -29,6 +29,7 @@
 #include <QSet>
 #include <QTimer>
 #include <iterator>
+#include <QDebug>
 
 namespace Molsketch {
   const int itemIncrement = 10;
