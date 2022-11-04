@@ -28,7 +28,7 @@ Then run
 The binary will be in the bin/ subdirectory, the library part in the lib/ subdirectory.
 2.3 Installing
 - make install
-Files will be copied into "bin", "doc", "include", and "lib" directories, relative to PREFIX.
+Files will be copied into "bin", "include", and "lib" directories, relative to PREFIX.
 
 3. Notes on OpenBabel (esp. Windows)
 If you have difficulties making qmake or cmake find openbabel, you might want to set the variables OB_LIBRARY_DIRS and OB_INCLUDE_DIRS:

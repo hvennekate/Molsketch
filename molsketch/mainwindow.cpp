@@ -134,7 +134,6 @@ MainWindow::MainWindow(ApplicationSettings *appSetttings)
 
   createStatusBar();
   createToolBarContextMenuOptions();
-  initializeAssistant();
 
   readSettings();
   setCurrentFile("");
@@ -161,9 +160,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     return;
   }
   saveWindowProperties();
-  if (assistantClient) {
-    assistantClient->terminate();
-  }
   event->accept();
   deleteLater();
 }
@@ -382,19 +378,6 @@ void MainWindow::setToolButtonStyle(QAction *styleAction)
   QMainWindow::setToolButtonStyle((Qt::ToolButtonStyle) styleAction->data().toInt());
 }
 
-void MainWindow::openAssistant()
-{
-  QFileInfo file(MSK_INSTALL_DOCS + QString("/index.html"));
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/doc/en/index.html");
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/../share/doc/molsketch/doc/en/index.html");
-  qDebug() << "Opening help:" << file.absoluteFilePath() ;
-  QTextStream stream(assistantClient) ;
-  stream << QLatin1String("setSource ")
-         << file.absoluteFilePath()
-         << QLatin1Char('\0')
-         << ('\n');
-}
-
 void MainWindow::about()
 {
   QString version(settings->currentVersion().toString()), versionNick(settings->versionNick());
@@ -430,7 +413,6 @@ void MainWindow::createHelpMenu() {
   menuBar()->addSeparator();
   auto helpMenu = menuBar()->addMenu(tr("&Help"));
   helpMenu->addActions(QList<QAction*>{
-                         ActionContainer::generateAction("help-contents", ":icons/help-contents.svg", tr("&Help Contents..."), tr("F1"), tr("Show the application's help contents"), this, &MainWindow::openAssistant),
                          ActionContainer::generateAction("", "", tr("Submit &Bug..."),"", tr("Open the browser with the bug tracker"), this, &MainWindow::submitBug),
                          ActionContainer::generateAction("", "", tr("YouTube channel..."), "", tr("Open the browser with the YouTube channel page"), this, &MainWindow::goToYouTube),
                          ActionContainer::generateAction("help-about", ":icons/help-about.svg", tr("&About..."), "", tr("Show the application's About box"), this, &MainWindow::about),
@@ -527,32 +509,6 @@ void MainWindow::createToolBarContextMenuOptions()
       action->setChecked(true);
   }
   connect(toolBarTextsAndIcons, SIGNAL(triggered(QAction*)), this, SLOT(setToolButtonStyle(QAction*)));
-}
-
-void MainWindow::initializeAssistant()
-{
-  assistantClient = new QProcess(this) ;
-  QString app =
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-      QLibraryInfo::location
-#else
-      QLibraryInfo::path
-#endif
-      (QLibraryInfo::BinariesPath)
-
-               + QLatin1String("/assistant-qt5"); // TODO the "-qt5" suffix might be specific to some Linux distros
-  QString docfile("molsketch.qhp") ;
-
-  QFileInfo file(MSK_INSTALL_DOCS + QString("/molsketch.adp"));
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/doc/en/" + docfile );
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/../share/doc/molsketch/doc/en/" + docfile);
-
-  qDebug() << "Starting assistant with arguments:" << file.absoluteFilePath() << app ;
-  QTextStream stream(assistantClient) ;
-  stream << QLatin1String("register ")
-         << file.absoluteFilePath()
-         << QLatin1Char('\0')
-         << ('\n');
 }
 
 void MainWindow::readSettings()

@@ -41,9 +41,6 @@ foreach(package ${Qt5RequiredPackages})
 endforeach(package)
 set_target_properties(molsketch PROPERTIES OUTPUT_NAME "molsketch")
 
-# Install the documentation
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/ DESTINATION ${MSK_INSTALL_DOCS})
-
 # Install menu entries on Linux
 if(UNIX)
   install(FILES ${PROJECT_SOURCE_DIR}/molsketch/images/molsketch.svg DESTINATION share/icons/hicolor/scalable/apps)
