@@ -526,6 +526,14 @@ namespace Molsketch {
     return result;
   }
 
+  QList<Molecule *> MolScene::molecules() const {
+    QList<Molecule *> result;
+    for (auto item : items())
+      if (auto molecule = dynamic_cast<Molecule*>(item))
+        result << molecule;
+    return result;
+  }
+
   void MolScene::selectionSlot() {
     foreach(AbstractItemAction* itemAction, findChildren<AbstractItemAction*>())
       itemAction->setItems(selectedItems());

@@ -24,8 +24,6 @@
 #include <vector>
 #include <QString>
 
-class QGraphicsScene ;
-
 namespace Molsketch
 {
   class Molecule ;
@@ -91,8 +89,8 @@ extern "C"
  * Saves the current document under @p fileName and returns @c false if the
  * save failed.
  */
-    bool saveFile(const QString &fileName, QGraphicsScene * scene, unsigned short int dim = 2);
-    typedef bool (*saveFileFunctionPointer)(const QString&, QGraphicsScene*, unsigned short int) ;
+    bool saveFile(const QString &fileName, const QList<Molecule *> &molecules, unsigned short int dim = 2, bool addHydrogens = false);
+    typedef bool (*saveFileFunctionPointer)(const QString&, const QList<Molecule *> &, unsigned short int, bool) ;
 /**
  * Get symmetry numbers for atoms
  */

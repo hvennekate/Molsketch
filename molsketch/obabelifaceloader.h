@@ -39,7 +39,7 @@ public:
   QStringList outputFormats();
   Molsketch::Molecule* loadFile(const QString& filename);
   Molsketch::Molecule* callOsra(const QString filename);
-  bool saveFile(const QString& fileName, QGraphicsScene* scene, bool use3d);
+  bool saveFile(const QString& fileName, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens);
   Molsketch::Molecule* convertInChI(const QString& InChI);
   QVector<QPointF> optimizeCoordinates(const Molsketch::Molecule* molecule);
 

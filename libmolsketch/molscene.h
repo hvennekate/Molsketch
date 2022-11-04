@@ -102,7 +102,8 @@ namespace Molsketch {
 
       TextInputItem *inputItem() ;
 
-      QList<Atom*> atoms() const;
+      QList<Atom *> atoms() const;
+      QList<Molecule *> molecules() const;
 
     signals:
       void copyAvailable(bool);

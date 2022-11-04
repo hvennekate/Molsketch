@@ -220,7 +220,8 @@ bool MainWindow::saveFile(const QString& fileName) {
       }
   } else {
     bool threeD = QMessageBox::question(this, tr("Save as 3D?"), tr("Save as three dimensional coordinates?")) == QMessageBox::Yes;
-    if (!obabelLoader->saveFile(fileName, m_molView->scene(), threeD)) {
+    auto scene = m_molView->scene();
+    if (!obabelLoader->saveFile(fileName, scene->molecules(), threeD, scene->settings()->autoAddHydrogen())) {
       QMessageBox::warning(0, tr("Could not save"), tr("Could not save file '%1' using OpenBabel.").arg(fileName));
       return false ;
     }
@@ -253,7 +254,8 @@ bool MainWindow::autoSave()
     return saved;
   } else {
     bool threeD = QMessageBox::question(this, tr("Save as 3D?"), tr("Save as three dimensional coordinates?")) == QMessageBox::Yes; // TODO not in autosave!
-    if (!obabelLoader->saveFile(fileName.absoluteFilePath(), m_molView->scene(), threeD)) {
+    auto scene = m_molView->scene();
+    if (!obabelLoader->saveFile(fileName.absoluteFilePath(), scene->molecules(), threeD, scene->settings()->autoAddHydrogen())) {
       statusBar()->showMessage(tr("Autosave failed! OpenBabel unavailable."), 10000);
       return false ;
     }
