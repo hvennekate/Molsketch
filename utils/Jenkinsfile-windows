@@ -30,9 +30,9 @@ pipeline {
     }
     stage('build') {
       steps {
-        dir('winbuild') {
+        dir('winbuild') { // TODO make Qt version configurable
           sh '''
-            /opt/Qt-5.15.6-mingw32-static/bin/qmake \
+            /opt/Qt6/6.4.0/windows-static/bin/qmake \
             CONFIG-=debug CONFIG+=release \
             DEFINES+=THIRD_PARTY_LICENSES \
             OB_LIBRARY_DIRS+=/opt/openbabel-3.1.1-static/lib/ \
@@ -80,7 +80,7 @@ pipeline {
       steps {
         dir("sources/wininstaller") {
           // TODO introduce variable for packages to exclude -e org.openbabel,org.openbabel.formats,org.openbabel.mainlib,org.openssl.lib
-          sh "/opt/qt-installer-fw-win/bin/repogen.exe -p packages --update -e org.openbabel,org.openbabel.formats,org.openbabel.mainlib ${env.msk_version}"
+          sh "/opt/qt-installer-fw-win/bin/repogen.exe -p packages --update ${env.msk_version}"
           sh "xsltproc -o Updates-new.xml --stringparam mskversion \"${env.msk_version}\" updatexml.xsl \"${env.msk_version}\"/Updates.xml && mv Updates-new.xml \"${env.msk_version}\"/Updates.xml"
         }
       }
