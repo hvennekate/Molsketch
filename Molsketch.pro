@@ -25,12 +25,6 @@ SUBDIRS += \
         molsketch
 equals(MSK_OBABELIFACE, true) : SUBDIRS += obabeliface
 
-################# making installs
-INSTALLS += documentation
-
-documentation.files = $$files($$PWD/doc/*, true)
-documentation.path = $${MSK_INSTALL_DOCS}                                                                                                                                                                                                                                
-
 OTHER_FILES += \
     version \
     versionnick \

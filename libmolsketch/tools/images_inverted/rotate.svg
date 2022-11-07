@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="64px"
+   height="64px"
+   id="svg2383"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   sodipodi:docname="rotate.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="/home/timvdm/molsketch-helium-git/src/images/lasso.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs2385">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 32 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="64 : 32 : 1"
+       inkscape:persp3d-origin="32 : 21.333333 : 1"
+       id="perspective2391" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="7.71875"
+     inkscape:cx="32"
+     inkscape:cy="29.987079"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:document-units="px"
+     inkscape:grid-bbox="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1258"
+     inkscape:window-height="726"
+     inkscape:window-x="2086"
+     inkscape:window-y="146">
+    <sodipodi:guide
+       orientation="0,1"
+       position="55.818182,59.636364"
+       id="guide2393" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="57.454545,4.7272727"
+       id="guide2395" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="4.7272727,54.727273"
+       id="guide2397" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="59.090909,22.727273"
+       id="guide2399" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="45.090909,36"
+       id="guide2401" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="50.909091,28.363636"
+       id="guide2403" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="38,32"
+       id="guide2405" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="25.818182,40"
+       id="guide2407" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="29.090909,24"
+       id="guide2409" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="14,36.181818"
+       id="guide2411" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="32,46.545455"
+       id="guide2413" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata2388">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <path
+       sodipodi:type="arc"
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path3235"
+       sodipodi:cx="32"
+       sodipodi:cy="32.18182"
+       sodipodi:rx="21.09091"
+       sodipodi:ry="21.09091"
+       d="M 53.09091,32.18182 A 21.09091,21.09091 0 1 1 31.82235,11.091658"
+       sodipodi:start="0"
+       sodipodi:end="4.7039658"
+       sodipodi:open="true"
+       transform="translate(0,2.7044534)" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 29.938167,7.3485463 L 30.456386,21.975708 L 42.347441,14.3894 L 29.938167,7.3485463 z"
+       id="path3237"
+       sodipodi:nodetypes="cccc" />
+  </g>
+</svg>

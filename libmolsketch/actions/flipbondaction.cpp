@@ -20,6 +20,7 @@
 
 #include "bond.h"
 #include "commands.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
@@ -27,7 +28,7 @@ namespace Molsketch {
     : abstractRecursiveItemAction(scene)
   {
     setMinimumItemCount(1);
-    setIcon(QIcon(":images/flip-bond.svg"));
+    setIcon(getInternalIcon("flip-bond"));
     setText(tr("Flip bond(s)"));
     setCheckable(false);
   }

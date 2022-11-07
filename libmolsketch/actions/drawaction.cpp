@@ -197,7 +197,7 @@ namespace Molsketch {
     : genericAction(scene),
       d(new privateData(this))
   {
-    d->dock = new QWidget(parentWidget()) ;
+    d->dock = new QWidget(qobject_cast<QWidget*>(parent())) ;
     QVBoxLayout *layout = new QVBoxLayout(d->dock) ;
     layout->setAlignment(Qt::AlignLeft | Qt::AlignTop) ;
     d->periodicTable = new periodicTableWidget(d->dock) ;

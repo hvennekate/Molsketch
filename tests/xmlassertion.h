@@ -41,8 +41,10 @@ public:
   XmlAssertion *exactlyTimes(const int &expectedCount);
   XmlAssertion *never();
   XmlAssertion *inAnyOrderWithValues(const QStringList &expectedValues);
+  XmlAssertion *exactly(const QStringList &expected);
 private:
   XmlAssertion(const QString& xml);
+  QStringList getStringResults();
 };
 
 namespace XmlAssert {

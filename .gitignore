@@ -16,6 +16,7 @@ GPATH
 *kate-swp
 
 # For Windows builds/installer
+/wininstaller/packages/*
 *.exe
 *.obf
 *.dll

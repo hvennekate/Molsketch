@@ -72,7 +72,8 @@ class OBabelIfaceLoaderPrivate {
              << "gen2dAvailable:" << gen2dAvailable
              << "optimizeCoordinates:" << optimizeCoordinates
              << "inChIAvailable:" << inChIAvailable
-             << "callOsra:" << callOsra;
+             << "callOsra:" << callOsra
+             << "Error:" << openBabelInterface.errorString();
   }
   void unloadFunctions () { // TODO check if this is really necessary
   }
@@ -122,9 +123,9 @@ Molsketch::Molecule *OBabelIfaceLoader::callOsra(const QString filename) {
   return nullptr;
 }
 
-bool OBabelIfaceLoader::saveFile (const QString& fileName, QGraphicsScene* scene, bool use3d) {
+bool OBabelIfaceLoader::saveFile (const QString& fileName, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens) {
   Q_D (OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->save) return d->save (fileName, scene, use3d ? 3 : 2);)
+  ENCAPSULE_OB_CALL(if (d->save) return d->save (fileName, molecules, use3d ? 3 : 2, addHydrogens);)
   qWarning ("No support for saving OpenBabel available");
   return false;
 }

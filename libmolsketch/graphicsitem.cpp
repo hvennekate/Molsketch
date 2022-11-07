@@ -155,9 +155,10 @@ namespace Molsketch {
   { // TODO this is pretty broken! cf. Commands::MoveItem
     QPointF shift = event->scenePos() - event->lastScenePos();
     QSet<graphicsItem*> selection;
-    if (d->selectedPoint < 0 && scene())
+    if (d->selectedPoint < 0 && scene()) {
       foreach(QGraphicsItem* gItem, scene()->selectedItems())
         selection << dynamic_cast<graphicsItem*>(gItem);
+    }
     selection.remove(0);
     if (selection.isEmpty())
       selection << this;
@@ -344,9 +345,10 @@ namespace Molsketch {
     {
       if (parentItem() && parentItem()->isSelected())
         retVal.setValue(false);
-      if (value.toBool())
+      if (value.toBool()) {
         foreach(QGraphicsItem* child, childItems())
           child->setSelected(false);
+      }
     }
     return retVal;
   }

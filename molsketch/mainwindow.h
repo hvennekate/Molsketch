@@ -99,7 +99,6 @@ private slots:
   /** Open the preferences editor. */
   void editPreferences();
 
-  void openAssistant();
   void submitBug();
   void goToYouTube();
   /** Open the molsKetch about dialog. */
@@ -132,12 +131,6 @@ private:
   // Timers
   /** The timer for the auto-save action */
   QTimer * m_autoSaveTimer;
-
-  // Documentation classes
-  /** The help client */
-  QProcess* assistantClient ;
-  /** Initialize the help client. */
-  void initializeAssistant();
 
   Molsketch::MolView* m_molView;
 

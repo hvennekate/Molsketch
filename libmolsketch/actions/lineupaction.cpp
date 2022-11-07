@@ -21,6 +21,7 @@
 #include "ui_alignrowdialog.h"
 #include "molecule.h"
 #include "commands.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
@@ -37,7 +38,7 @@ namespace Molsketch {
       }
     public:
       HorizontalLineUpAction(MolScene *scene) : LineUpAction(scene) {
-        setIcon(QIcon(":images/space-horizontal.svg"));
+        setIcon(getInternalIcon("space-horizontal"));
       }
     };
 
@@ -57,7 +58,7 @@ namespace Molsketch {
       }
     public:
       VerticalLineUpAction(MolScene *scene) : LineUpAction(scene) {
-        setIcon(QIcon(":images/space-vertical.svg"));
+        setIcon(getInternalIcon("space-vertical"));
       }
     };
 

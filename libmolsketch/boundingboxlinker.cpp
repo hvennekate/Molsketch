@@ -47,22 +47,24 @@ namespace Molsketch {
 
   BoundingBoxLinker::~BoundingBoxLinker() {}
 
-  qreal getXMultiplier(const Anchor& anchor) {
-    char anchorValue = static_cast<char>(anchor);
-    return (anchorValue & (1|2)) * 0.5;
-  }
-
-  qreal getYMultiplier(const Anchor& anchor) {
-    char anchorValue = static_cast<char>(anchor);
-    return (anchorValue & (4|8)) * 0.125;
-  }
+  class RectFLinkable : public Linkable {
+    QRectF rect;
+  public:
+    RectFLinkable(const QRectF& rect) : rect(rect) {}
+    QPointF getAnchorPoint(const Anchor &anchor) const override {
+      return Linkable::getAnchorPoint(rect, anchor);
+    }
+  };
 
   QPointF BoundingBoxLinker::getShift(const QRectF &reference, const QRectF &target) const {
+    return getShift(RectFLinkable(reference), RectFLinkable(target));
+  }
+
+  QPointF BoundingBoxLinker::getShift(const Linkable &reference, const Linkable &target) const {
     Q_D(const BoundingBoxLinker);
-    QPointF topLeftShift(reference.topLeft() - target.topLeft());
-    qreal xShift = getXMultiplier(d->origin) * reference.width() - getXMultiplier(d->target) * target.width();
-    qreal yShift = getYMultiplier(d->origin) * reference.height() - getYMultiplier(d->target) * target.height();
-    return topLeftShift + QPointF(xShift, yShift) + d->offset;
+    return reference.getAnchorPoint(d->origin)
+        - target.getAnchorPoint(d->target)
+        + d->offset;
   }
 
   QString BoundingBoxLinker::xmlName() const {
@@ -186,4 +188,20 @@ namespace Molsketch {
   BoundingBoxLinker BoundingBoxLinker::atTopRight() { return BoundingBoxLinker(Anchor::TopRight); }
   BoundingBoxLinker BoundingBoxLinker::atBottomLeft() { return BoundingBoxLinker(Anchor::BottomLeft); }
   BoundingBoxLinker BoundingBoxLinker::atBottomRight() { return BoundingBoxLinker(Anchor::BottomRight); }
+
+  QPointF Linkable::getAnchorPoint(const QRectF &rect, const Anchor &anchor) {
+    switch (anchor) {
+      case Anchor::BottomLeft: return rect.bottomLeft();
+      case Anchor::BottomRight: return rect.bottomRight();
+      case Anchor::TopLeft: return rect.topLeft();
+      case Anchor::TopRight: return rect.topRight();
+      case Anchor::Bottom: return (rect.bottomLeft() + rect.bottomRight())/2.;
+      case Anchor::Left: return (rect.topLeft() + rect.bottomLeft())/2.;
+      case Anchor::Right: return (rect.topRight() + rect.bottomRight())/2.;
+      case Anchor::Top: return (rect.topLeft() + rect.topRight())/2.;
+      case Anchor::Center:
+      default: return rect.center();
+    }
+  }
+
 } // namespace Molsketch

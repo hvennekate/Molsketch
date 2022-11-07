@@ -19,8 +19,6 @@
 
 #include <QFileInfo>
 #include <QDebug>
-#include <QGraphicsScene>
-#include <QGraphicsItem>
 #include <QProcess>
 #include <QDir>
 #include <QStandardPaths>
@@ -37,6 +35,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wdeprecated-copy" // OpenBabel 2 only
 
 #include <openbabel/graphsym.h>
@@ -134,7 +133,7 @@ namespace Molsketch
     return conv.WriteString(&obmol).c_str() ;
   }
 
-  bool saveFile(const QString &fileName, QGraphicsScene* scene, unsigned short int dim) // TODO this should really take all the molecules instead of the entire scene!
+  bool saveFile(const QString &fileName, const QList<Molecule*> &molecules, unsigned short int dim, bool addHydrogens)
   {
     using namespace OpenBabel;
     OBConversion conversion;
@@ -149,15 +148,11 @@ namespace Molsketch
     OBMol obmol;
     obmol.SetDimension(dim);
 
-    // Add all molecules on the scene
-    foreach(QGraphicsItem* item, scene->items()) // TODO remove this dependency on molscene
-      if (auto molecule = dynamic_cast<Molecule*>(item))
-        obmol += toOBMolecule(molecule, dim) ;
-    // TODO this should really be done on a per-atom basis
-    if (3 == dim // TODO also for 2D?
-      && dynamic_cast<MolScene*>(scene)
-      && dynamic_cast<MolScene*>(scene)->settings()->autoAddHydrogen()->get())
-        obmol.AddHydrogens(); // TODO check if this works without begin/end modify
+    // Add all molecules
+
+    for (auto molecule : molecules)
+      obmol += toOBMolecule(molecule, dim);
+    if (addHydrogens) obmol.AddHydrogens(); // TODO check if this works without begin/end modify
 
     // Checking if the file exists and making a backup
     if (QFile::exists(fileName))
@@ -172,10 +167,11 @@ namespace Molsketch
     return true;
   }
 
-  Molecule* fromOBMolecule(OpenBabel::OBMol& obmol) { // TODO convert title
+  Molecule* fromOBMolecule(OpenBabel::OBMol& obmol) {
     using namespace OpenBabel;
     // Create a new molecule
     Molecule* mol = new Molecule();
+    mol->setName(obmol.GetTitle());
     mol->setPos(QPointF(0,0));
 
     qDebug() << "Number of atoms" <<obmol.NumAtoms();
@@ -326,7 +322,7 @@ namespace Molsketch
   }
 
   QStringList inputFormats() {
-    OpenBabel::OBConversion conversion; // TODO find out why this needs to be instantiated
+    OpenBabel::OBConversion conversion;
     return getFormats(conversion.GetSupportedInputFormat());
   }
 

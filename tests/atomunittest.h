@@ -331,4 +331,99 @@ public:
     TS_ASSERT_EQUALS(legacyAtom->numImplicitHydrogens(), XML_DATA.HYDROGENS);
     delete legacyAtom;
   }
+
+  void testBondStartForRectangleWithHydrogenRight() {
+    Atom atom({}, "C");
+    Atom otherAtom({20,0});
+    atom.setNumImplicitHydrogens(5);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    TS_ASSERT_DELTA(bondStart.x(), atom.boundingRect().right(), 1e-5);
+  }
+
+  void testBondStartForCircularShapeWithHydrogenRight() {
+    Atom atom({}, "C");
+    Atom otherAtom({50,0});
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be greater than " + QString::number(atom.boundingRect().right()),
+          bondStart.x() > atom.boundingRect().right());
+  }
+
+  void testBondStartForCircularShapeWithHydrogenLeft() {
+    Atom atom({}, "C");
+    Atom otherAtom({-50,0});
+    atom.setNumImplicitHydrogens(5);
+    atom.setHAlignment(NeighborAlignment::west);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be smaller than " + QString::number(atom.boundingRect().left()),
+               bondStart.x() < atom.boundingRect().left());
+  }
+
+  void testBondStartForCircularShapeWithHydrogenTop() {
+    Atom atom({}, "C");
+    Atom otherAtom({0,-50});
+    atom.setNumImplicitHydrogens(5);
+    atom.setHAlignment(NeighborAlignment::north);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be smaller than " + QString::number(atom.boundingRect().top()),
+          bondStart.y() < atom.boundingRect().top());
+  }
+
+  void testBondStartForCircularShapeWithHydrogenBottom() {
+    Atom atom({}, "C");
+    Atom otherAtom({0,50});
+    atom.setNumImplicitHydrogens(5);
+    atom.setHAlignment(NeighborAlignment::south);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be greater than " + QString::number(atom.boundingRect().bottom()),
+          bondStart.y() > atom.boundingRect().bottom());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensRight() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::east);
+    QLineF testBondAxis({}, {50, 0});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be greater than " + QString::number(atom.boundingRect().right()),
+          bondStart.x() > atom.boundingRect().right());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensLeft() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::west);
+    QLineF testBondAxis({}, {-50, 0});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be smaller than " + QString::number(atom.boundingRect().left()),
+          bondStart.x() < atom.boundingRect().left());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensTop() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::north);
+    QLineF testBondAxis({}, {0, -50});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be smaller than " + QString::number(atom.boundingRect().top()),
+          bondStart.y() < atom.boundingRect().top());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensBottom() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::south);
+    QLineF testBondAxis({}, {0, 50});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be greater than " + QString::number(atom.boundingRect().bottom()),
+          bondStart.y() > atom.boundingRect().bottom());
+  }
 };

@@ -96,18 +96,7 @@ QString formatStringList(QStringList list) {
 
 XmlAssertion *XmlAssertion::inAnyOrderWithValues(const QStringList &expectedValues) {
   Q_D(XmlAssertion);
-  QXmlResultItems results;
-  d->query.evaluateTo(&results);
-  if (results.hasError())
-    d->printStackTraceAndThrow("Error in query!");
-  QXmlItem item = results.next();
-  QStringList actualValues;
-  while (!item.isNull()) {
-    if (!item.isAtomicValue())
-      d->printStackTraceAndThrow("Expected item from query to be an atomic value.");
-    actualValues << item.toAtomicValue().toString();
-    item = results.next();
-  }
+  auto actualValues = getStringResults();
   for (const QString& actual : actualValues)
     if (!expectedValues.contains(actual))
       d->printStackTraceAndThrow("Unexpected value found: \"" + actual + "\""
@@ -117,6 +106,21 @@ XmlAssertion *XmlAssertion::inAnyOrderWithValues(const QStringList &expectedValu
     if (!actualValues.contains(expected))
       d->printStackTraceAndThrow("Expected value not found: \"" + expected + "\""
                                  + "\nExpected values: " + formatStringList(expectedValues)
+                                 + "\nActual values:   " + formatStringList(actualValues));
+  return this;
+}
+
+XmlAssertion *XmlAssertion::exactly(const QStringList &expected) {
+  Q_D(XmlAssertion);
+  auto actualValues = getStringResults();
+  if (actualValues.size() != expected.size())
+    d->printStackTraceAndThrow(QString("Number of expected and acutal elements differ!")
+                               + "\nExpected values: " + formatStringList(expected)
+                               + "\nActual values:   " + formatStringList(actualValues));
+  for (int i = 0 ; i < actualValues.size(); ++i)
+    if (actualValues[i] != expected[i])
+      d->printStackTraceAndThrow("Actual and expected elements differ at index=" + QString::number(i)
+                                 + "\nExpected values: " + formatStringList(expected)
                                  + "\nActual values:   " + formatStringList(actualValues));
   return this;
 }
@@ -173,6 +177,24 @@ XmlAssertion::XmlAssertion(const QString &xml)
   Q_D(XmlAssertion);
   d->xml = xml;
   d->query.setFocus(xml);
+}
+
+QStringList XmlAssertion::getStringResults()
+{
+  Q_D(XmlAssertion);
+  QXmlResultItems results;
+  d->query.evaluateTo(&results);
+  if (results.hasError())
+    d->printStackTraceAndThrow("Error in query!");
+  QXmlItem item = results.next();
+  QStringList actualValues;
+  while (!item.isNull()) {
+    if (!item.isAtomicValue())
+      d->printStackTraceAndThrow("Expected item from query to be an atomic value.");
+    actualValues << item.toAtomicValue().toString();
+    item = results.next();
+  }
+  return actualValues;
 }
 
 XmlAssertion *XmlAssert::assertThat(const QString &xml) { return XmlAssertion::assertThat(xml); }

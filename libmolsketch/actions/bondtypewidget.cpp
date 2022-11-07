@@ -20,10 +20,11 @@
 #include <QButtonGroup>
 #include <QToolButton>
 #include <QHBoxLayout>
+#include "iconutils.h"
 
 namespace Molsketch {
 
-#define ADDBONDBUTTON(TYPE, ICON, INVERTED) addButton(TYPE, QPixmap::fromImage(QImage(":images/" ICON ".svg").mirrored(INVERTED, INVERTED)));
+#define ADDBONDBUTTON(TYPE, ICON, INVERTED) addButton(TYPE, QPixmap::fromImage(getInternalImage(ICON).mirrored(INVERTED, INVERTED)));
 
   bondTypeWidget::bondTypeWidget(bool withInversion, QWidget *parent)
     : ItemTypeWidget(parent)

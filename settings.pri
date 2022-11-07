@@ -1,9 +1,9 @@
 include(variables.pri)
 MSK_SOURCE_BASE = $$PWD
 QT += widgets printsupport svg
-CONFIG += silent c++14
+CONFIG += silent c++17
 lessThan(QT_MAJOR_VERSION,5): QMAKE_CXXFLAGS += -std=c++11
-QMAKE_CXXFLAGS += -Wsuggest-override
+QMAKE_CXXFLAGS += -Wsuggest-override -Werror
 
 buildVars = $$cat(buildvariables)
 for(line, $$list($$split(buildVars, $$escape_expand(\\n)))) {
@@ -13,7 +13,7 @@ for(line, $$list($$split(buildVars, $$escape_expand(\\n)))) {
     message("Could not find file with value of $$name, assuming default value: $$eval($$name)")
   }
   $$name = $$cat($$OUT_PWD/../buildvars/$$name)
-# The only variable used in code is MSK_INSTALL_DOCS
+# make variables also available to precompiler
   !equals($$name, false) : DEFINES += "$${name}=\"\\\"$$eval($$name)\\\"\""
 }
 

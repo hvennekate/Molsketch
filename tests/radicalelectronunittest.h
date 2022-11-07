@@ -51,7 +51,7 @@ public:
     scene = new MolScene;
     scene->settings()->atomFont()->set(QFont("Noto Sans", 8));
     atom = new Atom(QPointF(0,0), "C", false);
-    qDebug() << atom->boundingRect();
+    atom->setCharge(0);
     scene->addItem(atom);
   }
 
@@ -78,10 +78,10 @@ public:
   }
 
   void testPosition() {
-    auto svgOutput = svgWithAtomAndRadicalElectron();
-    // TODO determine how to properly calculate these values for SVG
-    assertThat(svgOutput)->contains("/*:svg/*:g/*:g/*:circle/@cx/data(.)")->exactlyOnceWithContent("0");
-    assertThat(svgOutput)->contains("/*:svg/*:g/*:g/*:circle/@cy/data(.)")->exactlyOnceWithContent("-9");
+    QXmlStreamReader reader(svgWithAtomAndRadicalElectron());
+    assertTrue(findNextElement(reader, "circle"), "Could not find circle in SVG!");
+    TS_ASSERT_EQUALS(reader.attributes().value("cx").toDouble() * 2, 0);
+    TS_ASSERT_EQUALS(reader.attributes().value("cy").toDouble() * 3, -27); // TODO this value used to be -21 (radical closer to the atom letter)
   }
 
   void testBoundingRectWithoutParent() {

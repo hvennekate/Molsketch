@@ -18,6 +18,7 @@
  ***************************************************************************/
 #include "mechanismarrowaction.h"
 #include "molscene.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
@@ -31,13 +32,13 @@ namespace Molsketch {
     {
       if (action->text() == tr("Single arrow"))
       {
-        action->setIcon(QIcon(":images/mechanismarrow.svg"));
+        action->setIcon(getInternalIcon("mechanismarrow"));
         action->trigger();
       }
       if (action->text() == tr("Double arrow"))
-        action->setIcon(QIcon(":images/curveddoublearrow.svg"));
+        action->setIcon(getInternalIcon("curveddoublearrow"));
       if (action->text() == tr("Half arrow"))
-        action->setIcon(QIcon(":images/curvedhalfarrow.svg"));
+        action->setIcon(getInternalIcon("curvedhalfarrow"));
     }
     setChecked(false);
   }

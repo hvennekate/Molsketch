@@ -134,7 +134,6 @@ MainWindow::MainWindow(ApplicationSettings *appSetttings)
 
   createStatusBar();
   createToolBarContextMenuOptions();
-  initializeAssistant();
 
   readSettings();
   setCurrentFile("");
@@ -161,9 +160,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     return;
   }
   saveWindowProperties();
-  if (assistantClient) {
-    assistantClient->terminate();
-  }
   event->accept();
   deleteLater();
 }
@@ -224,7 +220,8 @@ bool MainWindow::saveFile(const QString& fileName) {
       }
   } else {
     bool threeD = QMessageBox::question(this, tr("Save as 3D?"), tr("Save as three dimensional coordinates?")) == QMessageBox::Yes;
-    if (!obabelLoader->saveFile(fileName, m_molView->scene(), threeD)) {
+    auto scene = m_molView->scene();
+    if (!obabelLoader->saveFile(fileName, scene->molecules(), threeD, scene->settings()->autoAddHydrogen())) {
       QMessageBox::warning(0, tr("Could not save"), tr("Could not save file '%1' using OpenBabel.").arg(fileName));
       return false ;
     }
@@ -247,9 +244,9 @@ bool MainWindow::autoSave()
 
 
   if (!fileName.exists())
-    fileName = QDir::homePath() + tr("/untitled.backup.msk");
+    fileName.setFile(QDir::homePath() + tr("/untitled.backup.msk"));
   else
-    fileName = fileName.path() + fileName.baseName() +  ".backup." + fileName.completeSuffix();
+    fileName.setFile(fileName.path() + fileName.baseName() +  ".backup." + fileName.completeSuffix());
   // And save the file
   if (fileName.suffix() == "msk") {
     bool saved = writeMskFile(fileName.absoluteFilePath(), m_molView->scene());
@@ -257,7 +254,8 @@ bool MainWindow::autoSave()
     return saved;
   } else {
     bool threeD = QMessageBox::question(this, tr("Save as 3D?"), tr("Save as three dimensional coordinates?")) == QMessageBox::Yes; // TODO not in autosave!
-    if (!obabelLoader->saveFile(fileName.absoluteFilePath(), m_molView->scene(), threeD)) {
+    auto scene = m_molView->scene();
+    if (!obabelLoader->saveFile(fileName.absoluteFilePath(), scene->molecules(), threeD, scene->settings()->autoAddHydrogen())) {
       statusBar()->showMessage(tr("Autosave failed! OpenBabel unavailable."), 10000);
       return false ;
     }
@@ -339,9 +337,9 @@ bool MainWindow::exportDoc()
   // Finding the right extension
   if (QFileInfo(fileName).suffix().isEmpty())
   {
-    int index = filter.indexOf(QRegExp("\\*."));
+    int index = filter.indexOf(QRegularExpression("\\*."));
     filter = filter.remove(0, index + 1);
-    index = filter.indexOf(QRegExp("( \\*.)|(\\))"));
+    index = filter.indexOf(QRegularExpression("( \\*.)|(\\))"));
     if (index > 0) filter.truncate(index);
     fileName = fileName + filter;
   }
@@ -382,19 +380,6 @@ void MainWindow::setToolButtonStyle(QAction *styleAction)
   QMainWindow::setToolButtonStyle((Qt::ToolButtonStyle) styleAction->data().toInt());
 }
 
-void MainWindow::openAssistant()
-{
-  QFileInfo file(MSK_INSTALL_DOCS + QString("/index.html"));
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/doc/en/index.html");
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/../share/doc/molsketch/doc/en/index.html");
-  qDebug() << "Opening help:" << file.absoluteFilePath() ;
-  QTextStream stream(assistantClient) ;
-  stream << QLatin1String("setSource ")
-         << file.absoluteFilePath()
-         << QLatin1Char('\0')
-         << ('\n');
-}
-
 void MainWindow::about()
 {
   QString version(settings->currentVersion().toString()), versionNick(settings->versionNick());
@@ -430,7 +415,6 @@ void MainWindow::createHelpMenu() {
   menuBar()->addSeparator();
   auto helpMenu = menuBar()->addMenu(tr("&Help"));
   helpMenu->addActions(QList<QAction*>{
-                         ActionContainer::generateAction("help-contents", ":icons/help-contents.svg", tr("&Help Contents..."), tr("F1"), tr("Show the application's help contents"), this, &MainWindow::openAssistant),
                          ActionContainer::generateAction("", "", tr("Submit &Bug..."),"", tr("Open the browser with the bug tracker"), this, &MainWindow::submitBug),
                          ActionContainer::generateAction("", "", tr("YouTube channel..."), "", tr("Open the browser with the YouTube channel page"), this, &MainWindow::goToYouTube),
                          ActionContainer::generateAction("help-about", ":icons/help-about.svg", tr("&About..."), "", tr("Show the application's About box"), this, &MainWindow::about),
@@ -527,25 +511,6 @@ void MainWindow::createToolBarContextMenuOptions()
       action->setChecked(true);
   }
   connect(toolBarTextsAndIcons, SIGNAL(triggered(QAction*)), this, SLOT(setToolButtonStyle(QAction*)));
-}
-
-void MainWindow::initializeAssistant()
-{
-  assistantClient = new QProcess(this) ;
-  QString app = QLibraryInfo::location(QLibraryInfo::BinariesPath)
-               + QLatin1String("/assistant-qt5"); // TODO the "-qt5" suffix might be specific to some Linux distros
-  QString docfile("molsketch.qhp") ;
-
-  QFileInfo file(MSK_INSTALL_DOCS + QString("/molsketch.adp"));
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/doc/en/" + docfile );
-  if (!file.exists()) file.setFile(QApplication::applicationDirPath() + "/../share/doc/molsketch/doc/en/" + docfile);
-
-  qDebug() << "Starting assistant with arguments:" << file.absoluteFilePath() << app ;
-  QTextStream stream(assistantClient) ;
-  stream << QLatin1String("register ")
-         << file.absoluteFilePath()
-         << QLatin1Char('\0')
-         << ('\n');
 }
 
 void MainWindow::readSettings()
