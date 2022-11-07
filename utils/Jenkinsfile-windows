@@ -1,6 +1,5 @@
 def obabeldir = '/opt/openbabel-3.1.1-static';
 def mingwdir = '/usr/i686-w64-mingw32/sys-root/mingw/bin'
-def openssldir = '/opt/openssl-1.1.1q-mingw32/bin'
 
 pipeline {
   agent any
@@ -72,12 +71,6 @@ pipeline {
             fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
 // TODO need to either add license or remove this dependency
 //             fileCopyOperation(flattenFiles: true, includes: '**/libz.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
-          ])
-        }
-        dir(openssldir) {
-          fileOperations([
-            folderCreateOperation("${WORKSPACE}/sources/wininstaller/packages/org.openssl.lib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/*.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openssl.lib/data/")
           ])
         }
         sh 'find . "(" -iname "*.dll" -or -iname "*.exe" -or -iname "*.obf" ")" -exec strip -v {} \\;'
