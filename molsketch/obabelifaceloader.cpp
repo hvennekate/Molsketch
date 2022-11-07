@@ -72,7 +72,8 @@ class OBabelIfaceLoaderPrivate {
              << "gen2dAvailable:" << gen2dAvailable
              << "optimizeCoordinates:" << optimizeCoordinates
              << "inChIAvailable:" << inChIAvailable
-             << "callOsra:" << callOsra;
+             << "callOsra:" << callOsra
+             << "Error:" << openBabelInterface.errorString();
   }
   void unloadFunctions () { // TODO check if this is really necessary
   }
