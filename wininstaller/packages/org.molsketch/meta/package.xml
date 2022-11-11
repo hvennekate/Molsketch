@@ -9,6 +9,7 @@
   </Licenses>
   <ForcedInstallation>true</ForcedInstallation>
   <ExpandedByDefault>true</ExpandedByDefault>
+  <Replaces>org.openssl.lib</Replaces>
   <Script>molsketch-setup-actions.qs</Script>
   <UserInterfaces>
       <UserInterface>AssociateFileSuffixes.ui</UserInterface>
