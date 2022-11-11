@@ -8,6 +8,7 @@
   <Licenses>
     <License name="GCC Runtime Exception" file="gcc-runtime-exception.txt"/>
     <License name="Zope Public License" file="zpl.txt"/>
+    <License name="ZLib License" file="zlib.txt"/>
   </Licenses>
   <Dependencies>org.molsketch</Dependencies>
   <ExpandedByDefault>true</ExpandedByDefault>

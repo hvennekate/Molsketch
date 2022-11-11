@@ -69,8 +69,7 @@ pipeline {
             fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
             fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_sjlj-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
             fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
-// TODO need to either add license or remove this dependency
-//             fileCopyOperation(flattenFiles: true, includes: '**/libz.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libz.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
           ])
         }
         sh 'find . "(" -iname "*.dll" -or -iname "*.exe" -or -iname "*.obf" ")" -exec strip -v {} \\;'
