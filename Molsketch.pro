@@ -16,14 +16,17 @@ for(buildVar, $$list($$split(buildVars, \\n))) {
   write_file($$OUT_PWD/buildvars/$$variableName, $$variableName)
 }
 
-################# setting up sub projects
+############## setting up sub projects
 
 TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS += \
         libmolsketch \
         molsketch
-equals(MSK_OBABELIFACE, true) : SUBDIRS += obabeliface
+equals(MSK_OBABELIFACE, true) {
+    SUBDIRS += obabeliface
+    obabeliface.depends = libmolsketch
+}
 
 OTHER_FILES += \
     version \

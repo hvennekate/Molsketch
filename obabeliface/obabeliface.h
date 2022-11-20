@@ -47,36 +47,45 @@ extern "C"
  */
     EXPORT_PREFIX QStringList outputFormats();
     typedef QStringList (*formatsFunctionPointer)() ;
+    const char OUTPUT_FORMATS[] = "outputFormats";
 
 /**
  * Get supported input file formats
  */
     EXPORT_PREFIX QStringList inputFormats();
+    const char INPUT_FORMATS[] = "inputFormats";
 /**
  * Generate SMILES string from molecule
  */
     EXPORT_PREFIX QString smiles(const Molecule*) ;
+    const char SMILES[] = "smiles";
     typedef QString (*smilesFunctionPointer)(const Molecule*) ;
 /**
  * Generate molecule from SMILES string
  */
     EXPORT_PREFIX Molecule* fromSmiles(const QString&);
+    const char FROM_SMILES[] = "fromSmiles";
     typedef Molecule* (*fromSmilesFunctionPointer)(const QString&);
 /**
  * Generate molecule from InChI string
  */
     EXPORT_PREFIX Molecule* fromInChI(const QString&);
+    const char FROM_INCHI[] = "fromInChI";
     typedef Molecule* (*fromInChIFunctionPointer)(const QString&);
+    // TODO should be the same type as for smiles
 /**
  * Check if InChI format is available
  */
     EXPORT_PREFIX bool inChIAvailable();
+    const char INCHI_AVAILABLE[] = "inChIAvailable";
     EXPORT_PREFIX bool gen2dAvailable();
+    const char GEN2D_AVAILABLE[] = "gen2dAvailable";
     typedef bool (*formatAvailablePointer)();
 /**
  * Optimize coordinates
  */
     EXPORT_PREFIX QVector<QPointF> optimizeCoordinates(const Molecule* molecule);
+    const char OPTIMIZE_COORDS[] = "optimizeCoordinates";
     typedef QVector<QPointF> (*optimizeCoordsPointer)(const Molecule*);
 
 /**
@@ -90,27 +99,32 @@ extern "C"
  * object.
  */
     EXPORT_PREFIX Molecule* loadFile(const QString &fileName);
+    const char LOAD_FILE[] = "loadFile";
     typedef Molecule* (*loadFileFunctionPointer)(const QString&) ;
 /**
  * Saves the current document under @p fileName and returns @c false if the
  * save failed.
  */
     EXPORT_PREFIX bool saveFile(const QString &fileName, const QList<Molecule *> &molecules, unsigned short int dim = 2, bool addHydrogens = false);
+    const char SAVE_FILE[] = "saveFile";
     typedef bool (*saveFileFunctionPointer)(const QString&, const QList<Molecule *> &, unsigned short int, bool) ;
 /**
  * Get symmetry numbers for atoms
  */
     EXPORT_PREFIX void getSymmetryClasses(const Molecule* molecule, std::vector<unsigned int>& symmetry_classes) ;
+    const char GET_SYMMETRY_CLASSES[] = "getSymmetryClasses";
     typedef void (*getSymmetryClassesFunctionPointer)(const Molecule*, std::vector<unsigned int>&) ;
 /**
  * Get chiral atoms for molecule @p molecule
  */
     EXPORT_PREFIX QList<Atom*> chiralAtoms(const Molecule* molecule) ;
+    const char CHIRAL_ATOMS[] = "chiralAtoms";
     typedef QList<Atom*> (*chiralAtomsFunctionPointer)(const Molecule*) ;
 /**
  * Load Molecule from image (OSRA)
  */
     EXPORT_PREFIX Molecule*  call_osra(QString fileName);
+    const char CALL_OSRA[] = "call_osra";
     typedef Molecule* (*callOsraFunctionPointer)(QString) ;
   } // namespace
 } // extern "C"

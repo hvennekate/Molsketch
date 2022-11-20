@@ -1,5 +1,6 @@
 /tests          export-ignore
 /wininstaller   export-ignore
 /utils          export-ignore
+/obiftest       export-ignore
 .gitattributes  export-ignore
 README.md       export-ignore
