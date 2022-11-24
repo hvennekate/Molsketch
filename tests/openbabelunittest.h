@@ -28,7 +28,7 @@ class OpenBabelUnitTest : public CxxTest::TestSuite {
 public:
   void testConversionFromSmilesString() {
     qputenv("BABEL_LIBDIR", "/usr/lib64/openbabel/2.4.1"); // TODO make configurable
-    Molecule* molecule = assertNotNull(fromSmiles("CCCC"));
+    Molecule* molecule = assertNotNull(fromInChI("1S/C4H10/c1-3-4-2/h3-4H2,1-2H3"));
     TS_ASSERT_EQUALS(molecule->atoms().size(), 4);
     for(Atom* atom : molecule->atoms())
       TS_ASSERT_EQUALS(atom->element(), "C");

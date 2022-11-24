@@ -123,16 +123,6 @@ namespace Molsketch
     return obmol;
   }
 
-  QString smiles(const Molecule* mol)
-  {
-    OpenBabel::OBConversion conv ;
-    if (!conv.SetOutFormat("can"))
-      return "Output format 'can' not available." ;
-
-    OpenBabel::OBMol obmol(toOBMolecule(mol)) ;
-    return conv.WriteString(&obmol).c_str() ;
-  }
-
   bool saveFile(const QString &fileName, const QList<Molecule*> &molecules, unsigned short int dim, bool addHydrogens)
   {
     using namespace OpenBabel;
@@ -174,7 +164,7 @@ namespace Molsketch
     mol->setName(obmol.GetTitle());
     mol->setPos(QPointF(0,0));
 
-    qDebug() << "Number of atoms" <<obmol.NumAtoms();
+    qDebug() << "Number of atoms" << obmol.NumAtoms();
     QHash<OBAtom*, Atom*> atomHash ;
     QHash<Atom*, int> charges;
     // Add atoms one-by-ons
@@ -390,10 +380,6 @@ namespace Molsketch
     generate2dCoords(obmol);
     SetWedgeAndHash(obmol);
     return fromOBMolecule(obmol);
-  }
-
-  Molecule *fromSmiles(const QString &input) {
-    return fromString(input, "can");
   }
 
   Molecule *fromInChI(const QString &input) {

@@ -66,9 +66,7 @@ int main(int argc, char** argv) {
     auto atomB = new Atom(QPointF(100,0), "C");
     auto bond = new Bond(atomA, atomB);
     auto molecule = new Molecule({atomA, atomB}, {bond});
-    invoke<smilesFunctionPointer>(lib, SMILES, molecule);
 
-    invoke<fromSmilesFunctionPointer>(lib, FROM_SMILES, "[C][C]");
     invoke<fromInChIFunctionPointer>(lib, FROM_INCHI, "1S/C2H6/c1-2/h1-2H3");
 
     invoke<formatAvailablePointer>(lib, INCHI_AVAILABLE);

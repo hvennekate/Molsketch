@@ -38,8 +38,6 @@ class OBabelIfaceLoaderPrivate {
   QString openBabelFormatsPath;
   Molsketch::loadFileFunctionPointer load;
   Molsketch::saveFileFunctionPointer save;
-  Molsketch::smilesFunctionPointer toSmiles;
-  Molsketch::fromSmilesFunctionPointer fromSmiles;
   Molsketch::formatsFunctionPointer inputFormats;
   Molsketch::formatsFunctionPointer outputFormats;
   Molsketch::fromInChIFunctionPointer fromInChI;
@@ -51,8 +49,6 @@ class OBabelIfaceLoaderPrivate {
     load = (Molsketch::loadFileFunctionPointer)openBabelInterface.resolve (
       "loadFile"); // TODO put into obabeliface.h -- question: what happens when lib is dynamically loaded (with its constants etc.)?
     save = (Molsketch::saveFileFunctionPointer)openBabelInterface.resolve ("saveFile");
-    toSmiles = (Molsketch::smilesFunctionPointer)openBabelInterface.resolve ("smiles");
-    fromSmiles = (Molsketch::fromSmilesFunctionPointer)openBabelInterface.resolve ("fromSmiles");
     inputFormats = (Molsketch::formatsFunctionPointer)openBabelInterface.resolve ("inputFormats");
     outputFormats = (Molsketch::formatsFunctionPointer)openBabelInterface.resolve ("outputFormats");
     fromInChI = (Molsketch::fromInChIFunctionPointer)openBabelInterface.resolve ("fromInChI");
@@ -64,8 +60,6 @@ class OBabelIfaceLoaderPrivate {
     qDebug() << "Loaded OpenBabel functions. Available Functions:"
              << "load:" << load
              << "save:" << save
-             << "toSmiles:" << toSmiles
-             << "fromSmiles:" << fromSmiles
              << "inputFormats:" << inputFormats
              << "outputFormats:" << outputFormats
              << "fromInChI:" << fromInChI

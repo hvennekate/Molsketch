@@ -55,18 +55,6 @@ extern "C"
     EXPORT_PREFIX QStringList inputFormats();
     const char INPUT_FORMATS[] = "inputFormats";
 /**
- * Generate SMILES string from molecule
- */
-    EXPORT_PREFIX QString smiles(const Molecule*) ;
-    const char SMILES[] = "smiles";
-    typedef QString (*smilesFunctionPointer)(const Molecule*) ;
-/**
- * Generate molecule from SMILES string
- */
-    EXPORT_PREFIX Molecule* fromSmiles(const QString&);
-    const char FROM_SMILES[] = "fromSmiles";
-    typedef Molecule* (*fromSmilesFunctionPointer)(const QString&);
-/**
  * Generate molecule from InChI string
  */
     EXPORT_PREFIX Molecule* fromInChI(const QString&);
