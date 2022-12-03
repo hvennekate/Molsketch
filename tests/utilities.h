@@ -129,7 +129,7 @@ bool findNextElement(QXmlStreamReader& reader, const QString& element);
 
 int xmlElementCount(const QString& xml, const QString& element);
 
-QPolygonF getPointsFromXml(const QXmlStreamReader& reader, const QString& attribute);
+QPolygonF getPointsFromXml(const QXmlStreamReader& reader);
 
 QXmlStreamAttributes getAttributesOfParentElement(QXmlStreamReader& reader, const QString &element);
 

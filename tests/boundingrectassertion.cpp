@@ -31,15 +31,15 @@ public:
   void compareWith(const QRectF& expectedRect, const QVariant& expectedValue) {
     if (actualValue == expectedValue) return;
     QTextStream out(stdout, QIODevice::WriteOnly);
-    out << message << endl;
+    out << message << Qt::endl;
     QString comparisonMessage;
-    QDebug(&comparisonMessage) << "Expected:" << expectedValue << "Actual:" << actualValue << endl;
+    QDebug(&comparisonMessage) << "Expected:" << expectedValue << "Actual:" << actualValue << Qt::endl;
     out << comparisonMessage;
     out << "Expected bounds: " ;
     printRect(expectedRect, out);
-    out << endl << "Actual bounds: ";
+    out << Qt::endl << "Actual bounds: ";
     printRect(actualRect, out);
-    out << endl;
+    out << Qt::endl;
     throw message;
   }
 
