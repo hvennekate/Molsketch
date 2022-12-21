@@ -182,7 +182,8 @@ void MainWindow::open()
 }
 
 void MainWindow::readToSceneUsingOpenBabel(const QString& fileName) {
-  Molecule* mol = obabelLoader->loadFile(fileName); // TODO add coordinates if format does not supply them (e.g. InChI)
+  Molecule* mol = obabelLoader->loadFile(fileName,
+                                         settings->bondLength()->get()); // TODO add coordinates if format does not supply them (e.g. InChI)
   if (!mol) {
     qCritical() << "Could not read file using OpenBabel. Filename: " + fileName;
     QMessageBox::critical(this, tr(PROGRAM_NAME), tr("Could not open file using OpenBabel.")) ;
@@ -221,7 +222,11 @@ bool MainWindow::saveFile(const QString& fileName) {
   } else {
     bool threeD = QMessageBox::question(this, tr("Save as 3D?"), tr("Save as three dimensional coordinates?")) == QMessageBox::Yes;
     auto scene = m_molView->scene();
-    if (!obabelLoader->saveFile(fileName, scene->molecules(), threeD, scene->settings()->autoAddHydrogen())) {
+    if (!obabelLoader->saveFile(fileName,
+                                scene->molecules(),
+                                threeD,
+                                scene->settings()->autoAddHydrogen(),
+                                scene->settings()->bondLength()->get())) {
       QMessageBox::warning(0, tr("Could not save"), tr("Could not save file '%1' using OpenBabel.").arg(fileName));
       return false ;
     }
@@ -255,7 +260,11 @@ bool MainWindow::autoSave()
   } else {
     bool threeD = QMessageBox::question(this, tr("Save as 3D?"), tr("Save as three dimensional coordinates?")) == QMessageBox::Yes; // TODO not in autosave!
     auto scene = m_molView->scene();
-    if (!obabelLoader->saveFile(fileName.absoluteFilePath(), scene->molecules(), threeD, scene->settings()->autoAddHydrogen())) {
+    if (!obabelLoader->saveFile(fileName.absoluteFilePath(),
+                                scene->molecules(),
+                                threeD,
+                                scene->settings()->autoAddHydrogen(),
+                                scene->settings()->bondLength()->get())) {
       statusBar()->showMessage(tr("Autosave failed! OpenBabel unavailable."), 10000);
       return false ;
     }
@@ -300,7 +309,7 @@ bool MainWindow::saveAs() {
       QProgressBar *pb = new QProgressBar(this);
       pb->setMinimum(0);
       pb->setMaximum(0);
-      Molecule* mol = obabelLoader->callOsra(fileName);
+      Molecule* mol = obabelLoader->callOsra(fileName, m_molView->scene()->settings()->bondLength()->get());
       if (mol) {
         if (mol->canSplit()) {
           QList<Molecule*> molList = mol->split();

@@ -91,12 +91,11 @@ int main(int argc, char** argv) {
     invoke<formatAvailablePointer>(lib, INCHI_AVAILABLE);
     invoke<formatAvailablePointer>(lib, GEN2D_AVAILABLE);
 
-    invoke<optimizeCoordsPointer>(lib, OPTIMIZE_COORDS, molecule);
+    invoke<optimizeCoordsPointer>(lib, OPTIMIZE_COORDS, molecule->toCoreMolecule());
 //    invoke<loadFileFunctionPointer>(lib, LOAD_FILE, "testfile");  // TODO
 //    invoke<saveFileFunctionPointer>(lib, SAVE_FILE, "testoutfile", molecule); // TODO
 //    QVector<unsigned int> symmetryClasses;
 //    invoke<getSymmetryClassesFunctionPointer>(lib, GET_SYMMETRY_CLASSES, molecule, symmetryClasses); // TODO unused
-    invoke<chiralAtomsFunctionPointer>(lib, CHIRAL_ATOMS, molecule); // TODO unused
 //    invoke<callOsraFunctionPointer>(lib, CALL_OSRA, "testosrafile"); // TODO
 
     delete molecule;

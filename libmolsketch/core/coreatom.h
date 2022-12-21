@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
+ *   Copyright (C) 2022 by Hendrik Vennekate                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,45 +16,33 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
-#ifndef OBABELIFACELOADER_H
-#define OBABELIFACELOADER_H
 
-#include <QObject>
+#ifndef MOLSKETCH_CORE_ATOM_H
+#define MOLSKETCH_CORE_ATOM_H
 
-class OBabelIfaceLoaderPrivate;
-class QString;
-class QGraphicsScene;
+#include <QString>
+#include <QPointF>
+#include <QScopedPointer>
 
 namespace Molsketch {
-  class Molecule;
-}
+namespace Core {
 
-class OBabelIfaceLoader : public QObject
+class Atom
 {
-  Q_OBJECT
+  QString el;
+  QPointF pos;
+  unsigned hAtomCount;
+  int ch;
 public:
-  explicit OBabelIfaceLoader(QObject *parent = 0);
-  ~OBabelIfaceLoader();
-  QStringList inputFormats();
-  QStringList outputFormats();
-  Molsketch::Molecule* loadFile(const QString& filename, qreal scaling = 1);
-  Molsketch::Molecule* callOsra(const QString filename, qreal scaling = 1);
-  bool saveFile(const QString& fileName, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens, qreal scaling);
-  Molsketch::Molecule* convertInChI(const QString& InChI);
-  QVector<QPointF> optimizeCoordinates(const Molsketch::Molecule* molecule);
-
-signals:
-  void obabelIfaceAvailable(bool);
-  void inchiAvailable(bool);
-  void optimizeAvailable(bool);
-  void obabelIfaceFileNameChanged(QString);
-
-public slots:
-  void reloadObabelIface(const QString& path);
-  void setObabelFormats(const QString& folder);
-private:
-  Q_DECLARE_PRIVATE(OBabelIfaceLoader)
-  OBabelIfaceLoaderPrivate* d_ptr;
+  Atom(const QString &element, const QPointF &position = QPointF(), unsigned hAtoms = 0, int charge = 0);
+  Atom(const Atom &other, const QPointF &newPosition);
+  QPointF position() const;
+  QString element() const;
+  unsigned hAtoms() const;
+  int charge() const;
 };
 
-#endif // OBABELIFACELOADER_H
+} // namespace Core
+} // namespace Molsketch
+
+#endif // MOLSKETCH_CORE_ATOM_H

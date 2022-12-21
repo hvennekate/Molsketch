@@ -261,7 +261,7 @@ namespace Molsketch {
     }
     QList<Molecule*> temporaryMolecules;
     for (auto partiallySelectedMolecule : partiallySelectedMolecules.keys())
-      temporaryMolecules << Molecule(partiallySelectedMolecule,
+      temporaryMolecules << Molecule(*partiallySelectedMolecule,
                                      partiallySelectedMolecules[partiallySelectedMolecule])
                             .split();
     for (auto molecule : temporaryMolecules) items << molecule;

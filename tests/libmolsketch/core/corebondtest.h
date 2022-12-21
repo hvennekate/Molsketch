@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
+ *   Copyright (C) 2022 by Hendrik Vennekate                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,45 +16,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
-#ifndef OBABELIFACELOADER_H
-#define OBABELIFACELOADER_H
 
-#include <QObject>
+#ifndef COREBONDTEST_H
+#define COREBONDTEST_H
 
-class OBabelIfaceLoaderPrivate;
-class QString;
-class QGraphicsScene;
+#include <core/corebond.h>
+#include <cxxtest/TestSuite.h>
 
-namespace Molsketch {
-  class Molecule;
-}
-
-class OBabelIfaceLoader : public QObject
-{
-  Q_OBJECT
+class CoreBondTest : public CxxTest::TestSuite {
 public:
-  explicit OBabelIfaceLoader(QObject *parent = 0);
-  ~OBabelIfaceLoader();
-  QStringList inputFormats();
-  QStringList outputFormats();
-  Molsketch::Molecule* loadFile(const QString& filename, qreal scaling = 1);
-  Molsketch::Molecule* callOsra(const QString filename, qreal scaling = 1);
-  bool saveFile(const QString& fileName, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens, qreal scaling);
-  Molsketch::Molecule* convertInChI(const QString& InChI);
-  QVector<QPointF> optimizeCoordinates(const Molsketch::Molecule* molecule);
 
-signals:
-  void obabelIfaceAvailable(bool);
-  void inchiAvailable(bool);
-  void optimizeAvailable(bool);
-  void obabelIfaceFileNameChanged(QString);
+  void testCreation() {
+    Molsketch::Core::Bond bond(5, 3, Molsketch::Core::Bond::DativeDot);
 
-public slots:
-  void reloadObabelIface(const QString& path);
-  void setObabelFormats(const QString& folder);
-private:
-  Q_DECLARE_PRIVATE(OBabelIfaceLoader)
-  OBabelIfaceLoaderPrivate* d_ptr;
+    TS_ASSERT_EQUALS(5, bond.start());
+    TS_ASSERT_EQUALS(3, bond.end());
+    TS_ASSERT_EQUALS(Molsketch::Core::Bond::DativeDot, bond.type());
+
+    auto otherBond(bond);
+    TS_ASSERT_EQUALS(5, otherBond.start());
+    TS_ASSERT_EQUALS(3, otherBond.end());
+    TS_ASSERT_EQUALS(Molsketch::Core::Bond::DativeDot, otherBond.type());
+  }
 };
 
-#endif // OBABELIFACELOADER_H
+#endif

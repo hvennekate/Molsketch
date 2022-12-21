@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
+ *   Copyright (C) 2022 by Hendrik Vennekate                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,45 +16,42 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
-#ifndef OBABELIFACELOADER_H
-#define OBABELIFACELOADER_H
 
-#include <QObject>
+#include "corebond.h"
 
-class OBabelIfaceLoaderPrivate;
-class QString;
-class QGraphicsScene;
+#include <QDebug>
 
 namespace Molsketch {
-  class Molecule;
+namespace Core {
+
+  Bond::Type Bond::fromOrder(const unsigned &order) {
+    switch (order)
+    {
+      case 1: return Single;
+      case 2: return DoubleLegacy;
+      case 3: return Triple;
+      default: return Invalid;
+    }
+  }
+
+  Bond::Bond(unsigned start, unsigned end, Type type)
+  : m_start(start), m_end(end), m_type(type) {}
+
+unsigned Bond::start() const {
+  return m_start;
 }
 
-class OBabelIfaceLoader : public QObject
-{
-  Q_OBJECT
-public:
-  explicit OBabelIfaceLoader(QObject *parent = 0);
-  ~OBabelIfaceLoader();
-  QStringList inputFormats();
-  QStringList outputFormats();
-  Molsketch::Molecule* loadFile(const QString& filename, qreal scaling = 1);
-  Molsketch::Molecule* callOsra(const QString filename, qreal scaling = 1);
-  bool saveFile(const QString& fileName, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens, qreal scaling);
-  Molsketch::Molecule* convertInChI(const QString& InChI);
-  QVector<QPointF> optimizeCoordinates(const Molsketch::Molecule* molecule);
+unsigned Bond::end() const {
+  return m_end;
+}
 
-signals:
-  void obabelIfaceAvailable(bool);
-  void inchiAvailable(bool);
-  void optimizeAvailable(bool);
-  void obabelIfaceFileNameChanged(QString);
+Bond::Type Bond::type() const {
+  return m_type;
+}
 
-public slots:
-  void reloadObabelIface(const QString& path);
-  void setObabelFormats(const QString& folder);
-private:
-  Q_DECLARE_PRIVATE(OBabelIfaceLoader)
-  OBabelIfaceLoaderPrivate* d_ptr;
-};
+unsigned Bond::order() const {
+  return m_type / 10;
+}
 
-#endif // OBABELIFACELOADER_H
+} // namespace Core
+} // namespace Molsketch

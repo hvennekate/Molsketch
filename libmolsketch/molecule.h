@@ -36,6 +36,7 @@
 #include <QList>
 #include <QGraphicsItemGroup>
 #include "moleculepopup.h"
+#include "core/coremolecule.h"
 
 class QString;
 class QPoint;
@@ -67,11 +68,14 @@ namespace Molsketch {
 
     static qreal toDegrees(const qreal& angle) ;
 
-    Molecule(QGraphicsItem* parent = 0) ;
+    explicit Molecule(QGraphicsItem* parent = 0) ;
     Molecule(QSet<Atom*>, QSet<Bond*>, QGraphicsItem* parent = 0) ;
     // TODO get bonds from atoms or atoms from bonds, but don't take both
     /** Creates a copy of molecule @p mol with @p parent on MolScene @p scene. */
-    Molecule(const Molecule& mol) ;
+    explicit Molecule(const Molecule& mol) ;
+
+    explicit Molecule(const Core::Molecule &coreMolecule, qreal scaling = 1, QGraphicsItem *parent = 0);
+    static Molecule *fromCoreMolecule(const Core::Molecule &coreMolecule, qreal scaling = 1);
 
     /** Creates a copy of molecule @p mol, but clones @p atoms as the new molecule's
          * atoms, and any bonds where both atoms  are in @p atoms. */
@@ -199,6 +203,7 @@ namespace Molsketch {
 
     QString getName() const;
     void setName(const QString &value);
+    Core::Molecule toCoreMolecule(qreal scaling = 1) const;
   };
 
 } // namespace

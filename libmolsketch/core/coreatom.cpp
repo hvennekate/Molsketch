@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
+ *   Copyright (C) 2022 by Hendrik Vennekate                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,45 +16,35 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
-#ifndef OBABELIFACELOADER_H
-#define OBABELIFACELOADER_H
 
-#include <QObject>
-
-class OBabelIfaceLoaderPrivate;
-class QString;
-class QGraphicsScene;
+#include "coreatom.h"
 
 namespace Molsketch {
-  class Molecule;
+namespace Core {
+
+Atom::Atom(const QString &element, const QPointF &position, unsigned hAtoms, int charge)
+  : el(element), pos(position), hAtomCount(hAtoms), ch(charge)
+{}
+
+Atom::Atom(const Atom &other, const QPointF &newPosition)
+  : Atom(other.element(), newPosition, other.hAtoms(), other.charge())
+{}
+
+QPointF Atom::position() const {
+  return pos;
 }
 
-class OBabelIfaceLoader : public QObject
-{
-  Q_OBJECT
-public:
-  explicit OBabelIfaceLoader(QObject *parent = 0);
-  ~OBabelIfaceLoader();
-  QStringList inputFormats();
-  QStringList outputFormats();
-  Molsketch::Molecule* loadFile(const QString& filename, qreal scaling = 1);
-  Molsketch::Molecule* callOsra(const QString filename, qreal scaling = 1);
-  bool saveFile(const QString& fileName, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens, qreal scaling);
-  Molsketch::Molecule* convertInChI(const QString& InChI);
-  QVector<QPointF> optimizeCoordinates(const Molsketch::Molecule* molecule);
+QString Atom::element() const {
+  return el;
+}
 
-signals:
-  void obabelIfaceAvailable(bool);
-  void inchiAvailable(bool);
-  void optimizeAvailable(bool);
-  void obabelIfaceFileNameChanged(QString);
+unsigned Atom::hAtoms() const {
+  return hAtomCount;
+}
 
-public slots:
-  void reloadObabelIface(const QString& path);
-  void setObabelFormats(const QString& folder);
-private:
-  Q_DECLARE_PRIVATE(OBabelIfaceLoader)
-  OBabelIfaceLoaderPrivate* d_ptr;
-};
+int Atom::charge() const {
+  return ch;
+}
 
-#endif // OBABELIFACELOADER_H
+} // namespace Core
+} // namespace Molsketch

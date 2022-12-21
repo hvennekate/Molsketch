@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
+ *   Copyright (C) 2022 by Hendrik Vennekate                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,45 +16,50 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
-#ifndef OBABELIFACELOADER_H
-#define OBABELIFACELOADER_H
 
-#include <QObject>
+#ifndef MOLSKETCH_CORE_BOND_H
+#define MOLSKETCH_CORE_BOND_H
 
-class OBabelIfaceLoaderPrivate;
-class QString;
-class QGraphicsScene;
+#include <QDebug>
 
 namespace Molsketch {
-  class Molecule;
-}
+namespace Core {
 
-class OBabelIfaceLoader : public QObject
+class Bond
 {
-  Q_OBJECT
 public:
-  explicit OBabelIfaceLoader(QObject *parent = 0);
-  ~OBabelIfaceLoader();
-  QStringList inputFormats();
-  QStringList outputFormats();
-  Molsketch::Molecule* loadFile(const QString& filename, qreal scaling = 1);
-  Molsketch::Molecule* callOsra(const QString filename, qreal scaling = 1);
-  bool saveFile(const QString& fileName, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens, qreal scaling);
-  Molsketch::Molecule* convertInChI(const QString& InChI);
-  QVector<QPointF> optimizeCoordinates(const Molsketch::Molecule* molecule);
-
-signals:
-  void obabelIfaceAvailable(bool);
-  void inchiAvailable(bool);
-  void optimizeAvailable(bool);
-  void obabelIfaceFileNameChanged(QString);
-
-public slots:
-  void reloadObabelIface(const QString& path);
-  void setObabelFormats(const QString& folder);
+  enum Type
+  {
+    Invalid = 0,
+    DativeDot = 1,
+    DativeDash = 2,
+    Single = 10,
+    Wedge = 11,
+    Hash = 12,
+    WedgeOrHash = 13,
+    Thick = 14,
+    Striped = 15,
+    DoubleLegacy = 20,
+    CisOrTrans = 21,
+    DoubleAsymmetric = 22,
+    DoubleSymmetric = 23,
+    Triple = 30,
+    TripleAsymmetric = 31, // TODO more?
+  };
+  static Type fromOrder(const unsigned &order);
 private:
-  Q_DECLARE_PRIVATE(OBabelIfaceLoader)
-  OBabelIfaceLoaderPrivate* d_ptr;
+  unsigned m_start, m_end;
+  Type m_type;
+public:
+
+  Bond(unsigned start, unsigned end, Type type = Single);
+  unsigned start() const;
+  unsigned end() const;
+  Type type() const;
+  unsigned order() const;
 };
 
-#endif // OBABELIFACELOADER_H
+} // namespace Core
+} // namespace Molsketch
+
+#endif // MOLSKETCH_CORE_BOND_H
