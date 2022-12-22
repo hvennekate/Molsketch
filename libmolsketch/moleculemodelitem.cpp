@@ -19,9 +19,14 @@
 
 #include "moleculemodelitem.h"
 #include "molecule.h"
+#include "molscene.h"
+#include "scenesettings.h"
+#include "settingsitem.h"
 #include <QIcon>
 #include <QLibrary>
 #include <QDebug>
+#include <QPixmap>
+#include <QPainter>
 
 #ifdef Q_OS_WINDOWS
 #define OBABELOSSUFFIX ".dll"
@@ -52,6 +57,10 @@ namespace Molsketch {
   MoleculeModelItem::MoleculeModelItem()
     : d_ptr(new MoleculeModelItemPrivate)
   {}
+
+  bool MoleculeModelItem::performScaling() const {
+    return false;
+  }
 
   MoleculeModelItem::~MoleculeModelItem() {}
 
@@ -105,5 +114,27 @@ namespace Molsketch {
       }
     };
     return new MoleculeItem(molecule);
+  }
+
+  QPixmap MoleculeModelItem::renderMolecule(const Molecule &input) {
+    Molecule *molecule = new Molecule(input);
+    MolScene renderScene;
+    if (performScaling()) molecule->scale(renderScene.settings()->bondLength()->get());
+    qDebug() << "rendering molecule" << &input;
+    if (molecule->atoms().size() > 20)
+      renderScene.setRenderMode(MolScene::RenderColoredCircles);
+    renderScene.addItem(molecule);
+    renderScene.settings()->chargeVisible()->set(true);
+    renderScene.setSceneRect(molecule->boundingRect());
+    QPixmap pixmap(qCeil(renderScene.width()), qCeil(renderScene.height()));
+    if (pixmap.isNull()) return pixmap;
+
+    pixmap.fill();
+    // Creating and setting the painter
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    renderScene.render(&painter);
+    qDebug() << "rendered molecule" << &input;
+    return pixmap;
   }
 } // namespace Molsketch

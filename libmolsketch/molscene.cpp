@@ -669,6 +669,13 @@ namespace Molsketch {
     d->dragItem = new Molecule;
     QXmlStreamReader reader(event->mimeData()->data(mimeType()));
     reader >> *(d->dragItem);
+    if (event->mimeData()->hasFormat(bondLengthMimeType)) {
+      QDataStream in(event->mimeData()->data(bondLengthMimeType));
+      qreal originalScaling;
+      in >> originalScaling;
+      qreal scaling = settings()->bondLength()->get() / originalScaling;
+      if (qIsFinite(scaling) && scaling != 0.) d->dragItem->scale(scaling);
+    }
     d->moveDragItem(event);
     addItem(d->dragItem); // TODO loop until stream is exhausted
     updateAll();

@@ -166,22 +166,26 @@ namespace Molsketch {
     setName(coreMolecule.name());
 
     QList<Atom*> newAtoms;
+    QMap<Atom*, QPair<unsigned, int>> hAtomsAndCharges;
     for (auto atom : coreMolecule.atoms()) {
       auto newAtom = new Atom(atom.position() * scaling, atom.element());
-      newAtom->setCharge(atom.charge());
-      newAtom->setNumImplicitHydrogens(atom.hAtoms());
-      addAtom(newAtom);
+      hAtomsAndCharges[newAtom] = qMakePair(atom.hAtoms(), atom.charge());
       newAtoms << newAtom;
+      addAtom(newAtom);
     }
     for (auto bond : coreMolecule.bonds())
       if (auto start = newAtoms.value(bond.start()))
         if(auto end = newAtoms.value(bond.end()))
-    addBond(new Bond(start, end, fromCoreBondType(bond.type())));
+          addBond(new Bond(start, end, fromCoreBondType(bond.type())));
+    for (auto it = hAtomsAndCharges.cbegin(); it != hAtomsAndCharges.cend(); ++it) {
+      it.key()->setNumImplicitHydrogens(it.value().first);
+      it.key()->setCharge(it.value().second);
     }
+  }
 
-    Molecule *Molecule::fromCoreMolecule(const Core::Molecule &coreMolecule, qreal scaling) {
-      return coreMolecule.isValid() ? new Molecule(coreMolecule, scaling) : nullptr;
-    }
+  Molecule *Molecule::fromCoreMolecule(const Core::Molecule &coreMolecule, qreal scaling) {
+    return coreMolecule.isValid() ? new Molecule(coreMolecule, scaling) : nullptr;
+  }
 
   Molecule::Molecule(const Molecule &mol, const QSet<Atom *> &atoms, QGraphicsItem *parent)
     : graphicsItem (mol),
@@ -848,26 +852,5 @@ void Molecule::updateElectronSystems()
       cbonds << Core::Bond(atoms().indexOf(bond->beginAtom()), atoms().indexOf(bond->endAtom()),
                            toCoreBondType(bond->bondType()));
     return Core::Molecule(catoms, cbonds, getName());
-  }
-
-  QPixmap renderMolecule(const Molecule &input) {
-    Molecule *molecule = new Molecule(input);
-    MolScene renderScene;
-    qDebug() << "rendering molecule" << &input;
-    if (molecule->atoms().size() > 20)
-      renderScene.setRenderMode(MolScene::RenderColoredCircles);
-    renderScene.addItem(molecule);
-    renderScene.settings()->chargeVisible()->set(true);
-    renderScene.setSceneRect(molecule->boundingRect());
-    QPixmap pixmap(qCeil(renderScene.width()), qCeil(renderScene.height()));
-    if (pixmap.isNull()) return pixmap;
-
-    pixmap.fill();
-    // Creating and setting the painter
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    renderScene.render(&painter);
-    qDebug() << "rendered molecule" << &input;
-    return pixmap;
   }
 } // namespace

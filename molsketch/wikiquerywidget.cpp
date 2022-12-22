@@ -20,6 +20,7 @@
 #include "ui_wikiquerywidget.h"
 #include "molecule.h"
 #include "obabelifaceloader.h"
+#include "constants.h"
 
 #include <QJsonDocument>
 #include <QLibrary>
@@ -32,6 +33,7 @@
 #include <moleculemodelitem.h>
 #include <QDebug>
 #include <QFileDialog>
+#include <QMimeData>
 
 #ifdef Q_OS_WINDOWS
 #define OBABELOSSUFFIX ".dll"
@@ -40,6 +42,20 @@
 #endif
 
 using namespace Molsketch;
+
+class ScalingLibraryModel : public LibraryModel {
+public:
+  explicit ScalingLibraryModel(QObject *parent = nullptr) : LibraryModel(parent) {}
+  QMimeData *mimeData(const QModelIndexList &indexes) const override {
+    auto data = LibraryModel::mimeData(indexes);
+    QByteArray ba;
+    QDataStream out(&ba, QIODevice::WriteOnly);
+    qreal scalingFactor = 1.;
+    out << scalingFactor;
+    data->setData(bondLengthMimeType, ba);
+    return data;
+  }
+};
 
 WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, const QString &queryUrl, QWidget *parent) :
   QDockWidget(parent),
@@ -50,7 +66,7 @@ WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, const QString &query
 {
   setObjectName("wikidata-query-widget");
   ui->setupUi(this);
-  ui->moleculeListView->setModel(new LibraryModel(this));
+  ui->moleculeListView->setModel(new ScalingLibraryModel(this));
   connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processMoleculeQuery(QNetworkReply*)));
   connect(loader, SIGNAL(inchiAvailable(bool)), ui->dockWidgetContents, SLOT(setEnabled(bool)));
   ui->progressWidget->hide();
@@ -80,6 +96,9 @@ class InChIItem : public MoleculeModelItem {
   QString inchi;
   QString name;
   OBabelIfaceLoader *obloader;
+  bool performScaling() const override {
+    return true;
+  }
 public:
   InChIItem(QString name, QString inchi, OBabelIfaceLoader* obloader) : inchi(inchi), name(name), obloader(obloader) {}
   Molecule* produceMolecule() const override {
