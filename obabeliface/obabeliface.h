@@ -42,64 +42,36 @@ extern "C"
 
   namespace Molsketch
   {
-/**
- * Get supported output file formats
- */
     EXPORT_PREFIX QStringList outputFormats();
     typedef QStringList (*formatsFunctionPointer)() ;
     const char OUTPUT_FORMATS[] = "outputFormats";
 
-/**
- * Get supported input file formats
- */
     EXPORT_PREFIX QStringList inputFormats();
     const char INPUT_FORMATS[] = "inputFormats";
-/**
- * Generate molecule from InChI string
- */
+
     EXPORT_PREFIX Core::Molecule fromInChI(const QString&);
     const char FROM_INCHI[] = "fromInChI";
     typedef Core::Molecule (*fromInChIFunctionPointer)(const QString&);
-    // TODO should be the same type as for smiles
-/**
- * Check if InChI format is available
- */
+
     EXPORT_PREFIX bool inChIAvailable();
     const char INCHI_AVAILABLE[] = "inChIAvailable";
+    typedef bool (*formatAvailablePointer)();
+
     EXPORT_PREFIX bool gen2dAvailable();
     const char GEN2D_AVAILABLE[] = "gen2dAvailable";
-    typedef bool (*formatAvailablePointer)();
-/**
- * Optimize coordinates
- */
+
     EXPORT_PREFIX QVector<QPointF> optimizeCoordinates(const Core::Molecule &molecule);
     const char OPTIMIZE_COORDS[] = "optimizeCoordinates";
     typedef QVector<QPointF> (*optimizeCoordsPointer)(const Core::Molecule &);
 
-/**
- * Load and save routines
- *
- * @author Harm van Eersel (modified by H. Vennekate)
- */
-
-/**
- * Loads file with @p fileName and returns it as pointer to a new Molecule
- * object.
- */
-    EXPORT_PREFIX Core::Molecule loadFile(const QString &fileName);
+    EXPORT_PREFIX Core::Molecule loadFile(std::istream *input, const std::string &filename);
     const char LOAD_FILE[] = "loadFile";
-    typedef Core::Molecule (*loadFileFunctionPointer)(const QString&) ;
-/**
- * Saves the current document under @p fileName and returns @c false if the
- * save failed.
- */
-    EXPORT_PREFIX bool saveFile(const QString &fileName, const QList<Core::Molecule> &molecules, unsigned short int dim = 2, bool addHydrogens = false);
-    const char SAVE_FILE[] = "saveFile";
-    typedef bool (*saveFileFunctionPointer)(const QString&, const QList<Core::Molecule> &, unsigned short int, bool) ;
+    typedef Core::Molecule (*loadFileFunctionPointer)(std::istream *, const std::string &) ;
 
-/**
- * Load Molecule from image (OSRA)
- */
+    EXPORT_PREFIX bool saveFile(std::ostream *input, const std::string &filename, const QList<Core::Molecule> &molecules, unsigned short int dim = 2, bool addHydrogens = false);
+    const char SAVE_FILE[] = "saveFile";
+    typedef bool (*saveFileFunctionPointer)(std::ostream *, const std::string &, const QList<Core::Molecule> &, unsigned short int, bool) ;
+
     EXPORT_PREFIX Core::Molecule call_osra(QString fileName);
     const char CALL_OSRA[] = "call_osra";
     typedef Core::Molecule (*callOsraFunctionPointer)(QString) ;

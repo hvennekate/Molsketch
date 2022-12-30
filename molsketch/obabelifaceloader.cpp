@@ -104,26 +104,26 @@ QStringList OBabelIfaceLoader::outputFormats () {
   return QStringList ();
 }
 
-Molsketch::Molecule* OBabelIfaceLoader::loadFile (const QString& filename, qreal scaling) {
+Molsketch::Molecule* OBabelIfaceLoader::loadFile (std::istream *input, const std::string &filename, qreal scaling) {
   Q_D (OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->load) return Molsketch::Molecule::fromCoreMolecule(d->load (filename), scaling);)
+  ENCAPSULE_OB_CALL(if (d->load) return Molsketch::Molecule::fromCoreMolecule(d->load (input, filename), scaling);)
   qWarning ("No OpenBabel support available for loading file");
   return nullptr;
 }
 
-Molsketch::Molecule *OBabelIfaceLoader::callOsra(const QString filename, qreal scaling) {
+Molsketch::Molecule *OBabelIfaceLoader::callOsra(const QString &filename, qreal scaling) {
   Q_D(OBabelIfaceLoader);
   ENCAPSULE_OB_CALL(if (d->callOsra) return Molsketch::Molecule::fromCoreMolecule(d->callOsra(filename), scaling);)
   return nullptr;
 }
 
-bool OBabelIfaceLoader::saveFile (const QString& fileName, const QList<Molsketch::Molecule *> &originalMolecules, bool use3d, bool addHydrogens, qreal scaling) {
+bool OBabelIfaceLoader::saveFile (std::ostream *output, const std::string &filename, const QList<Molsketch::Molecule *> &originalMolecules, bool use3d, bool addHydrogens, qreal scaling) {
   QList<Molsketch::Core::Molecule> molecules;
   for (auto originalMolecule : originalMolecules)
     if (originalMolecule)
       molecules << originalMolecule->toCoreMolecule(scaling);
   Q_D (OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->save) return d->save (fileName, molecules, use3d ? 3 : 2, addHydrogens);)
+  ENCAPSULE_OB_CALL(if (d->save) return d->save (output, filename, molecules, use3d ? 3 : 2, addHydrogens);)
   qWarning ("No support for saving OpenBabel available");
   return false;
 }

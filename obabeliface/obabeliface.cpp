@@ -120,37 +120,23 @@ namespace Molsketch
     return obmol;
   }
 
-  bool saveFile(const QString &fileName, const QList<Molecule> &molecules, unsigned short int dim, bool addHydrogens)
+  bool saveFile(std::ostream *output, const std::string &filename, const QList<Molecule> &molecules, unsigned short int dim, bool addHydrogens)
   {
     using namespace OpenBabel;
     OBConversion conversion;
 
-    if (!conversion.SetOutFormat(QFileInfo(fileName).suffix().toLatin1()))
-    {
-      qDebug() << "Error while saving" << fileName;
+    if (!conversion.SetOutFormat(conversion.FormatFromExt(filename))) {
+      qDebug() << "Error while saving:" << QString::fromStdString(filename);
       return false;
     }
 
-    // Create the output molecule
     OBMol obmol;
     obmol.SetDimension(dim);
-
-    // Add all molecules
-
     for (auto molecule : molecules)
       obmol += toOBMolecule(molecule, dim);
     if (addHydrogens) obmol.AddHydrogens(); // TODO check if this works without begin/end modify
 
-    // Checking if the file exists and making a backup
-    if (QFile::exists(fileName))
-    {
-      QFile::remove(fileName + "~");
-      QFile::copy(fileName,fileName + "~");
-    }
-
-    // Writing the final result to the file
-    conversion.WriteFile(&obmol,fileName.toStdString()); // TODO use Write (with stream) instead
-
+    conversion.Write(&obmol, output);
     return true;
   }
 
@@ -188,17 +174,16 @@ namespace Molsketch
     return Molecule(atoms, bonds, obmol.GetTitle());
   }
 
-  Molecule loadFile(const QString &fileName)
+  Molecule loadFile(std::istream *input, const std::string &filename)
   {
     // Creating and setting conversion classes
     using namespace OpenBabel;
     OBConversion conversion ;
-    conversion.SetInFormat(conversion.FormatFromExt(fileName.toStdString())) ;
-    conversion.AddOption("h", OBConversion::GENOPTIONS);
+    conversion.SetInFormat(conversion.FormatFromExt(filename)) ;
+    conversion.AddOption("h", OBConversion::GENOPTIONS); // add hydrogens
     OBMol obmol;
 
-    if (!conversion.ReadFile(&obmol, fileName.toStdString())) // TODO use Read (with stream argument) instead
-      return Molecule({}, {});
+    if (!conversion.Read(&obmol, input)) return Molecule({}, {});
 
     return fromOBMolecule(obmol);
   }
@@ -226,7 +211,8 @@ namespace Molsketch
     if (QProcess::execute(command, arguments))
       return Molecule({}, {});
 
-    auto mol = loadFile(tmpresult);
+    std::ifstream input(tmpresult.toStdString()); // TODO check if opening worked
+    auto mol = loadFile(&input, tmpresult.toStdString());
     QFile::remove(tmpresult);
 
     return mol.shiftedBy(-mol.center());

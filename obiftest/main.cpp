@@ -17,6 +17,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
+#include <sstream>
 #include <functional>
 #include <QApplication>
 #include <QDebug>
@@ -111,9 +112,12 @@ int main(int argc, char** argv) {
     Core::Molecule testMolecule({Core::Atom("C", QPointF(), 0, -1), Core::Atom("N")}, {Core::Bond(0, 1, Core::Bond::Triple)},"test molecule name");
     invoke<optimizeCoordsPointer>(lib, OPTIMIZE_COORDS, testMolecule);
 //    invoke<loadFileFunctionPointer>(lib, LOAD_FILE, "testfile");  // TODO
-    invoke<saveFileFunctionPointer>(lib, SAVE_FILE, "testoutfile.pcm", QList<Core::Molecule>() << testMolecule, 2, false);
-    invoke<saveFileFunctionPointer>(lib, SAVE_FILE, "testoutfile.inchi", QList<Core::Molecule>() << testMolecule, 2, false);
-    invoke<loadFileFunctionPointer>(lib, LOAD_FILE, "testoutfile.inchi");
+    std::ostringstream output;
+    invoke<saveFileFunctionPointer>(lib, SAVE_FILE, &output, "testoutfile.inchi", QList<Core::Molecule>() << testMolecule, 2, false);
+    qDebug() << "Result of conversion of molecule:" << QString::fromStdString(output.str());
+
+    std::istringstream input("InChI=1S/CN/c1-2/q-1");
+    invoke<loadFileFunctionPointer>(lib, LOAD_FILE, &input, "testoutfile.inchi");
 
     // TODO
     // test implicit hydrogens
