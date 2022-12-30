@@ -27,6 +27,27 @@
 
 using namespace Molsketch;
 
+void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stderr, "Debug: (%s:%u, %s) %s\n", context.file, context.line, context.function, localMsg.constData());
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning: (%s:%u, %s) %s\n", context.file, context.line, context.function, localMsg.constData());
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical: (%s:%u, %s) %s\n", context.file, context.line, context.function, localMsg.constData());
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: (%s:%u, %s) %s\n", context.file, context.line, context.function, localMsg.constData());
+        abort();
+      case QtInfoMsg:
+        fprintf(stderr, "Info: (%s:%u, %s) %s\n", context.file, context.line, context.function, localMsg.constData());
+    }
+}
+
 template<class FUNCTION_POINTER_TYPE, class... ARGS>
 void invoke(QLibrary &lib, const char *functionName, ARGS... args) {
     auto functionToInvoke = (FUNCTION_POINTER_TYPE) lib.resolve(functionName);
@@ -52,6 +73,7 @@ void invoke(QLibrary &lib, const char *functionName, ARGS... args) {
 //}
 
 int main(int argc, char** argv) {
+    qInstallMessageHandler(messageOutput);
     QApplication app(argc, argv);
 
     QCommandLineParser parser;
@@ -81,24 +103,25 @@ int main(int argc, char** argv) {
     invoke<formatAvailablePointer>(lib, INCHI_AVAILABLE);
     invoke<formatAvailablePointer>(lib, GEN2D_AVAILABLE);
 
-    auto atomA = new Atom(QPointF(0,0), "C");
-    auto atomB = new Atom(QPointF(100,0), "C");
-    auto bond = new Bond(atomA, atomB);
-    auto molecule = new Molecule({atomA, atomB}, {bond});
-
     invoke<fromInChIFunctionPointer>(lib, FROM_INCHI, "1S/C2H6/c1-2/h1-2H3");
 
     invoke<formatAvailablePointer>(lib, INCHI_AVAILABLE);
     invoke<formatAvailablePointer>(lib, GEN2D_AVAILABLE);
 
-    invoke<optimizeCoordsPointer>(lib, OPTIMIZE_COORDS, molecule->toCoreMolecule());
+    Core::Molecule testMolecule({Core::Atom("C", QPointF(), 0, -1), Core::Atom("N")}, {Core::Bond(0, 1, Core::Bond::Triple)},"test molecule name");
+    invoke<optimizeCoordsPointer>(lib, OPTIMIZE_COORDS, testMolecule);
 //    invoke<loadFileFunctionPointer>(lib, LOAD_FILE, "testfile");  // TODO
-//    invoke<saveFileFunctionPointer>(lib, SAVE_FILE, "testoutfile", molecule); // TODO
+    invoke<saveFileFunctionPointer>(lib, SAVE_FILE, "testoutfile.pcm", QList<Core::Molecule>() << testMolecule, 2, false);
+    invoke<saveFileFunctionPointer>(lib, SAVE_FILE, "testoutfile.inchi", QList<Core::Molecule>() << testMolecule, 2, false);
+    invoke<loadFileFunctionPointer>(lib, LOAD_FILE, "testoutfile.inchi");
+
+    // TODO
+    // test implicit hydrogens
+    // test stereo bonds
 //    QVector<unsigned int> symmetryClasses;
 //    invoke<getSymmetryClassesFunctionPointer>(lib, GET_SYMMETRY_CLASSES, molecule, symmetryClasses); // TODO unused
 //    invoke<callOsraFunctionPointer>(lib, CALL_OSRA, "testosrafile"); // TODO
 
-    delete molecule;
     qDebug() << "Completed test invocations.";
 
     return 0;

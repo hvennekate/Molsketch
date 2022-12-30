@@ -108,17 +108,13 @@ namespace Molsketch
     for (auto bond : originalMolecule.bonds()) {
       if (bond.order() < 1) continue;
 
-      int flags = 0 ;
-      switch (bond.type()) {
-      case Bond::Wedge:
-        flags |= OB_WEDGE_BOND;
-        break;
-      case Bond::Hash:
-        flags |= OB_HASH_BOND;
-        break;
-      default: break;
-      }
-      obmol.AddBond(bond.start(), bond.end(), bond.order(), flags);
+      auto newBond = obmol.NewBond();
+      newBond->SetBondOrder(bond.order());
+      newBond->SetBegin(newAtoms.at(bond.start()));
+      newBond->SetEnd(newAtoms.at(bond.end()));
+
+      if (Bond::Wedge == bond.type()) newBond->SetWedge();
+      if (Bond::Hash == bond.type()) newBond->SetHash();
     }
     obmol.EndModify();
     return obmol;
@@ -153,7 +149,7 @@ namespace Molsketch
     }
 
     // Writing the final result to the file
-    conversion.WriteFile(&obmol,fileName.toStdString());
+    conversion.WriteFile(&obmol,fileName.toStdString()); // TODO use Write (with stream) instead
 
     return true;
   }
@@ -201,7 +197,7 @@ namespace Molsketch
     conversion.AddOption("h", OBConversion::GENOPTIONS);
     OBMol obmol;
 
-    if (!conversion.ReadFile(&obmol, fileName.toStdString()))
+    if (!conversion.ReadFile(&obmol, fileName.toStdString())) // TODO use Read (with stream argument) instead
       return Molecule({}, {});
 
     return fromOBMolecule(obmol);
