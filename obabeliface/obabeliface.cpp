@@ -101,7 +101,9 @@ namespace Molsketch
       newAtom->SetVector(atom.position().x(), atom.position().y(), 0);
       newAtom->SetAtomicNum(Molsketch::symbol2number(atom.element()));
       newAtom->SetFormalCharge(atom.charge()); // TODO does this have to be done after the bonds?
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
       newAtom->SetImplicitHCount(atom.hAtoms());
+#endif
     }
     for (auto bond : originalMolecule.bonds()) {
       if (bond.order() < 1) continue;
@@ -165,7 +167,11 @@ namespace Molsketch
     FOR_ATOMS_OF_MOL(obatom, obmol) {
       atoms << Atom(Molsketch::number2symbol(obatom->GetAtomicNum()),
                     QPointF(obatom->x(), obatom->y()),
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
                     obatom->GetImplicitHCount(),
+#else
+                    obatom->ImplicitHydrogenCount(),
+#endif
                     obatom->GetFormalCharge());
       atomNumbers[&(*obatom)] = i++;
     }
