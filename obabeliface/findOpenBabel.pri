@@ -43,19 +43,26 @@ defineTest(findOpenBabel) {
         return(true)
 }
 
-unix {
-        CONFIG += link_pkgconfig
-        packagesExist(openbabel-3) {
-                message("Using pkgconfig to find OpenBabel.")
-                PKGCONFIG += openbabel-3
-        } else {
-                packagesExist(openbabel-2.0) {
-                        message("Using pkgconfig to find OpenBabel.")
-                        PKGCONFIG += openbabel-2.0
-                } else {
-                        findOpenBabel()
-                }
-        }
+!isEmpty( MSK_OB_LIB_DIR ) {
+        isEmpty( MSK_OB_INC_DIR ) : error("Need to set both MSK_OB_LIB_DIR and MSK_OB_INC_DIR!")
+        LIBS += -L$${MSK_OB_LIB_DIR} -lopenbabel
+        INCLUDEPATH += $${MSK_OB_INC_DIR}
 } else {
-        findOpenBabel()
+        !isEmpty( MSK_OB_INC_DIR ) : error("Need to set both MSK_OB_LIB_DIR and MSK_OB_INC_DIR!")
+        unix {
+                CONFIG += link_pkgconfig
+                packagesExist(openbabel-3) {
+                        message("Using pkgconfig to find OpenBabel.")
+                        PKGCONFIG += openbabel-3
+                } else {
+                        packagesExist(openbabel-2.0) {
+                                message("Using pkgconfig to find OpenBabel.")
+                                PKGCONFIG += openbabel-2.0
+                        } else {
+                                findOpenBabel()
+                        }
+                }
+        } else {
+                findOpenBabel()
+        }
 }
