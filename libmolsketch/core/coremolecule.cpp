@@ -68,7 +68,7 @@ bool Molecule::isValid() const {
 QDebug operator<<(QDebug debug, const Molsketch::Core::Molecule &molecule) {
   auto out = debug.nospace() << "Molecule[name=\"" << molecule.name() << "\", atoms=(";
   for (auto atom : molecule.atoms())
-    out << "<" << atom.element() << ": " << atom.position() << ">";
+    out << "<" << atom.element() << ": " << atom.position() << ", " << atom.hAtoms() << ">";
   out <<"), bonds=(";
   for (auto bond: molecule.bonds())
     out << "<type=" << bond.type() << ", start=" << bond.start() << ", end=" << bond.end() << ">";

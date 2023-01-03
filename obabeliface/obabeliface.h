@@ -49,7 +49,7 @@ extern "C"
     EXPORT_PREFIX QStringList inputFormats();
     const char INPUT_FORMATS[] = "inputFormats";
 
-    EXPORT_PREFIX Core::Molecule fromInChI(const QString&);
+    EXPORT_PREFIX Core::Molecule fromInChI(const QString&); // TODO add name
     const char FROM_INCHI[] = "fromInChI";
     typedef Core::Molecule (*fromInChIFunctionPointer)(const QString&);
 
@@ -68,7 +68,7 @@ extern "C"
     const char LOAD_FILE[] = "loadFile";
     typedef Core::Molecule (*loadFileFunctionPointer)(std::istream *, const std::string &) ;
 
-    EXPORT_PREFIX bool saveFile(std::ostream *input, const std::string &filename, const QList<Core::Molecule> &molecules, unsigned short int dim = 2, bool addHydrogens = false);
+    EXPORT_PREFIX bool saveFile(std::ostream *output, const std::string &filename, const QList<Core::Molecule> &molecules, unsigned short int dim = 2, bool addHydrogens = false);
     const char SAVE_FILE[] = "saveFile";
     typedef bool (*saveFileFunctionPointer)(std::ostream *, const std::string &, const QList<Core::Molecule> &, unsigned short int, bool) ;
 

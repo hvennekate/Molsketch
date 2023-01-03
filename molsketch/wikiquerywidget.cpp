@@ -161,6 +161,8 @@ void WikiQueryWidget::startMoleculeQuery(const QString& queryString) {
                                 "FILTER(REGEX(?label, \"" + queryString + "\", \"i\")) "
                                 "} GROUP BY ?qnumber"
 //                                " LIMIT 100 ORDER BY DESC(?label)"
+                                // TODO allow for use of smiles ("isomer" column)
+                                // TODO take language from locale
                                 ));
   QUrl url(queryUrl);
   url.setQuery(query);

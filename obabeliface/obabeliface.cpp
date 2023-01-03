@@ -40,7 +40,6 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-copy" // OpenBabel 2 only
 
 #include <openbabel/graphsym.h>
-#include <openbabel/stereo/stereo.h>
 
 #include <openbabel/mol.h>
 #include <openbabel/data.h>
@@ -48,6 +47,7 @@
 #include <openbabel/babelconfig.h>
 #include <openbabel/op.h>
 #include <openbabel/stereo/stereo.h>
+#include <openbabel/stereo/tetrahedral.h>
 
 #if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
 #include <openbabel/obiter.h>
@@ -105,18 +105,22 @@ namespace Molsketch
       newAtom->SetImplicitHCount(atom.hAtoms());
 #endif
     }
+
     for (auto bond : originalMolecule.bonds()) {
       if (bond.order() < 1) continue;
 
-      auto newBond = obmol.NewBond();
-      newBond->SetBondOrder(bond.order());
-      newBond->SetBegin(newAtoms.at(bond.start()));
-      newBond->SetEnd(newAtoms.at(bond.end()));
+      OpenBabel::OBBond newBond;
+      newBond.SetBondOrder(bond.order());
+      newBond.SetBegin(newAtoms.at(bond.start()));
+      newBond.SetEnd(newAtoms.at(bond.end()));
 
-      if (Bond::Wedge == bond.type()) newBond->SetWedge();
-      if (Bond::Hash == bond.type()) newBond->SetHash();
+      if (Bond::Wedge == bond.type()) newBond.SetWedge();
+      if (Bond::Hash == bond.type()) newBond.SetHash();
+      if (Bond::WedgeOrHash == bond.type()) newBond.SetWedgeOrHash();
+      obmol.AddBond(newBond);
     }
     obmol.EndModify();
+
     return obmol;
   }
 
@@ -135,7 +139,6 @@ namespace Molsketch
     for (auto molecule : molecules)
       obmol += toOBMolecule(molecule, dim);
     if (addHydrogens) obmol.AddHydrogens(); // TODO check if this works without begin/end modify
-
     conversion.Write(&obmol, output);
     return true;
   }
@@ -174,6 +177,53 @@ namespace Molsketch
     return Molecule(atoms, bonds, obmol.GetTitle());
   }
 
+  // TODO should be const, but OpenBabel iterator methods do not support const
+  bool hasCoordinates(OpenBabel::OBMol &molecule) {
+    FOR_ATOMS_OF_MOL(obatom, molecule) {
+      if (obatom->GetVector() != OpenBabel::VZero)
+        return true;
+    }
+    return false;
+  }
+
+  void generate2dCoords(OpenBabel::OBMol& obmol)
+  {
+    OpenBabel::OBOp* gen2D = OpenBabel::OBOp::FindType("gen2D");
+    if (!gen2D || !gen2D->Do(&obmol))
+      qCritical("Could not find gen2D for coordinate generation.");
+  }
+
+  void setWedgeAndHash(OpenBabel::OBMol& mol) {
+      using namespace OpenBabel;
+    // Remove any existing wedge and hash bonds
+    FOR_BONDS_OF_MOL(b, &mol)  {
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+      b->SetWedge(false);
+      b->SetHash(false);
+#else
+      b->UnsetWedge();
+      b->UnsetHash();
+#endif
+    }
+
+    // TODO reverse bonds where their direction is not "from stereo center"
+
+    std::map<OBBond*, enum OBStereo::BondDirection> updown;
+    std::map<OBBond*, OBStereo::Ref> from;
+    std::map<OBBond*, OBStereo::Ref>::const_iterator from_cit;
+    TetStereoToWedgeHash(mol, updown, from);
+
+    for(from_cit = from.begin(); from_cit != from.end(); ++from_cit) {
+      OBBond* pbond = from_cit->first;
+      if(updown[pbond]==OBStereo::UpBond)
+        pbond->SetHash();
+      else if(updown[pbond]==OBStereo::DownBond)
+        pbond->SetWedge();
+      else if(updown[pbond]==OBStereo::UnknownDir)
+        pbond->SetWedgeOrHash();
+    }
+  }
+
   Molecule loadFile(std::istream *input, const std::string &filename)
   {
     // Creating and setting conversion classes
@@ -184,6 +234,11 @@ namespace Molsketch
     OBMol obmol;
 
     if (!conversion.Read(&obmol, input)) return Molecule({}, {});
+
+    if (!hasCoordinates(obmol)) {
+      generate2dCoords(obmol);
+      setWedgeAndHash(obmol); // TODO check if this is only needed if no original coords were present or generally for all formats
+    }
 
     return fromOBMolecule(obmol);
   }
@@ -238,47 +293,11 @@ namespace Molsketch
     return getFormats(conversion.GetSupportedInputFormat());
   }
 
-  void SetWedgeAndHash(OpenBabel::OBMol& mol) {
-      using namespace OpenBabel;
-    // Remove any existing wedge and hash bonds
-    FOR_BONDS_OF_MOL(b, &mol)  {
-#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
-      b->SetWedge(false);
-      b->SetHash(false);
-#else
-      b->UnsetWedge();
-      b->UnsetHash();
-#endif
-    }
-
-    std::map<OBBond*, enum OBStereo::BondDirection> updown;
-    std::map<OBBond*, OBStereo::Ref> from;
-    std::map<OBBond*, OBStereo::Ref>::const_iterator from_cit;
-    TetStereoToWedgeHash(mol, updown, from);
-
-    for(from_cit=from.begin();from_cit!=from.end();++from_cit) {
-      OBBond* pbond = from_cit->first;
-      if(updown[pbond]==OBStereo::UpBond)
-        pbond->SetHash();
-      else if(updown[pbond]==OBStereo::DownBond)
-        pbond->SetWedge();
-      else if(updown[pbond]==OBStereo::UnknownDir)
-        pbond->SetWedgeOrHash();
-    }
-  }
-
   bool isInputFormatAvailable(OpenBabel::OBConversion conv, const char* format) {
     if (conv.SetInFormat(format)) return true;
     qCritical("Could not find format: %s", format);
     qInfo() << ("Available formats: " + outputFormats().join(", "));
     return false;
-  }
-
-  void generate2dCoords(OpenBabel::OBMol& obmol)
-  {
-    OpenBabel::OBOp* gen2D = OpenBabel::OBOp::FindType("gen2D");
-    if (!gen2D || !gen2D->Do(&obmol))
-      qCritical("Could not find gen2D for coordinate generation.");
   }
 
   Molecule fromString(const QString &input, const char* format) {
@@ -300,7 +319,7 @@ namespace Molsketch
     qDebug() << "Error messages:" << QString::fromStdString(OpenBabel::OBMessageHandler().GetMessageSummary());
 
     generate2dCoords(obmol);
-    SetWedgeAndHash(obmol);
+    setWedgeAndHash(obmol);
     return fromOBMolecule(obmol);
   }
 

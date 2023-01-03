@@ -27,6 +27,7 @@
 #include <QDebug>
 #include <QPixmap>
 #include <QPainter>
+#include <QtMath>
 
 #ifdef Q_OS_WINDOWS
 #define OBABELOSSUFFIX ".dll"

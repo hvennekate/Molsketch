@@ -26,6 +26,10 @@ Atom::Atom(const QString &element, const QPointF &position, unsigned hAtoms, int
   : el(element), pos(position), hAtomCount(hAtoms), ch(charge)
 {}
 
+Atom::Atom(const QString &element, unsigned hAtoms, int charge, const QPointF &position)
+  : Atom(element, position, hAtoms, charge)
+{}
+
 Atom::Atom(const Atom &other, const QPointF &newPosition)
   : Atom(other.element(), newPosition, other.hAtoms(), other.charge())
 {}

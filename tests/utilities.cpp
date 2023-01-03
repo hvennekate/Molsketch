@@ -157,3 +157,7 @@ void doubleClick(QWidget *w, QPoint p) {
 void doubleClick(QWindow *w, QPoint p) {
   QTest::mouseDClick(w, Qt::LeftButton, Qt::KeyboardModifiers(), p);
 }
+
+QDebug operator <<(QDebug debug, const std::string &string) {
+  return debug << QString::fromStdString(string);
+}

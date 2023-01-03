@@ -22,16 +22,165 @@
 #include <molecule.h>
 #include "utilities.h"
 using namespace Molsketch;
-#include <QDebug>
+
+const char BUTANE_INCHI[] = "1S/C4H10/c1-3-4-2/h3-4H2,1-2H3";
+const char BUTANE_FULL_INHCHI[] = "InChI=1S/C4H10/c1-3-4-2/h3-4H2,1-2H3\n";
+const Core::Molecule &BUTANE{
+  {{"C", 3}, {"C", 3}, {"C", 2}, {"C", 2}},
+  {{0, 2}, {2, 3}, {3, 1}},
+  ""
+};
+
+const char D_LACTIC_ACID_FULL_INCHI[] = "InChI=1S/C3H6O3/c1-2(4)3(5)6/h2,4H,1H3,(H,5,6)/t2-/m1/s1\n";
+// TODO OpenBabel's gen2d actually generates a molecule here that is not in line with its own convention
+// (tip of the hash bond is at the terminal methyl group; see perception.cpp:2440-2442
+const Core::Molecule &D_LACTIC_ACID{
+  {{"C", {2.6, 0.5}, 3}, {"C", {1.7, 0}, 1}, {"C", {0.9, 0.5}}, {"O", {1.7, -1}, 1}, {"O", {0.9, 1.5}}, {"O", 1}},
+  {{1, 0, Core::Bond::Wedge}, {1, 2}, {1, 3}, {2, 4, Core::Bond::DoubleLegacy}, {2, 5}},
+  "Lactic acid"
+};
+
+const char L_LACTIC_ACID_FULL_INCHI[] = "InChI=1S/C3H6O3/c1-2(4)3(5)6/h2,4H,1H3,(H,5,6)/t2-/m0/s1\n";
+const Core::Molecule &L_LACTIC_ACID{
+  {{"C", {2.6, 0.5}, 3}, {"C", {1.7, 0}, 1}, {"C", {0.9, 0.5}}, {"O", {1.7, -1}, 1}, {"O", {0.9, 1.5}}, {"O", 1}},
+  {{1, 0, Core::Bond::Hash}, {1, 2}, {1, 3}, {2, 4, Core::Bond::DoubleLegacy}, {2, 5}},
+  "Lactic acid"
+};
+
+const char CYANIDE_FULL_INCHI[] = "InChI=1S/CN/c1-2/q-1\n";
+const Core::Molecule &CYANIDE{
+  {{"C", {-.5, 0}, 0, -1}, {"N", {.5, 0}}},
+  {{0, 1, Core::Bond::Triple}},
+  "Cyanide anion"
+};
 
 class OpenBabelUnitTest : public CxxTest::TestSuite {
+  void assertButane(const Core::Molecule &molecule) {
+    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, {"C", "C", "C", "C"});
+  }
+
+  void assertLacticAcid(const Core::Molecule &molecule, Core::Bond::Type stereoBondType) {
+    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, QList<QString>{"C", "C", "C", "O", "O", "O"});
+    typedef std::tuple<unsigned, unsigned, unsigned> BondTuple;
+    auto singleBond = Core::Bond::Single;
+    assertListTransformed(molecule.bonds().toList(), [](Core::Bond bond) { return std::make_tuple(bond.type(), bond.start(), bond.end()); },
+      QList<BondTuple>{{stereoBondType, 0, 1}, {singleBond, 1, 2}, {singleBond, 1, 3}, {Core::Bond::DoubleLegacy, 2, 4}, {singleBond, 2, 5}});
+  }
 public:
-  void testConversionFromSmilesString() {
-    qputenv("BABEL_LIBDIR", "/usr/lib64/openbabel/2.4.1"); // TODO make configurable
-    auto molecule = fromInChI("1S/C4H10/c1-3-4-2/h3-4H2,1-2H3");
+  void testConversionFromInChIString() {
+    auto molecule = fromInChI(BUTANE_INCHI);
     QSM_ASSERT("molecule not valid", molecule.isValid());
-    TS_ASSERT_EQUALS(molecule.atoms().size(), 4);
-    for(auto atom : molecule.atoms())
-      TS_ASSERT_EQUALS(atom.element(), "C");
+    assertButane(molecule);
+  }
+
+  void testReadingFile() {
+    std::istringstream input(BUTANE_FULL_INHCHI);
+    auto molecule = loadFile(&input, "testinput.inchi");
+    assertButane(molecule);
+  }
+
+  void testWritingFile() {
+    std::ostringstream output;
+    bool result = saveFile(&output, "test.inchi", {BUTANE});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(output.str(), BUTANE_FULL_INHCHI);
+  } // TODO three dim
+
+  void testReadingWedgeBond() {
+    std::istringstream input(L_LACTIC_ACID_FULL_INCHI);
+    auto molecule = loadFile(&input, "testinput.inchi");
+    assertLacticAcid(molecule, Core::Bond::Wedge);
+  }
+
+  void testWritingWedgeBond() {
+    std::ostringstream output;
+    bool result = saveFile(&output, "test.inchi", {D_LACTIC_ACID});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(output.str(), D_LACTIC_ACID_FULL_INCHI);
+  }
+
+  void testReadingHashBond() {
+    std::istringstream input(D_LACTIC_ACID_FULL_INCHI);
+    auto molecule = loadFile(&input, "testinput.inchi");
+    assertLacticAcid(molecule, Core::Bond::Hash);
+  }
+
+  void testWritingHashBond() {
+    std::ostringstream output;
+    bool result = saveFile(&output, "test.inchi", {L_LACTIC_ACID});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(output.str(), L_LACTIC_ACID_FULL_INCHI);
+  }
+
+  void testOptimizationOfCoordinates() {
+    auto optimizedCoords = optimizeCoordinates(BUTANE);
+    TS_ASSERT_EQUALS(optimizedCoords.size(), 4);
+    for (auto point : optimizedCoords) TS_ASSERT(!point.isNull());
+  }
+
+  void testOptimizationOfNullMolecule() {
+    auto optimizedCoords = optimizeCoordinates(Core::Molecule({}, {}));
+    TS_ASSERT_EQUALS(optimizedCoords.size(), 0);
+  }
+
+  void testInputFormatsAvailable() {
+    QS_ASSERT_CONTAINS("GAMESS Input (*.gamin)", inputFormats());
+    QS_ASSERT_CONTAINS("InChI format (*.inchi)", inputFormats());
+  }
+
+  void testOutputFormatsAvailable() {
+    QS_ASSERT_CONTAINS("MOPAC Internal (*.mopin)", outputFormats());
+    QS_ASSERT_CONTAINS("InChI format (*.inchi)", outputFormats());
+  }
+
+  void testReadingImplicitHydrogens() {
+    std::istringstream input("InChI=1S/C2H5/c1-2/h1H2,2H3\n");
+    auto molecule = loadFile(&input, "testinput.inchi");
+    assertListProperty(molecule.bonds().toList(), &Core::Bond::type, {Core::Bond::Single});
+    assertListProperty(molecule.atoms().toList(), &Core::Atom::charge, {0, 0});
+    assertListProperty(molecule.atoms().toList(), &Core::Atom::hAtoms, {2, 3});
+  }
+
+  void testWritingImplicitHydrogens() {
+    std::ostringstream output;
+    bool result = saveFile(&output, "test.inchi", {Core::Molecule({{"C", 2}, {"C", 3}}, {{0, 1, Core::Bond::Single}})});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(output.str(), "InChI=1S/C2H5/c1-2/h1H2,2H3\n");
+  }
+
+  void testReadingCharge() {
+    std::istringstream input(CYANIDE_FULL_INCHI);
+    auto molecule = loadFile(&input, "testinput.inchi");
+    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, {"C", "N"});
+    assertListProperty(molecule.atoms().toList(), &Core::Atom::charge, {-1, 0});
+    assertListProperty(molecule.bonds().toList(), &Core::Bond::type, {Core::Bond::Triple});
+    assertListProperty(molecule.bonds().toList(), &Core::Bond::start, {0});
+    assertListProperty(molecule.bonds().toList(), &Core::Bond::end, {1});
+  }
+
+  void testWritingCharge() {
+    std::ostringstream output;
+    bool result = saveFile(&output, "test.inchi", {CYANIDE});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(output.str(), CYANIDE_FULL_INCHI);
+  }
+
+  void testReadMultipleMolecules() {
+    std::istringstream input("InChI=1S/C4H10.CN/c1-3-4-2;1-2/h3-4H2,1-2H3;/q;-1\n");
+    auto molecule = loadFile(&input, "testinput.inchi");
+
+    // it is acceptable here to have one "big" united molecule,
+    // as the disjoint parts will be split in MainWindow::readSceneUsingOpenBabel
+    // (should possibly be moved
+    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, {"C", "C", "C", "C", "C", "N"});
+    assertListProperty(molecule.bonds().toList(), &Core::Bond::start, {0, 1, 2, 4});
+    assertListProperty(molecule.bonds().toList(), &Core::Bond::end, {2, 3, 3, 5});
+  }
+
+  void testWriteMultipleMolecules() {
+    std::ostringstream output;
+    bool result = saveFile(&output, "test.inchi", {BUTANE, CYANIDE});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(output.str(), "InChI=1S/C4H10.CN/c1-3-4-2;1-2/h3-4H2,1-2H3;/q;-1\n");
   }
 };

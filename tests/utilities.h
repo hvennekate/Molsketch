@@ -53,6 +53,11 @@ class QMainWindow;
   makeComparisonString(#VAL1, #VAL2, VAL1, VAL2, "==", "    Expected:           ", "    not to be equal to: ").toStdString().data()); \
   } __TS_CATCH(__FILE__, __LINE__) }
 
+#define QS_ASSERT_CONTAINS(VAL, COLLECTION) {_TS_TRY { \
+  if (!COLLECTION.contains(VAL)) CxxTest::tracker().failedTest(__FILE__, __LINE__, \
+  makeComparisonString(#VAL, #COLLECTION, VAL, COLLECTION, " not in ", "    Expected: ", "    to be in: ").toStdString().data()); \
+  } __TS_CATCH(__FILE__, __LINE__) }
+
 template<typename T, typename U>
 QString makeComparisonString(const char *first, const char *second, T expected, U actual, const char *op,
                              const char *expectedIntro, const char *actualIntro) {
@@ -93,6 +98,38 @@ QString joinToString(FirstType firstInput, InputTypes... inputs) {
     CAST_TYPE *p = dynamic_cast<CAST_TYPE*>(POINTER);\
     if (p) QS_ASSERT_EQUALS(p->METHOD, VALUE)\
   }\
+  }
+
+template<class T, class U, typename binaryOperation>
+void assertListTransformed(QList<T> items, binaryOperation transformer, QList<U> expected) {
+  QList<U> actual;
+  std::transform(items.cbegin(), items.cend(), std::back_inserter(actual), transformer);
+  QS_ASSERT_EQUALS(actual, expected);
+}
+
+template<class T, class U>
+void assertListProperty(QList<T> items, U (T::*extractor)() const , QList<U> expected) {
+  assertListTransformed(items, std::mem_fn(extractor), expected);
+}
+
+template<typename ... Types>
+QDebug operator<<(QDebug debug, const std::tuple<Types...>& tuple) {
+  debug << "Tuple [";
+  printTupel(tuple, debug);
+  return debug << "]";
+}
+
+template<std::size_t I = 0, typename... TupelTypes>
+typename std::enable_if<I == sizeof...(TupelTypes)>::type
+  printTupel(const std::tuple<TupelTypes...>&, QDebug&) {}
+
+template<std::size_t I = 0, typename... TupelTypes>
+typename std::enable_if<I < sizeof...(TupelTypes)>::type
+  printTupel(const std::tuple<TupelTypes...>& tupel, QDebug& debug)
+  {
+    debug << std::get<I>(tupel);
+    if (I + 1 < sizeof...(TupelTypes)) debug << ", ";
+    printTupel<I + 1, TupelTypes...>(tupel, debug);
   }
 
 void mouseMoveEvent(QWidget *widget, Qt::MouseButton button, Qt::KeyboardModifiers stateKey, QPoint pos, int delay=-1);
@@ -156,5 +193,7 @@ void leftMouseClick(QWidget* w, QPoint p = QPoint());
 void leftMouseClick(QWindow* w, QPoint p = QPoint());
 void doubleClick(QWidget* w, QPoint p = QPoint());
 void doubleClick(QWindow* w, QPoint p = QPoint());
+
+QDebug operator <<(QDebug debug, const std::string &string);
 
 #endif // UTILITIES_H

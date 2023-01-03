@@ -35,6 +35,7 @@ class Atom
   int ch;
 public:
   Atom(const QString &element, const QPointF &position = QPointF(), unsigned hAtoms = 0, int charge = 0);
+  Atom(const QString &element, unsigned hAtoms, int charge = 0, const QPointF &position = QPointF());
   Atom(const Atom &other, const QPointF &newPosition);
   QPointF position() const;
   QString element() const;
