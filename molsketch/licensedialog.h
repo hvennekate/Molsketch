@@ -32,6 +32,8 @@ class LicenseDialog : public QDialog {
 public:
   LicenseDialog(QWidget *parent = 0);
   ~LicenseDialog();
+private slots:
+  void on_aboutQtButton_clicked();
 };
 
 #endif // LICENSEDIALOG_H

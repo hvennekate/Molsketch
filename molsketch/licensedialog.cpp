@@ -18,12 +18,38 @@
  ***************************************************************************/
 #include "licensedialog.h"
 #include "ui_licensedialog.h"
+#include <QFile>
+#include <QFontDatabase>
+
+QString readFile(const QString filename) {
+  QFile input(filename);
+  input.open(QIODevice::ReadOnly);
+  return input.readAll();
+}
 
 LicenseDialog::LicenseDialog(QWidget *parent)
   : QDialog(parent),
     internal(new Ui::LicenseDialog)
 {
   internal->setupUi(this);
+  // TODO write test to check that license texts are actually present
+  auto gpl2 = readFile(":/licenses/gpl2.html");
+  internal->licenseTextCppRuntime->setHtml(gpl2);
+  internal->licenseTextOpenBabel->setHtml(gpl2);
+  auto lgpl3 = readFile(":/licenses/lgpl3.html");
+  internal->licenseTextQt->setHtml(lgpl3);
+
+  auto fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+  auto winpthreads = readFile(":/licenses/winpthreads.txt");
+  internal->licenseTextWinpthreads->setFont(fixedFont);
+  internal->licenseTextWinpthreads->setPlainText(winpthreads);
+  auto zlib = readFile(":/licenses/zlib.txt");
+  internal->licenseTextZlib->setFont(fixedFont);
+  internal->licenseTextZlib->setPlainText(zlib);
 }
 
 LicenseDialog::~LicenseDialog() {}
+
+void LicenseDialog::on_aboutQtButton_clicked() {
+  qApp->aboutQt();
+}

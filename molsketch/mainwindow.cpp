@@ -425,7 +425,7 @@ void MainWindow::createHelpMenu() {
   connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
   helpMenu->addAction(aboutQtAction);
 #ifdef THIRD_PARTY_LICENSES
-  auto thirdPartyLicensesAction = ActionContainer::generateAction("", "", tr("Thirdparty licenses..."), "", tr("Show licenses of included libraries"), this);
+  auto thirdPartyLicensesAction = ActionContainer::generateAction("", "", tr("Third-party licenses..."), "", tr("Show licenses of included libraries"), this);
   auto licenseDialog = new LicenseDialog(this);
   connect(thirdPartyLicensesAction, SIGNAL(triggered()), licenseDialog, SLOT(exec()));
   helpMenu->addAction(thirdPartyLicensesAction);

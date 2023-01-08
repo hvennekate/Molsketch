@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/licenses">
+        <file alias="gpl2.html">licenses/gpl2.html</file>
+        <file alias="lgpl3.html">licenses/lgpl3.html</file>
+        <file alias="winpthreads.txt">licenses/winpthreads.txt</file>
+        <file alias="zlib.txt">licenses/zlib.txt</file>
+    </qresource>
+</RCC>
