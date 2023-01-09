@@ -27,7 +27,7 @@ matrixJob('Molsketch/tests') {
       cd build
       export LD_LIBRARY_PATH=/opt/openbabel-${openbabel_version}/lib
       ATOM_H_FILE=$(find /opt/openbabel-${openbabel_version}/ -name "atom.h")
-      ${qmake_executable} ../tests \
+      ${qmake_executable} ../sources/tests \
               -spec linux-g++ \
               CONFIG+=debug \
               CONFIG-=qml_debug \
