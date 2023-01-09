@@ -17,33 +17,61 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "regulartextbox.h"
-#include <QPainter>
-#include <QDebug>
+#include "coremolecule.h"
+
+#include "coreatom.h"
+#include "corebond.h"
+
+#include <QPolygonF>
 
 namespace Molsketch {
+namespace Core {
 
-  QDebug RegularTextBox::debug(QDebug debug) const {
-    return debug << "Regular text box(" << text << ", " << font << ")";
-  }
+Molecule::Molecule(QVector<Atom> atoms, QVector<Bond> bonds, const QString &name)
+  : m_atoms(atoms), m_bonds(bonds), m_name(name) {}
 
-  RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
-    : TextBox(font), text(text) {}
+QString Molecule::name() const {
+  return m_name;
+}
 
-  QRectF RegularTextBox::boundingRect() const {
-    // TODO consider tightBoundingRect() (possibly selectable by user)
-    return metrics.boundingRect(text);
-  }
+QVector<Atom> Molecule::atoms() const {
+  return m_atoms;
+}
 
-  void RegularTextBox::paint(QPainter *painter) const {
-    painter->save();
-    painter->setFont(font);
-    painter->drawText(0, 0, text);
-    painter->restore();
-  }
+QVector<Bond> Molecule::bonds() const {
+  return m_bonds;
+}
 
-  bool RegularTextBox::preferredCenter() const {
-    return true;
-  }
+QPointF Molecule::center() const {
+  return coordinates().boundingRect().center();
+}
 
+QPolygonF Molecule::coordinates() const {
+  QPolygonF positions;
+  for (auto atom : atoms()) positions << atom.position();
+  return positions;
+}
+
+Molecule Molecule::shiftedBy(const QPointF &shift) const {
+  QVector<Atom> shiftedAtoms;
+  for (auto atom : atoms()) shiftedAtoms << Atom(atom, atom.position() + shift);
+  return Molecule(shiftedAtoms, bonds(), name());
+}
+
+bool Molecule::isValid() const {
+  return !atoms().empty();
+}
+
+} // namespace Core
 } // namespace Molsketch
+
+QDebug operator<<(QDebug debug, const Molsketch::Core::Molecule &molecule) {
+  auto out = debug.nospace() << "Molecule[name=\"" << molecule.name() << "\", atoms=(";
+  for (auto atom : molecule.atoms())
+    out << "<" << atom.element() << ": " << atom.position() << ", " << atom.hAtoms() << ">";
+  out <<"), bonds=(";
+  for (auto bond: molecule.bonds())
+    out << "<type=" << bond.type() << ", start=" << bond.start() << ", end=" << bond.end() << ">";
+  out << ")]";
+  return debug;
+}

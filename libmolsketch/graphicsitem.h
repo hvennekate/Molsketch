@@ -62,6 +62,7 @@ namespace Molsketch {
     virtual QPolygonF coordinates() const = 0;
     virtual void setCoordinates(const QVector<QPointF>& c) = 0;
     void setCoordinates(const QPolygonF& c);
+    void scale(qreal scaling);
     virtual void setCoordinate(const int& index, const QPointF& p);
     virtual QPointF getPoint(const int& index) const;
     virtual QPointF lastPoint() const;
@@ -133,5 +134,8 @@ namespace Molsketch {
 #endif
 
 } // namespace
+
+QPolygonF operator *(const QPolygonF &polygon, qreal scaling);
+QPolygonF operator *(qreal scaling, const QPolygonF &polygon);
 
 #endif // GRAPHICSITEM_H

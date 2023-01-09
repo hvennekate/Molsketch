@@ -17,33 +17,33 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "regulartextbox.h"
-#include <QPainter>
-#include <QDebug>
+#ifndef MOLSKETCH_CORE_ATOM_H
+#define MOLSKETCH_CORE_ATOM_H
+
+#include <QString>
+#include <QPointF>
+#include <QScopedPointer>
 
 namespace Molsketch {
+namespace Core {
 
-  QDebug RegularTextBox::debug(QDebug debug) const {
-    return debug << "Regular text box(" << text << ", " << font << ")";
-  }
+class Atom
+{
+  QString el;
+  QPointF pos;
+  unsigned hAtomCount;
+  int ch;
+public:
+  Atom(const QString &element, const QPointF &position = QPointF(), unsigned hAtoms = 0, int charge = 0);
+  Atom(const QString &element, unsigned hAtoms, int charge = 0, const QPointF &position = QPointF());
+  Atom(const Atom &other, const QPointF &newPosition);
+  QPointF position() const;
+  QString element() const;
+  unsigned hAtoms() const;
+  int charge() const;
+};
 
-  RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
-    : TextBox(font), text(text) {}
-
-  QRectF RegularTextBox::boundingRect() const {
-    // TODO consider tightBoundingRect() (possibly selectable by user)
-    return metrics.boundingRect(text);
-  }
-
-  void RegularTextBox::paint(QPainter *painter) const {
-    painter->save();
-    painter->setFont(font);
-    painter->drawText(0, 0, text);
-    painter->restore();
-  }
-
-  bool RegularTextBox::preferredCenter() const {
-    return true;
-  }
-
+} // namespace Core
 } // namespace Molsketch
+
+#endif // MOLSKETCH_CORE_ATOM_H

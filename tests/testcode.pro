@@ -48,5 +48,6 @@ legacy_files.CONFIG = target_predeps
 QMAKE_EXTRA_COMPILERS += legacy_files
 
 QMAKE_CXXFLAGS += -g -Wall -fprofile-arcs -ftest-coverage -O0
+QMAKE_CXXFLAGS -= -Wsuggest-override -Werror
 QMAKE_LFLAGS += -g -Wall -fprofile-arcs -ftest-coverage  -O0
 LIBS += -L. -lgcov -lboost_stacktrace_addr2line -lmskmain

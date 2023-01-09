@@ -17,33 +17,41 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "regulartextbox.h"
-#include <QPainter>
+#include "corebond.h"
+
 #include <QDebug>
 
 namespace Molsketch {
+namespace Core {
 
-  QDebug RegularTextBox::debug(QDebug debug) const {
-    return debug << "Regular text box(" << text << ", " << font << ")";
+  Bond::Type Bond::fromOrder(const unsigned &order) {
+    switch (order)
+    {
+      case 1: return Single;
+      case 2: return DoubleLegacy;
+      case 3: return Triple;
+      default: return Invalid;
+    }
   }
 
-  RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
-    : TextBox(font), text(text) {}
+  Bond::Bond(unsigned start, unsigned end, Type type)
+  : m_start(start), m_end(end), m_type(type) {}
 
-  QRectF RegularTextBox::boundingRect() const {
-    // TODO consider tightBoundingRect() (possibly selectable by user)
-    return metrics.boundingRect(text);
-  }
+unsigned Bond::start() const {
+  return m_start;
+}
 
-  void RegularTextBox::paint(QPainter *painter) const {
-    painter->save();
-    painter->setFont(font);
-    painter->drawText(0, 0, text);
-    painter->restore();
-  }
+unsigned Bond::end() const {
+  return m_end;
+}
 
-  bool RegularTextBox::preferredCenter() const {
-    return true;
-  }
+Bond::Type Bond::type() const {
+  return m_type;
+}
 
+unsigned Bond::order() const {
+  return m_type / 10;
+}
+
+} // namespace Core
 } // namespace Molsketch

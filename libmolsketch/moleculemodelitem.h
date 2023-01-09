@@ -24,6 +24,7 @@
 class QIcon;
 class QString;
 class QXmlStreamWriter;
+class QPixmap;
 
 namespace Molsketch {
   class Molecule;
@@ -42,9 +43,11 @@ namespace Molsketch {
   {
     Q_DECLARE_PRIVATE(MoleculeModelItem)
     QScopedPointer<MoleculeModelItemPrivate> d_ptr;
+    QPixmap renderMolecule(const Molecule &molecule);
   protected:
     MoleculeModelItem();
     virtual Molecule* produceMolecule() const = 0;
+    virtual bool performScaling() const;
   public:
     virtual ~MoleculeModelItem();
     QIcon icon();

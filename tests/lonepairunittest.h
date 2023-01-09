@@ -43,7 +43,7 @@ class LonePairUnitTest : public CxxTest::TestSuite {
     lp->setParentItem(atom);
     QXmlStreamReader reader(scene->toSvg());
     TS_ASSERT(findNextElement(reader, "polyline"));
-    QPolygonF points = getPointsFromXml(reader, "points");
+    QPolygonF points = getPointsFromXml(reader);
     QSM_ASSERT_EQUALS(reader.attributes().value("points").toString(), points.size(), 2);
     return QLineF(points[0], points[1]);
   }

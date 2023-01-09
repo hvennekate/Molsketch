@@ -73,9 +73,9 @@ QString XmlAssertionPrivate::formatXml(const QString &xml) {
 
 void XmlAssertionPrivate::printStackTraceAndThrow(const QString& message) {
   QTextStream out(stdout, QIODevice::WriteOnly);
-  out << message << endl;
-  out << "Query:" << endl << queryString << endl
-           << "XML:" << endl << formatXml(xml) << endl;
+  out << message << Qt::endl;
+  out << "Query:" << Qt::endl << queryString << Qt::endl
+           << "XML:" << Qt::endl << formatXml(xml) << Qt::endl;
   // TODO parent matches etc.
 #ifdef MSKTEST_STACKTRACE
   std::cout << boost::stacktrace::stacktrace();

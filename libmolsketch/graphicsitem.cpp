@@ -215,6 +215,10 @@ namespace Molsketch {
     setCoordinates((const QVector<QPointF>&) c);
   }
 
+  void graphicsItem::scale(qreal scaling) {
+    setCoordinates(coordinates() * scaling);
+  }
+
   void graphicsItem::readAttributes(const QXmlStreamAttributes &attributes)
   {
     readGraphicAttributes(attributes) ;
@@ -532,3 +536,15 @@ namespace Molsketch {
   }
 
 } // namespace
+
+QPolygonF operator *(const QPolygonF &polygon, qreal scaling) {
+  QPolygonF result;
+  for (auto point : polygon) {
+    result << point * scaling;
+  }
+  return result.translated(polygon.boundingRect().center() - result.boundingRect().center());
+}
+
+QPolygonF operator *(qreal scaling, const QPolygonF &polygon) {
+  return polygon * scaling;
+}

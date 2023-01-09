@@ -17,33 +17,38 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "regulartextbox.h"
-#include <QPainter>
-#include <QDebug>
+#include "coreatom.h"
 
 namespace Molsketch {
+namespace Core {
 
-  QDebug RegularTextBox::debug(QDebug debug) const {
-    return debug << "Regular text box(" << text << ", " << font << ")";
-  }
+Atom::Atom(const QString &element, const QPointF &position, unsigned hAtoms, int charge)
+  : el(element), pos(position), hAtomCount(hAtoms), ch(charge)
+{}
 
-  RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
-    : TextBox(font), text(text) {}
+Atom::Atom(const QString &element, unsigned hAtoms, int charge, const QPointF &position)
+  : Atom(element, position, hAtoms, charge)
+{}
 
-  QRectF RegularTextBox::boundingRect() const {
-    // TODO consider tightBoundingRect() (possibly selectable by user)
-    return metrics.boundingRect(text);
-  }
+Atom::Atom(const Atom &other, const QPointF &newPosition)
+  : Atom(other.element(), newPosition, other.hAtoms(), other.charge())
+{}
 
-  void RegularTextBox::paint(QPainter *painter) const {
-    painter->save();
-    painter->setFont(font);
-    painter->drawText(0, 0, text);
-    painter->restore();
-  }
+QPointF Atom::position() const {
+  return pos;
+}
 
-  bool RegularTextBox::preferredCenter() const {
-    return true;
-  }
+QString Atom::element() const {
+  return el;
+}
 
+unsigned Atom::hAtoms() const {
+  return hAtomCount;
+}
+
+int Atom::charge() const {
+  return ch;
+}
+
+} // namespace Core
 } // namespace Molsketch

@@ -99,9 +99,9 @@ bool findNextElement(QXmlStreamReader& reader, const QString& element) {
   return false;
 }
 
-QPolygonF getPointsFromXml(const QXmlStreamReader &reader, const QString &attribute) {
+QPolygonF getPointsFromXml(const QXmlStreamReader &reader) {
   QStringRef localValue = reader.attributes().value("points");
-  QVector<QStringRef> pointsText = localValue.split(" ", QString::SkipEmptyParts);
+  QVector<QStringRef> pointsText = localValue.split(" ", Qt::SkipEmptyParts);
   QPolygonF points;
   for (QStringRef pointText : pointsText) {
     QVector<QStringRef> coordsText = pointText.split(",");
@@ -156,4 +156,8 @@ void doubleClick(QWidget *w, QPoint p) {
 
 void doubleClick(QWindow *w, QPoint p) {
   QTest::mouseDClick(w, Qt::LeftButton, Qt::KeyboardModifiers(), p);
+}
+
+QDebug operator <<(QDebug debug, const std::string &string) {
+  return debug << QString::fromStdString(string);
 }

@@ -27,7 +27,6 @@
 #include <QClipboard>
 #include <molscene.h>
 #include <molview.h>
-#include <QMimeData>
 
 #include <actions/coloraction.h>
 #include <actions/deleteaction.h>

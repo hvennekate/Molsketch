@@ -40,6 +40,8 @@
 #include "electronsystem.h"
 #include "scenesettings.h"
 #include "settingsitem.h"
+#include "core/coreatom.h"
+#include "core/corebond.h"
 
 namespace Molsketch {
 
@@ -134,6 +136,55 @@ namespace Molsketch {
     setPos(mol.pos());
     updateElectronSystems();
     updateTooltip();
+  }
+
+  Bond::BondType fromCoreBondType(const Core::Bond::Type &type) {
+    switch (type) {
+      case Core::Bond::Invalid: return Bond::Invalid;
+      case Core::Bond::DativeDot: return Bond::DativeDot;
+      case Core::Bond::DativeDash : return Bond::DativeDash;
+      case Core::Bond::Single : return Bond::Single;
+      case Core::Bond::Wedge : return Bond::Wedge;
+      case Core::Bond::Hash : return Bond::Hash;
+      case Core::Bond::WedgeOrHash : return Bond::WedgeOrHash;
+      case Core::Bond::Thick : return Bond::Thick;
+      case Core::Bond::Striped : return Bond::Striped;
+      case Core::Bond::DoubleLegacy : return Bond::DoubleLegacy;
+      case Core::Bond::CisOrTrans : return Bond::CisOrTrans;
+      case Core::Bond::DoubleAsymmetric : return Bond::DoubleAsymmetric;
+      case Core::Bond::DoubleSymmetric : return Bond::DoubleSymmetric;
+      case Core::Bond::Triple : return Bond::Triple;
+      case Core::Bond::TripleAsymmetric : return Bond::TripleAsymmetric;
+    }
+    return Bond::Invalid;
+  }
+
+  Molecule::Molecule(const Core::Molecule &coreMolecule, qreal scaling, QGraphicsItem *parent)
+    : graphicsItem(parent),
+      DEFAULTINITIALIZER
+  {
+    setName(coreMolecule.name());
+
+    QList<Atom*> newAtoms;
+    QMap<Atom*, QPair<unsigned, int>> hAtomsAndCharges;
+    for (auto atom : coreMolecule.atoms()) {
+      auto newAtom = new Atom(atom.position() * scaling, atom.element());
+      hAtomsAndCharges[newAtom] = qMakePair(atom.hAtoms(), atom.charge());
+      newAtoms << newAtom;
+      addAtom(newAtom);
+    }
+    for (auto bond : coreMolecule.bonds())
+      if (auto start = newAtoms.value(bond.start()))
+        if(auto end = newAtoms.value(bond.end()))
+          addBond(new Bond(start, end, fromCoreBondType(bond.type())));
+    for (auto it = hAtomsAndCharges.cbegin(); it != hAtomsAndCharges.cend(); ++it) {
+      it.key()->setNumImplicitHydrogens(it.value().first);
+      it.key()->setCharge(it.value().second);
+    }
+  }
+
+  Molecule *Molecule::fromCoreMolecule(const Core::Molecule &coreMolecule, qreal scaling) {
+    return coreMolecule.isValid() ? new Molecule(coreMolecule, scaling) : nullptr;
   }
 
   Molecule::Molecule(const Molecule &mol, const QSet<Atom *> &atoms, QGraphicsItem *parent)
@@ -770,24 +821,36 @@ void Molecule::updateElectronSystems()
     name = value;
   }
 
-  QPixmap renderMolecule(const Molecule &input) {
-    Molecule *molecule = new Molecule(input);
-    MolScene renderScene;
-    qDebug() << "rendering molecule" << &input;
-    if (molecule->atoms().size() > 20)
-      renderScene.setRenderMode(MolScene::RenderColoredCircles);
-    renderScene.addItem(molecule);
-    renderScene.settings()->chargeVisible()->set(true);
-    renderScene.setSceneRect(molecule->boundingRect());
-    QPixmap pixmap(qCeil(renderScene.width()), qCeil(renderScene.height()));
-    if (pixmap.isNull()) return pixmap;
+  /* This is to let the compiler check that we properly convert all bond types */
+  Core::Bond::Type toCoreBondType(const Bond::BondType &type) {
+    switch (type) {
+      case Bond::Invalid: return Core::Bond::Invalid;
+      case Bond::DativeDot: return Core::Bond::DativeDot;
+      case Bond::DativeDash : return Core::Bond::DativeDash;
+      case Bond::Single : return Core::Bond::Single;
+      case Bond::Wedge : return Core::Bond::Wedge;
+      case Bond::Hash : return Core::Bond::Hash;
+      case Bond::WedgeOrHash : return Core::Bond::WedgeOrHash;
+      case Bond::Thick : return Core::Bond::Thick;
+      case Bond::Striped : return Core::Bond::Striped;
+      case Bond::DoubleLegacy : return Core::Bond::DoubleLegacy;
+      case Bond::CisOrTrans : return Core::Bond::CisOrTrans;
+      case Bond::DoubleAsymmetric : return Core::Bond::DoubleAsymmetric;
+      case Bond::DoubleSymmetric : return Core::Bond::DoubleSymmetric;
+      case Bond::Triple : return Core::Bond::Triple;
+      case Bond::TripleAsymmetric : return Core::Bond::TripleAsymmetric;
+    }
+    return Core::Bond::Invalid;
+  }
 
-    pixmap.fill();
-    // Creating and setting the painter
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    renderScene.render(&painter);
-    qDebug() << "rendered molecule" << &input;
-    return pixmap;
+  Core::Molecule Molecule::toCoreMolecule(qreal scaling) const {
+    QVector<Core::Atom> catoms;
+    QVector<Core::Bond> cbonds;
+    for (auto atom : atoms())
+      catoms << Core::Atom(atom->element(), atom->pos() / scaling, atom->numImplicitHydrogens(), atom->charge());
+    for (auto bond : bonds())
+      cbonds << Core::Bond(atoms().indexOf(bond->beginAtom()), atoms().indexOf(bond->endAtom()),
+                           toCoreBondType(bond->bondType()));
+    return Core::Molecule(catoms, cbonds, getName());
   }
 } // namespace

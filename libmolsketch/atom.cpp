@@ -543,7 +543,7 @@ namespace Molsketch {
     return m_elementSymbol;
   }
 
-  int Atom::charge()  const
+  int Atom::charge() const
   {
     // non element atoms have no charge unless explicitly set (m_userCharge)
     int atomicNumber = Element::strings.indexOf(m_elementSymbol);

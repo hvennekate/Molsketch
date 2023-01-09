@@ -17,33 +17,27 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "regulartextbox.h"
-#include <QPainter>
-#include <QDebug>
+#ifndef COREBONDTEST_H
+#define COREBONDTEST_H
 
-namespace Molsketch {
+#include <core/corebond.h>
+#include <cxxtest/TestSuite.h>
 
-  QDebug RegularTextBox::debug(QDebug debug) const {
-    return debug << "Regular text box(" << text << ", " << font << ")";
+class CoreBondTest : public CxxTest::TestSuite {
+public:
+
+  void testCreation() {
+    Molsketch::Core::Bond bond(5, 3, Molsketch::Core::Bond::DativeDot);
+
+    TS_ASSERT_EQUALS(5, bond.start());
+    TS_ASSERT_EQUALS(3, bond.end());
+    TS_ASSERT_EQUALS(Molsketch::Core::Bond::DativeDot, bond.type());
+
+    auto otherBond(bond);
+    TS_ASSERT_EQUALS(5, otherBond.start());
+    TS_ASSERT_EQUALS(3, otherBond.end());
+    TS_ASSERT_EQUALS(Molsketch::Core::Bond::DativeDot, otherBond.type());
   }
+};
 
-  RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
-    : TextBox(font), text(text) {}
-
-  QRectF RegularTextBox::boundingRect() const {
-    // TODO consider tightBoundingRect() (possibly selectable by user)
-    return metrics.boundingRect(text);
-  }
-
-  void RegularTextBox::paint(QPainter *painter) const {
-    painter->save();
-    painter->setFont(font);
-    painter->drawText(0, 0, text);
-    painter->restore();
-  }
-
-  bool RegularTextBox::preferredCenter() const {
-    return true;
-  }
-
-} // namespace Molsketch
+#endif

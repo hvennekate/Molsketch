@@ -21,6 +21,7 @@
 
 namespace Molsketch {
 const QString moleculeMimeType("molecule/molsketch");
+const QString bondLengthMimeType("molecule/bond-length");
 const QStringList moleculeMimeTypes(moleculeMimeType);
 }
 

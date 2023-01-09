@@ -17,33 +17,49 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "regulartextbox.h"
-#include <QPainter>
+#ifndef MOLSKETCH_CORE_BOND_H
+#define MOLSKETCH_CORE_BOND_H
+
 #include <QDebug>
 
 namespace Molsketch {
+namespace Core {
 
-  QDebug RegularTextBox::debug(QDebug debug) const {
-    return debug << "Regular text box(" << text << ", " << font << ")";
-  }
+class Bond
+{
+public:
+  enum Type
+  {
+    Invalid = 0,
+    DativeDot = 1,
+    DativeDash = 2,
+    Single = 10,
+    Wedge = 11,
+    Hash = 12,
+    WedgeOrHash = 13,
+    Thick = 14,
+    Striped = 15,
+    DoubleLegacy = 20,
+    CisOrTrans = 21,
+    DoubleAsymmetric = 22,
+    DoubleSymmetric = 23,
+    Triple = 30,
+    TripleAsymmetric = 31, // TODO more?
+  };
+  static Type fromOrder(const unsigned &order);
+private:
+  unsigned m_start, m_end;
+  Type m_type;
+public:
 
-  RegularTextBox::RegularTextBox(const QString &text, const QFont &font)
-    : TextBox(font), text(text) {}
+  Bond(unsigned start, unsigned end, Type type = Single);
+  unsigned start() const;
+  unsigned end() const;
+  Type type() const;
+  unsigned order() const;
+};
 
-  QRectF RegularTextBox::boundingRect() const {
-    // TODO consider tightBoundingRect() (possibly selectable by user)
-    return metrics.boundingRect(text);
-  }
-
-  void RegularTextBox::paint(QPainter *painter) const {
-    painter->save();
-    painter->setFont(font);
-    painter->drawText(0, 0, text);
-    painter->restore();
-  }
-
-  bool RegularTextBox::preferredCenter() const {
-    return true;
-  }
-
+} // namespace Core
 } // namespace Molsketch
+
+#endif // MOLSKETCH_CORE_BOND_H
