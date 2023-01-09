@@ -12,7 +12,6 @@ matrixJob('Molsketch/tests') {
     git {
       remote {
         github 'hvennekate/Molsketch'
-        branch 'testmatrix' // TODO Remove!
       }
       extensions {
         wipeOutWorkspace()
@@ -61,7 +60,6 @@ pipelineJob('Molsketch/sourceforge') {
         git {
           remote {
             github 'hvennekate/Molsketch'
-            branch 'testmatrix' // TODO Remove!
           }
           extensions {
             wipeOutWorkspace()
