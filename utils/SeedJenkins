@@ -14,7 +14,6 @@ matrixJob('Molsketch/tests') {
         github 'hvennekate/Molsketch'
       }
       extensions {
-        wipeOutWorkspace()
         relativeTargetDirectory 'sources'
       }
     }
@@ -31,8 +30,7 @@ matrixJob('Molsketch/tests') {
               -spec linux-g++ \
               CONFIG+=debug \
               CONFIG-=qml_debug \
-              CXXTEST_INCLUDE_PATH=/opt/cxxtest-4.4 \
-              CXXTEST_BIN_PATH=/opt/cxxtest-4.4 \
+              CXXTEST_PATH=/opt/cxxtest-4.4 \
               MSK_OB_LIB_DIR=/opt/openbabel-${openbabel_version}/lib/ \
               MSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h}
       make -j 8
@@ -43,6 +41,9 @@ matrixJob('Molsketch/tests') {
     archiveJunit('**/TEST-cxxtest.xml') {
       allowEmptyResults false
       retainLongStdout true
+    }
+    cleanWs {
+      skipWhenFailed(true)
     }
   }
 }
@@ -62,7 +63,7 @@ pipelineJob('Molsketch/sourceforge') {
             github 'hvennekate/Molsketch'
           }
           extensions {
-            wipeOutWorkspace()
+            wipeWorkspace()
             relativeTargetDirectory 'sources'
           }
         }
@@ -85,7 +86,7 @@ pipelineJob('Molsketch/windows') {
             github 'hvennekate/Molsketch'
           }
           extensions {
-            wipeOutWorkspace()
+            wipeWorkspace()
             relativeTargetDirectory 'sources'
           }
         }
