@@ -99,8 +99,8 @@ public:
     QString actualXml;
     QXmlStreamWriter writer(&actualXml);
     settings->writeXml(writer);
-    assertThat(actualXml)->contains("/settings/atom-font/@value/data(.)")->exactlyOnceWithContent(BASE64_ATOM_FONT);
-    assertThat(actualXml)->contains("/settings/bond-angle/@value/data(.)")->exactlyOnceWithContent(QString::number(BOND_ANGLE));
+    assertThat(actualXml)->hasNodes("settings/atom-font")->haveAttribute("value")->exactly({BASE64_ATOM_FONT});
+    assertThat(actualXml)->hasNodes("settings/bond-angle")->haveAttribute("value")->exactly({QString::number(BOND_ANGLE)});
   }
 
   void testSettingsDeserialization() {

@@ -69,7 +69,7 @@ const QPointF ATOM_COORDS(5,3);
 const QPointF OTHER_ATOM_COORDS(-5,3);
 const QString ELEMENT("Ca");
 const QString OTHER_ELEMENT("Mg");
-const QString XPATH_BOND("/molecule/bondArray/bond");
+const QString XPATH_BOND("molecule/bondArray/bond");
 const QString MOLECULE_XML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                            "<molecule name=\"\">"
                            "<atomArray>"
@@ -98,10 +98,6 @@ using XmlAssert::assertThat;
 
 class ClipboardTest : public CxxTest::TestSuite {
   MolScene *scene;
-
-  QString xpathForAtom(const QString &element) {
-    return "/molecule/atomArray/atom[@elementType='" + element + "']";
-  }
 
   void pasteFromClipboard(const QString &content) {
     QMimeData *mimeData = new QMimeData;
@@ -146,9 +142,9 @@ public:
     bond->setSelected(true);
     scene->copy();
     auto clipboardContent = QApplication::clipboard()->mimeData()->data(MIME_TYPE);
-    assertThat(clipboardContent)->contains(xpathForAtom(ELEMENT))->exactlyOnce();
-    assertThat(clipboardContent)->contains(xpathForAtom(OTHER_ELEMENT))->exactlyOnce();
-    assertThat(clipboardContent)->contains(XPATH_BOND)->exactlyOnce();
+    assertThat(clipboardContent)->hasNodes("molecule/atomArray/atom")->haveAttribute("elementType")
+        ->exactlyInAnyOrder({ELEMENT, OTHER_ELEMENT});
+    assertThat(clipboardContent)->hasNodes(XPATH_BOND)->exactlyOne();
   }
 
   void testCopyingMultipleBondsIncludesAllAtomsAndAllBondsBetweenAtoms() {
@@ -166,11 +162,9 @@ public:
     scene->copy();
 
     auto clipboardContent = QApplication::clipboard()->mimeData()->data(MIME_TYPE);
-    assertThat(clipboardContent)->contains(xpathForAtom("A"))->exactlyOnce();
-    assertThat(clipboardContent)->contains(xpathForAtom("B"))->exactlyOnce();
-    assertThat(clipboardContent)->contains(xpathForAtom("C"))->exactlyOnce();
-    assertThat(clipboardContent)->contains(xpathForAtom("D"))->exactlyOnce();
-    assertThat(clipboardContent)->contains(XPATH_BOND)->exactlyTimes(3);
+    assertThat(clipboardContent)->hasNodes("molecule/atomArray/atom")->haveAttribute("elementType")
+        ->exactlyInAnyOrder({"A", "B", "C", "D"});
+    assertThat(clipboardContent)->hasNodes(XPATH_BOND)->times(3);
   }
 
   void testCopyingBondAndAtomIncludesAtomsOfBondAndAtomAndAllBondsBetweenAtoms() {
@@ -188,11 +182,9 @@ public:
     scene->copy();
 
     auto clipboardContent = QApplication::clipboard()->mimeData()->data(MIME_TYPE);
-    assertThat(clipboardContent)->contains(xpathForAtom("A"))->exactlyOnce();
-    assertThat(clipboardContent)->contains(xpathForAtom("B"))->exactlyOnce();
-    assertThat(clipboardContent)->contains(xpathForAtom("C"))->exactlyOnce();
-    assertThat(clipboardContent)->contains(xpathForAtom("D"))->never();
-    assertThat(clipboardContent)->contains(XPATH_BOND)->exactlyTimes(2);
+    assertThat(clipboardContent)->hasNodes("molecule/atomArray/atom")->haveAttribute("elementType")
+        ->exactlyInAnyOrder({"A", "B", "C"});
+    assertThat(clipboardContent)->hasNodes(XPATH_BOND)->times(2);
   }
 
   void testCopyingAtomAndBondFromDifferentMolecules() {
@@ -211,18 +203,16 @@ public:
     scene->copy();
 
     auto clipboardContent = QApplication::clipboard()->mimeData()->data(MIME_TYPE);
-    QString atomAXPath("/molsketchItems/molecule/atomArray/atom[@elementType='A']");
-    assertThat(clipboardContent)->contains(atomAXPath)->exactlyOnce();
-    assertThat(clipboardContent)->contains(atomAXPath + "/../atom[@elementType='B']")->exactlyOnce();
-    assertThat(clipboardContent)->contains(atomAXPath + "/../../../molecule/atomArray/atom[@elementType='C']")->exactlyOnce();
-    assertThat(clipboardContent)->contains(atomAXPath + "/../../../molecule/atomArray/atom[@elementType='D']")->never();
-    assertThat(clipboardContent)->contains(atomAXPath + "/../../bondArray/bond")->exactlyOnce();
-    assertThat(clipboardContent)->contains(atomAXPath + "/../../../molecule/bondArray/bond")->exactlyOnce();
+    assertThat(clipboardContent)->hasNodes("molsketchItems/molecule/atomArray/atom")->haveAttribute("elementType")
+        ->exactlyInAnyOrder({"A", "B", "C"});
+    assertThat(clipboardContent)->hasNodes("molsketchItems/molecule")->times(2);
+    // TODO assert that C is in other molecule
+    assertThat(clipboardContent)->hasNodes("molsketchItems/molecule/bondArray/bond")->exactlyOne();
   }
 
   void testCopyingIncludesPngAndSvgFormats() {
     Atom *atom = new Atom(ATOM_COORDS, ELEMENT);
-    scene->addItem(atom);
+    scene->addItem(new Molecule{QSet<Atom*>{atom}, {}});
     atom->setSelected(true);
     scene->copy();
     auto actualFormatList = QApplication::clipboard()->mimeData()->formats();
@@ -233,7 +223,7 @@ public:
 
   void testCutting() {
     Atom *atom = new Atom(ATOM_COORDS, ELEMENT);
-    scene->addItem(atom);
+    scene->addItem(new Molecule{QSet<Atom*>{atom}, {}});
     atom->setSelected(true);
     scene->cut();
     QS_ASSERT_EQUALS(QApplication::clipboard()->mimeData()->data(MIME_TYPE), CLIPBOARD_CONTENT);

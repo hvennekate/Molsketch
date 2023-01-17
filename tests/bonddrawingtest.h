@@ -25,15 +25,13 @@
 #include <molecule.h>
 #include <QSet>
 #include <QDebug>
-#include <QXmlQuery>
-#include <QXmlResultItems>
 #include "xmlassertion.h"
 #include <scenesettings.h>
 #include <settingsitem.h>
 
 using namespace Molsketch;
 
-const char QUERY_LINE_COORDS[] = "//*:path/@d/data(.)";
+const char QUERY_LINE_COORDS[] = "svg/g/g/path";
 
 class BondDrawingTest : public CxxTest::TestSuite {
   MolScene *scene;
@@ -42,7 +40,7 @@ class BondDrawingTest : public CxxTest::TestSuite {
   Molecule *m;
 
   void assertLineCoords(const QString& value) {
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)->exactlyOnceWithContent(value);
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")->exactly({value});
   }
 
 public:
@@ -121,8 +119,8 @@ public:
     a1->setElement("C");
     m->addAtom(a3);
     m->addBond(a1, a3);
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)
-        ->inAnyOrderWithValues({"M2.82843,2.82843 L45.1667,45.1667", "M-2.32495,-3.25493 L-45.1667,-63.2333"});
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")
+        ->exactlyInAnyOrder({"M2.82843,2.82843 L45.1667,45.1667", "M-2.32495,-3.25493 L-45.1667,-63.2333"});
   }
 
   void testDrawingSecondAtomInOriginBond() {
@@ -143,7 +141,7 @@ public:
     m->addAtom(a3);
     m->addBond(a2, a3, Bond::Invalid);
     a2->setCoordinates(QPolygonF() << QPointF(1,1));
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)->exactlyOnceWithContent(""); // TODO ->never();
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")->exactly({""});
   }
 
   void testBondNotDrawnIfOverlapsWithNewmanAtomReverse() {
@@ -153,6 +151,6 @@ public:
     m->addAtom(a3);
     m->addBond(a1, a3, Bond::Invalid);
     a1->setCoordinates(QPolygonF() << QPointF(1,1));
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)->exactlyOnceWithContent(""); // TODO->never();
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")->exactly({""});
   }
 };

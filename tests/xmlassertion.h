@@ -22,34 +22,75 @@
 #include <QScopedPointer>
 #include <QString>
 #include <xmlobjectinterface.h>
+#include "assertionbase.h"
 
+class XmlAssertionBasePrivate;
+class XmlAssertionBase : private AssertionBase {
+  Q_DECLARE_PRIVATE(XmlAssertionBase)
+  QScopedPointer<XmlAssertionBasePrivate> d_ptr;
+protected:
+  XmlAssertionBase(const QString &previousMessages);
+  void printStackTraceAndThrow(const QString &message) const;
+  QString previousMessages() const;
+public:
+  virtual ~XmlAssertionBase();
+private:
+  Q_DISABLE_COPY(XmlAssertionBase)
+};
+
+class StringListAssertionPrivate;
+class StringListAssertion : private XmlAssertionBase {
+  Q_DECLARE_PRIVATE(StringListAssertion)
+  QScopedPointer<StringListAssertionPrivate> d_ptr;
+public:
+  StringListAssertion(const QStringList &strings, const QString &previousMessages = QString());
+  const StringListAssertion *exactly(const QStringList &expected) const;
+  const StringListAssertion *exactlyInAnyOrder(const QStringList &expected) const;
+  ~StringListAssertion();
+private:
+  Q_DISABLE_COPY(StringListAssertion)
+};
+
+class XmlNode;
+class XmlNodesAssertionPrivate;
+class XmlNodesAssertion : private XmlAssertionBase {
+  Q_DECLARE_PRIVATE(XmlNodesAssertion)
+  QScopedPointer<XmlNodesAssertionPrivate> d_ptr;
+public:
+  ~XmlNodesAssertion();
+  const XmlNodesAssertion *times(int expectedCount) const;
+  const XmlNodesAssertion *exactlyOne() const;
+  void none() const;
+  const XmlNodesAssertion *index(int i) const;
+  const XmlNodesAssertion *withNoAttribute(const QString &attribute) const;
+  const StringListAssertion *haveAttribute(const QString &attribute) const;
+  const StringListAssertion *haveTexts() const;
+private:
+  XmlNodesAssertion(const QList<XmlNode> &, const QString &message);
+  friend class XmlAssertion;
+  Q_DISABLE_COPY(XmlNodesAssertion)
+};
 
 class XmlAssertionPrivate;
-
-class XmlAssertion
-{
+class XmlAssertion : private XmlAssertionBase {
   Q_DECLARE_PRIVATE(XmlAssertion)
   QScopedPointer<XmlAssertionPrivate> d_ptr;
 public:
-  // TODO don't use pointers here
-  static XmlAssertion *assertThat(const QString& xml);
-  static XmlAssertion *assertThat(const Molsketch::XmlObjectInterface &object);
-  static QString formatXml(const QString&xml);
-  XmlAssertion* contains(const QString& xQuery);
-  XmlAssertion* exactlyOnceWithContent(const QString& expected);
-  XmlAssertion *exactlyOnce();
-  XmlAssertion *exactlyTimes(const int &expectedCount);
-  XmlAssertion *never();
-  XmlAssertion *inAnyOrderWithValues(const QStringList &expectedValues);
-  XmlAssertion *exactly(const QStringList &expected);
+  ~XmlAssertion();
+  static const XmlAssertion *assertThat(const QString& xml);
+  static const XmlAssertion *assertThat(const Molsketch::XmlObjectInterface &object);
+  const XmlNodesAssertion *hasNodes(const QString& xQuery) const;
+  const XmlNodesAssertion *hasParentOf(const QString& xQuery) const;
 private:
   XmlAssertion(const QString& xml);
   QStringList getStringResults();
+  Q_DISABLE_COPY(XmlAssertion)
 };
 
 namespace XmlAssert {
-  XmlAssertion* assertThat(const QString& xml);
-  XmlAssertion* assertThat(const Molsketch::XmlObjectInterface& object);
+  QString formatXml(const QString &xml);
+  const XmlAssertion *assertThat(const QString& xml);
+  const XmlAssertion *assertThat(const Molsketch::XmlObjectInterface& object);
 }
 
 #endif // XMLASSERTION_H

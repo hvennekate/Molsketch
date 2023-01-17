@@ -16,4 +16,9 @@ cxxrunner.input = CXXRUNNER_TEMPLATE
 cxxrunner.variable_out = SOURCES
 QMAKE_EXTRA_COMPILERS += cxxrunner
 
-LIBS += -L. -lgcov -lboost_stacktrace_addr2line -lmskmain -lmsktests
+LIBS += \
+    -L. \
+    -lgcov \
+    -lboost_stacktrace_addr2line \
+    -lmskmain \
+    -lmsktests \

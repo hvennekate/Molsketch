@@ -124,7 +124,6 @@ const struct
   const QString INDEX = "testIndex";
   const int HYDROGENS = 8;
 } XML_DATA;
-const char NEWMAN_XQUERY[] = "//*:atom/@newmanDiameter/data(.)";
 const qreal RADICAL_DIAMETER = 3;
 const qreal LONE_PAIR_ANGLE = 45;
 const qreal LONE_PAIR_LINE_WIDTH = 1.5;
@@ -218,14 +217,14 @@ public:
 
   void testNormalAtomHasNoNewmanDiameter() {
     Atom atom(QPointF(), "C");
-    assertThat(atom)->contains(NEWMAN_XQUERY)->never();
+    assertThat(atom)->hasNodes("atom")->exactlyOne()->withNoAttribute("newmanDiameter");
   }
 
   void testNewmanAtomHasNewmanDiameter() {
     Atom atom(QPointF(), "C");
     atom.setNewmanDiameter(5.5);
     TS_ASSERT_EQUALS(atom.getNewmanDiameter(), 5.5);
-    assertThat(atom)->contains(NEWMAN_XQUERY)->exactlyOnceWithContent("5.5");
+    assertThat(atom)->hasNodes("atom")->haveAttribute("newmanDiameter")->exactly({"5.5"});
   }
 
   void testDisabledNewmanAtomHasNoNewmanDiameter() {
@@ -233,7 +232,7 @@ public:
     atom.setNewmanDiameter(5.5);
     TS_ASSERT_EQUALS(atom.getNewmanDiameter(), 5.5);
     atom.disableNewman();
-    assertThat(atom)->contains(NEWMAN_XQUERY)->never();
+    assertThat(atom)->hasNodes("atom")->exactlyOne()->withNoAttribute("newmanDiameter");
   }
 
   void testAtomWithNewmanDiameterCanBeRead() {
