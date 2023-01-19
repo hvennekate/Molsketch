@@ -22,6 +22,7 @@ matrixJob('Molsketch/tests') {
   steps {
     shell 'echo "QMake: ${qmake_executable}, OpenBabel: ${openbabel_version}"'
     shell '''
+      rm -r build # TODO this should be done by workspace cleanup (also the source code should be disposed of by that)
       mkdir build
       cd build
       export LD_LIBRARY_PATH=/opt/openbabel-${openbabel_version}/lib
