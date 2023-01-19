@@ -4,13 +4,14 @@ TESTS = $$files(*test.h, true)
 
 SOURCES += $$files($$PWD/../*.cpp, true)
 SOURCES -= $$PWD/../molsketch/main.cpp
+SOURCES -= $$files($$PWD/../tests/*.cpp, true) $$files($$PWD/../obiftest/*.cpp, true)
 HEADERS += $$files($$PWD/../*.h, true)
-HEADERS -= ${TESTS}
+HEADERS -= $$files($$PWD/../tests/*.h, true) $$files($$PWD/../obiftest/*.h, true)
 FORMS += $$files($$PWD/../*.ui, true)
 RESOURCES += $$files($$PWD/../*.qrc, true)
 
 CONFIG += c++14
-QT += widgets printsupport svg testlib network xmlpatterns
+QT += widgets printsupport svg testlib network
 
 INCLUDEPATH += \
     /usr/include/boost/stacktrace \
