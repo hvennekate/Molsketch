@@ -2,15 +2,18 @@ include(../obabeliface/findOpenBabel.pri)
 include(../settings.pri)
 TESTS = $$files(*test.h, true)
 
-SOURCES += $$files($$PWD/../*.cpp, true)
+SOURCES += \
+    $$files($$PWD/../libmolsketch/*.cpp, true) \
+    $$files($$PWD/../molsketch/*.cpp, true) \
+    $$files($$PWD/../obabeliface/*.cpp, true)
 SOURCES -= $$PWD/../molsketch/main.cpp
-SOURCES -= $$files($$PWD/../tests/*.cpp, true) $$files($$PWD/../obiftest/*.cpp, true)
+
 HEADERS += $$files($$PWD/../*.h, true)
 HEADERS -= $$files($$PWD/../tests/*.h, true) $$files($$PWD/../obiftest/*.h, true)
 FORMS += $$files($$PWD/../*.ui, true)
 RESOURCES += $$files($$PWD/../*.qrc, true)
 
-CONFIG += c++14
+CONFIG += c++14 debug
 QT += widgets printsupport svg testlib network
 
 INCLUDEPATH += \

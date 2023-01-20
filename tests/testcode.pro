@@ -4,8 +4,10 @@ include(../settings.pri)
 TESTS = $$files(*test.h, true)
 
 HEADERS += $$files($$PWD/../*.h, true)
+SOURCES += $$files($$PWD/../tests/*.cpp, true)
 
-CONFIG += c++14
+CONFIG += c++14 debug
+
 QT += widgets printsupport svg testlib network
 
 INCLUDEPATH += $$CXXTEST_PATH \
