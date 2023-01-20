@@ -35,7 +35,7 @@ matrixJob('Molsketch/tests') {
               MSK_OB_LIB_DIR=/opt/openbabel-${openbabel_version}/lib/ \
               MSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h}
       make -j 8
-      xvfb-run ./msktests
+      xvfb-run ./msktestrunner
       '''
   }
   publishers {
