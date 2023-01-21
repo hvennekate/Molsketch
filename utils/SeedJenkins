@@ -25,7 +25,7 @@ matrixJob('Molsketch/tests') {
       rm -r build # TODO this should be done by workspace cleanup (also the source code should be disposed of by that)
       mkdir build
       cd build
-      export LD_LIBRARY_PATH=/opt/openbabel-${openbabel_version}/lib
+      LD_LIBRARY_PATH=/opt/openbabel-${openbabel_version}/lib
       ATOM_H_FILE=$(find /opt/openbabel-${openbabel_version}/ -name "atom.h")
       ${qmake_executable} ../sources/tests \
               -spec linux-g++ \
@@ -35,7 +35,7 @@ matrixJob('Molsketch/tests') {
               MSK_OB_LIB_DIR=/opt/openbabel-${openbabel_version}/lib/ \
               MSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h}
       make -j 8
-      xvfb-run ./msktestrunner
+      LD_LIBRARY_PATH=.:/opt/openbabel-${openbabel_version}/lib xvfb-run ./msktestrunner
       '''
   }
   publishers {
