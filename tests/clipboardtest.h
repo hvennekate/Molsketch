@@ -351,7 +351,7 @@ public:
     scene->selectAll();
     scene->copy();
     auto mimeData = QApplication::clipboard()->mimeData();
-    QS_ASSERT_EQUALS(mimeData->formats().toSet(), (QStringList() << "application/x-qt-image" << "molecule/molsketch" << "image/svg+xml").toSet());
+    QS_ASSERT_EQUALS(toSet(mimeData->formats()), QSet<QString>() << "application/x-qt-image" << "molecule/molsketch" << "image/svg+xml");
     QS_ASSERT_EQUALS_OR_EQUALS(mimeData->data("molecule/molsketch"), MOLECULE_XML, ALTERNATIVE_MOLECULE_XML);
   }
 

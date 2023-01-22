@@ -196,4 +196,15 @@ void doubleClick(QWindow* w, QPoint p = QPoint());
 
 QDebug operator <<(QDebug debug, const std::string &string);
 
+// Qt5 -> Qt6 replacement
+template<class T>
+QSet<T> toSet(const QList<T>& list) {
+  return QSet<T>{list.cbegin(), list.cend()};
+}
+
+template<typename T>
+QSet<T> toSet(const QPair<T, T>& pair) {
+  return QSet<T>{pair.first, pair.second};
+}
+
 #endif // UTILITIES_H

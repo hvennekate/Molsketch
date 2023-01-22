@@ -100,11 +100,11 @@ bool findNextElement(QXmlStreamReader& reader, const QString& element) {
 }
 
 QPolygonF getPointsFromXml(const QXmlStreamReader &reader) {
-  QStringRef localValue = reader.attributes().value("points");
-  QVector<QStringRef> pointsText = localValue.split(" ", Qt::SkipEmptyParts);
+  QStringView localValue = reader.attributes().value("points");
+  auto pointsText = localValue.split(QRegularExpression(" "), Qt::SkipEmptyParts);
   QPolygonF points;
-  for (QStringRef pointText : pointsText) {
-    QVector<QStringRef> coordsText = pointText.split(",");
+  for (auto pointText : pointsText) {
+    auto coordsText = pointText.split(QRegularExpression{","});
     QSM_ASSERT_EQUALS(pointText.toString(), coordsText.size(),2);
     points << QPointF(coordsText[0].toDouble(), coordsText[1].toDouble());
   }
@@ -124,7 +124,7 @@ QXmlStreamAttributes getAttributesOfParentElement(QXmlStreamReader& reader, cons
 template<typename T, QString (T::*FP)() const>
 T *findItem(const QList<T*> &items, const QString& text) {
  for (auto item : items)
-   if ((item->*FP)().remove(QRegExp("&(?!&)")) == text)
+   if ((item->*FP)().remove(QRegularExpression("&(?!&)")) == text)
      return item;
  TS_FAIL("Could not find item by the name of " + text);
  return nullptr;

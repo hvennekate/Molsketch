@@ -26,6 +26,7 @@
 #include <QXmlStreamReader>
 
 #include <QDebug>
+#include <QRegularExpression>
 
 // TODO make the stack trace facility an abstract parent
 const int MAX_STACK_TRACE_DEPTH = 15;
@@ -87,8 +88,8 @@ StringListAssertion::StringListAssertion(const QStringList &strings, const QStri
 
 QString formatStringList(QStringList list) {
   return "[" + list
-      .replaceInStrings(QRegExp("^"), "\"")
-      .replaceInStrings(QRegExp("$"), "\"")
+      .replaceInStrings(QRegularExpression("^"), "\"")
+      .replaceInStrings(QRegularExpression("$"), "\"")
       .join(", ") + "]";
 }
 
@@ -127,7 +128,7 @@ StringListAssertion::~StringListAssertion() {}
 struct XmlNode {
     QXmlStreamAttributes attributes;
     QString text;
-    QStringRef name;
+    QString name;
     QList<size_t> location;
     QString locationAsString() const {
       if (location.empty()) return "";
@@ -182,7 +183,7 @@ const XmlNodesAssertion *XmlNodesAssertion::withNoAttribute(const QString &attri
   QStringList violatingNodes;
   for (auto node : d->nodes)
     if (node.attributes.hasAttribute(attribute))
-      violatingNodes << node.name.toString();
+      violatingNodes << node.name;
   if (!violatingNodes.isEmpty())
     printStackTraceAndThrow(QString("Expected nodes not to have attribute '%1', but the following did: %2")
                             .arg(attribute)
@@ -226,9 +227,9 @@ struct XmlAssertionPrivate {
         XmlNode node;
         node.attributes = in.attributes();
         node.location = QList(location);
-        node.name = in.name();
+        node.name = in.name().toString();
         location << 0;
-        currentPath += in.name().toString();
+        currentPath += node.name;
         nodes.insert(currentPath.join("/"), node);
       }
       if (in.tokenType() == QXmlStreamReader::EndElement) {

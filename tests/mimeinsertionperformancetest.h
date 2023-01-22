@@ -111,7 +111,7 @@ public:
     mimeData->setData(scene->mimeType(), MOLECULE_XML.toUtf8());
     event->setMimeData(mimeData);
     event->setProposedAction(Qt::CopyAction);
-    QTime stopwatch;
+    QElapsedTimer stopwatch;
     stopwatch.start();
     scene->sendDragEnterEvent(event);
     TSM_ASSERT_LESS_THAN("Inserting complex molecule took too long!", stopwatch.elapsed(), 500); // TODO limit should be 100

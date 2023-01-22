@@ -40,9 +40,7 @@ class CoordinateModelUnitTest : public CxxTest::TestSuite {
                      WhatsThisRole <<
                      FontRole <<
                      TextAlignmentRole <<
-                     BackgroundColorRole <<
                      BackgroundRole <<
-                     TextColorRole <<
                      ForegroundRole <<
                      CheckStateRole <<
                      AccessibleTextRole <<

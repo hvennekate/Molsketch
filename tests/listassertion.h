@@ -74,7 +74,7 @@ public:
           .arg(list.size())
           .arg(printList());
       QTextStream out(stdout, QIODevice::WriteOnly);
-      out << message << endl;
+      out << message << Qt::endl;
 #ifdef MSKTEST_STACKTRACE
       std::cout << boost::stacktrace::stacktrace();
 #endif

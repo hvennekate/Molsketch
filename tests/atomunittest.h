@@ -272,7 +272,7 @@ public:
     auto atomBounds = atom->boundingRect();
     auto rightEdge = QLineF(atomBounds.topRight(), atomBounds.bottomRight());
     QPointF intersectionOfRightEdgeAndConnectingLine;
-    QS_ASSERT_EQUALS(rightEdge.intersect(QLineF(QPointF(0,0), otherAtomPosition), &intersectionOfRightEdgeAndConnectingLine),
+    QS_ASSERT_EQUALS(rightEdge.intersects(QLineF(QPointF(0,0), otherAtomPosition), &intersectionOfRightEdgeAndConnectingLine),
                      QLineF::BoundedIntersection);
 
     QS_ASSERT_EQUALS(atom->bondDrawingStart(&otherAtom, 0), intersectionOfRightEdgeAndConnectingLine);

@@ -136,19 +136,19 @@ public:
     for (auto item : items) scene->addItem(item);
 
     scene->selectAll();
-    QS_ASSERT_EQUALS(scene->selectedItems().toSet(),
+    QS_ASSERT_EQUALS(toSet(scene->selectedItems()),
                      QSet<QGraphicsItem*>() << arrow << molecule << frame << textItem); // TODO improve output
   }
 
   void testSelectingAllItemsDoesNotSelectGrid() {
-    auto originalItems = scene->items().toSet();
+    auto originalItems = toSet(scene->items());
     scene->setGrid(true);
 
     scene->selectAll();
-    auto gridItemSet = scene->items().toSet() - originalItems;
+    auto gridItemSet = toSet(scene->items()) - originalItems;
     QS_ASSERT_EQUALS(gridItemSet.size(), 1);
     TSM_ASSERT("Grid item should not be contained in selected items",
-               (scene->selectedItems().toSet() & gridItemSet).isEmpty());
+               (toSet(scene->selectedItems()) & gridItemSet).isEmpty());
   }
 
   void testSelectingAllItemsDoesNotSelectInputItem() {
@@ -157,24 +157,24 @@ public:
     scene->addItem(molecule);
     scene->addItem(atom);
 
-    auto originalItems = scene->items().toSet();
+    auto originalItems = toSet(scene->items());
     atom->sendMouseDoubleClickEvent();
 
     scene->selectAll();
-    auto inputItemSet = scene->items().toSet() - originalItems;
+    auto inputItemSet = toSet(scene->items()) - originalItems;
     TS_ASSERT_EQUALS(inputItemSet.size(), 1);
     TSM_ASSERT("Input item should not be contained in selected items",
-               (scene->selectedItems().toSet() & inputItemSet).isEmpty());
+               (toSet(scene->selectedItems()) & inputItemSet).isEmpty());
   }
 
   void testSelectingAllItemsDoesNotSelectSelectionRectangle() {
-    auto originalItems = scene->items().toSet();
+    auto originalItems = toSet(scene->items());
     scene->sendMousePressEvent();
 
     scene->selectAll();
-    auto selectionRectangleSet = scene->items().toSet() - originalItems;
+    auto selectionRectangleSet = toSet(scene->items()) - originalItems;
     TS_ASSERT_EQUALS(selectionRectangleSet.size(), 1);
     TSM_ASSERT("Selection rectangle should not be contained in selected items",
-               (scene->selectedItems().toSet() & selectionRectangleSet).isEmpty());
+               (toSet(scene->selectedItems()) & selectionRectangleSet).isEmpty());
   }
 };

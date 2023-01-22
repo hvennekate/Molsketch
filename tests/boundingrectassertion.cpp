@@ -21,6 +21,7 @@
 #include <QRectF>
 #include <QTextStream>
 #include <QVariant>
+#include <QIODevice>
 #include <QDebug>
 
 class BoundingRectAssertionPrivate {
