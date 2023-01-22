@@ -68,7 +68,7 @@ public:
     popup = new AtomPopup;
     scene = new MolScene();
     atom = new Atom;
-    Molecule *molecule = new Molecule(QSet<Atom*>() << atom, QSet<Bond*>());
+    Molecule *molecule = new Molecule(QSet<Atom*>{atom}, {});
     scene->addItem(molecule);
 
     elementEditor = popup->findChild<QLineEdit*>("element");
