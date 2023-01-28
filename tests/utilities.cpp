@@ -23,7 +23,6 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QTableView>
-#include <QXmlStreamReader>
 #include <QMenuBar>
 
 void mouseMoveEvent(QWidget *widget, Qt::MouseButton button, Qt::KeyboardModifiers stateKey, QPoint pos, int delay) {
@@ -82,43 +81,6 @@ void assertTrue(bool input, QString message) {
 void clickCheckBox(QCheckBox *checkBox) {
   auto minimumSize = checkBox->minimumSizeHint();
   leftMouseClick(checkBox, {minimumSize.width()/2, minimumSize.height()/2});
-}
-
-int xmlElementCount(const QString& xml, const QString& element) {
-  int count = 0;
-  QXmlStreamReader reader(xml);
-  while (findNextElement(reader, element))
-    ++count;
-  return count;
-}
-
-bool findNextElement(QXmlStreamReader& reader, const QString& element) {
-  while (!reader.atEnd())
-    if (QXmlStreamReader::StartElement == reader.readNext() && reader.name() == element)
-      return true;
-  return false;
-}
-
-QPolygonF getPointsFromXml(const QXmlStreamReader &reader) {
-  QStringView localValue = reader.attributes().value("points");
-  auto pointsText = localValue.split(QRegularExpression(" "), Qt::SkipEmptyParts);
-  QPolygonF points;
-  for (auto pointText : pointsText) {
-    auto coordsText = pointText.split(QRegularExpression{","});
-    QSM_ASSERT_EQUALS(pointText.toString(), coordsText.size(),2);
-    points << QPointF(coordsText[0].toDouble(), coordsText[1].toDouble());
-  }
-  return points;
-}
-
-QXmlStreamAttributes getAttributesOfParentElement(QXmlStreamReader& reader, const QString &element) {
-  QXmlStreamAttributes parentAttributes;
-  while (!reader.atEnd()) {
-    if (reader.name() == element) return parentAttributes;
-    parentAttributes = reader.attributes();
-    while (!reader.atEnd() && QXmlStreamReader::StartElement != reader.readNext());
-  }
-  return QXmlStreamAttributes();
 }
 
 template<typename T, QString (T::*FP)() const>

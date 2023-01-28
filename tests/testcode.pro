@@ -21,7 +21,7 @@ TEMPLATE = lib
 TARGET = msktests
 
 cxxtest.output = ${QMAKE_FILE_BASE}.cpp
-cxxtest.commands = $$CXXTEST_PATH/bin/cxxtestgen --xunit-printer --part ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
+cxxtest.commands = $$CXXTEST_PATH/bin/cxxtestgen --have-eh --xunit-printer --part ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
 cxxtest.depency_type = TYPE_C
 cxxtest.input = TESTS
 cxxtest.variable_out = SOURCES

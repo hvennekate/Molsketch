@@ -29,8 +29,6 @@
 class QTableView;
 class QLineEdit;
 class QCheckBox;
-class QXmlStreamReader;
-class QXmlStreamAttributes;
 class QMainWindow;
 
 #define QS_MANUAL_TEST {\
@@ -161,14 +159,6 @@ T* assertNotNull(T* pointer, QString message = "Should not be null") {
   return pointer;
 }
 void assertTrue(bool input, QString message = "Assertion not fulfilled!");
-
-bool findNextElement(QXmlStreamReader& reader, const QString& element);
-
-int xmlElementCount(const QString& xml, const QString& element);
-
-QPolygonF getPointsFromXml(const QXmlStreamReader& reader);
-
-QXmlStreamAttributes getAttributesOfParentElement(QXmlStreamReader& reader, const QString &element);
 
 void clickMenuEntry(const QStringList& names, QMainWindow* mainWindow);
 

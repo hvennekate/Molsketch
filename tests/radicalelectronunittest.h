@@ -35,13 +35,14 @@ CLASS_FOR_TESTING_WITH_FUNCTIONS(RadicalElectron, \
 const int DIAMETER = 2;
 const QString RADICAL_ELECTRON_XML("<radicalElectron diameter=\"5\" colorR=\"255\" colorG=\"0\" colorB=\"0\"><bbLinker originAnchor=\"TopLeft\" targetAnchor=\"BottomRight\" xOffset=\"0\" yOffset=\"0\"/></radicalElectron>");
 const RadicalElectron SAMPLE_RADICAL_ELECTRON(5, BoundingBoxLinker::upperLeft(), Qt::red);
+const QString &CIRCLE_QUERY("svg/g/g/circle");
 
 class RadicalElectronUnitTest : public CxxTest::TestSuite {
   MolScene *scene;
   Atom *atom;
 
   QString svgWithAtomAndRadicalElectron() {
-    RadicalElectron *radical = new RadicalElectron(DIAMETER);
+    RadicalElectron *radical = new RadicalElectron(DIAMETER, BoundingBoxLinker::above(), Qt::blue);
     radical->setParentItem(atom);
     return scene->toSvg();
   }
@@ -62,26 +63,28 @@ public:
 
   void testNothingDrawnIfNoParentWasSet() {
     scene->addItem(new RadicalElectron(DIAMETER));
-    int circleCount = xmlElementCount(scene->toSvg(), "circle");
-    TSM_ASSERT_EQUALS("No radical electrons should be drawn if parent was not assigned.", circleCount, 0);
+    assertThat(scene->toSvg())->hasNodes(CIRCLE_QUERY)->none();
   }
 
   void testCircleIsDrawnIfParentIsAtom() {
-    int circleCount = xmlElementCount(svgWithAtomAndRadicalElectron(), "circle");
-    TSM_ASSERT_EQUALS("A radical electron should be drawn if parent was not assigned.", circleCount, 1);
+    assertThat(svgWithAtomAndRadicalElectron())->hasNodes(CIRCLE_QUERY)->exactlyOne();
   }
 
   void testCircleSize() {
-    QXmlStreamReader reader(svgWithAtomAndRadicalElectron());
-    assertTrue(findNextElement(reader, "circle"), "Could not find circle in SVG!");
-    TS_ASSERT_EQUALS(reader.attributes().value("r").toDouble() * 2, DIAMETER);
+    assertThat(svgWithAtomAndRadicalElectron())->hasNodes(CIRCLE_QUERY)
+        ->haveAttribute("r")->exactly({QString::number(DIAMETER/2.)});
   }
 
   void testPosition() {
-    QXmlStreamReader reader(svgWithAtomAndRadicalElectron());
-    assertTrue(findNextElement(reader, "circle"), "Could not find circle in SVG!");
-    TS_ASSERT_EQUALS(reader.attributes().value("cx").toDouble() * 2, 0);
-    TS_ASSERT_EQUALS(reader.attributes().value("cy").toDouble() * 3, -27); // TODO this value used to be -21 (radical closer to the atom letter)
+    auto circle = assertThat(svgWithAtomAndRadicalElectron())->hasNodes(CIRCLE_QUERY);
+    circle->haveAttribute("cx")->exactly({"0"});
+    circle->haveAttribute("cy")->exactly({"-9"});
+  }
+
+  void testColor() {
+    auto parent = assertThat(svgWithAtomAndRadicalElectron())->hasParentOf(CIRCLE_QUERY);
+    parent->haveAttribute("fill")->exactly({"#0000ff"});
+    parent->haveAttribute("stroke")->exactly({"#0000ff"});
   }
 
   void testBoundingRectWithoutParent() {

@@ -72,6 +72,7 @@ namespace Molsketch {
     if (!parentItem()) return;
     painter->save();
     painter->setBrush(d->color);
+    painter->setPen(d->color);
     painter->drawEllipse(boundingRect());
     painter->restore();
   }
