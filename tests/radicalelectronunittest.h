@@ -115,6 +115,4 @@ public:
     radicalElectron.readXml(reader);
     QS_ASSERT_EQUALS(radicalElectron, SAMPLE_RADICAL_ELECTRON);
   }
-
-  // TODO test color!
 };
