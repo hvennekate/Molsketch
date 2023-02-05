@@ -23,6 +23,8 @@
 #include "utilities.h"
 using namespace Molsketch;
 
+static const char BABEL_LIBDIR_VARIABLE[] = "BABEL_LIBDIR"; // TODO take from OpenBabel directly
+
 const char BUTANE_INCHI[] = "1S/C4H10/c1-3-4-2/h3-4H2,1-2H3";
 const char BUTANE_FULL_INHCHI[] = "InChI=1S/C4H10/c1-3-4-2/h3-4H2,1-2H3\n";
 const Core::Molecule &BUTANE{
@@ -67,6 +69,13 @@ class OpenBabelUnitTest : public CxxTest::TestSuite {
       QList<BondTuple>{{stereoBondType, 0, 1}, {singleBond, 1, 2}, {singleBond, 1, 3}, {Core::Bond::DoubleLegacy, 2, 4}, {singleBond, 2, 5}});
   }
 public:
+#define MACRO_STRING_VALUE(X) STRING_VALUE(X) // TODO this should already be defined somewhere
+#define STRING_VALUE(X) #X
+
+  void setUp() override {
+    qputenv (BABEL_LIBDIR_VARIABLE, MACRO_STRING_VALUE(MSK_OB_FORMATS_DIR));
+  }
+
   void testConversionFromInChIString() {
     auto molecule = fromInChI(BUTANE_INCHI);
     QSM_ASSERT("molecule not valid", molecule.isValid());

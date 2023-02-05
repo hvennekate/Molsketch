@@ -212,7 +212,6 @@ namespace Molsketch {
     for(QObject *child : QObject::children())
       if (QAction *action = dynamic_cast<QAction*>(child))
         action->setChecked(false);
-    clear();
     delete d;
   }
 

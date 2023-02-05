@@ -121,6 +121,23 @@ namespace Molsketch
     }
     obmol.EndModify();
 
+#if (OB_VERSION < OB_VERSION_CHECK(3, 0, 0))
+    for (int i = 0 ; i < newAtoms.size() ; ++i) {
+      auto newAtom = newAtoms.at(i);
+      auto atom = originalMolecule.atoms().at(i);
+      qDebug() << "H atoms" << atom.hAtoms()
+               << "implicit count:" << newAtom->ImplicitHydrogenCount()
+               << "exlicit count:" << newAtom->ExplicitHydrogenCount()
+               << "valence:" << newAtom->GetImplicitValence();
+      newAtom->SetSpinMultiplicity(qAbs(2*(newAtom->ImplicitHydrogenCount() - atom.hAtoms())));
+      qDebug() << "after set H atoms" << atom.hAtoms()
+               << "implicit count:" << newAtom->ImplicitHydrogenCount()
+               << "exlicit count:" << newAtom->ExplicitHydrogenCount()
+               << "valence:" << newAtom->GetImplicitValence()
+               << "multiplicity:" << newAtom->GetSpinMultiplicity();
+    }
+#endif
+
     return obmol;
   }
 

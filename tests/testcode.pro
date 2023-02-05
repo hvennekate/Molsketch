@@ -6,6 +6,8 @@ TESTS = $$files(*test.h, true)
 HEADERS += $$files($$PWD/../*.h, true)
 SOURCES += $$files($$PWD/../tests/*.cpp, true)
 
+DEFINES += MSK_OB_FORMATS_DIR=$$MSK_OB_FORMATS_DIR
+
 CONFIG += c++14 debug
 
 QT += widgets printsupport svg testlib network

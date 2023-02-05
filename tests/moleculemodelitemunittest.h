@@ -37,10 +37,10 @@ class MoleculeModelItemUnitTest : public CxxTest::TestSuite {
 public:
   void setUp() {
     item = new MoleculeModelItemForTesting;
+    moleculeToProduce = new Molecule(QSet<Atom*>{new Atom(QPointF(), "A")}, {});
     produceMoleculeInvocationCounter = 0;
     item->produceMoleculeCallback =
         [&] { ++produceMoleculeInvocationCounter; return moleculeToProduce; };
-    moleculeToProduce = new Molecule();
   }
 
   void tearDown() {
@@ -80,13 +80,5 @@ public:
     QByteArray xml;
     QXmlStreamWriter writer(&xml);
     item->getMolecule();
-  }
-
-  void testIconNameAndXmlAreReturnedFromXml() {
-    // TODO
-  }
-
-  void testIconNameAndXmlAreReturnedFromInChI() {
-    // TODO mock obabeliface
   }
 };

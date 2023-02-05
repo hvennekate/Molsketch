@@ -27,13 +27,15 @@ matrixJob('Molsketch/tests') {
       cd build
       LD_LIBRARY_PATH=/opt/openbabel-${openbabel_version}/lib
       ATOM_H_FILE=$(find /opt/openbabel-${openbabel_version}/ -name "atom.h")
+      INCHIFORMAT_SO_FILE=$(find /opt/openbabel-${openbabel_version}/ -name "inchiformat.so")
       ${qmake_executable} ../sources/tests \
               -spec linux-g++ \
               CONFIG+=debug \
               CONFIG-=qml_debug \
               CXXTEST_PATH=/opt/cxxtest-4.4 \
               MSK_OB_LIB_DIR=/opt/openbabel-${openbabel_version}/lib/ \
-              MSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h}
+              MSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h} \
+              MSK_OB_FORMATS_DIR=${INCHIFORMAT_SO_FILE%inchiformat.so}
       make -j 8
       LD_LIBRARY_PATH=.:/opt/openbabel-${openbabel_version}/lib xvfb-run -a ./msktestrunner
       '''

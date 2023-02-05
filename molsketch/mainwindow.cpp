@@ -502,10 +502,10 @@ void MainWindow::createStatusBar()
 
   Indicator *openBabelIndicator = new Indicator(tr("OpenBabel"), statusBar());
   openBabelIndicator->setToolTip(tr("Indicates if OpenBabel was found and could be loaded.\n"
-                                    "If OpenBabel is not available, download the auxiliary library package from molsketch.sf.net"));
+                                    "Can be installed using the installer."));
   Indicator *inchiIndicator = new Indicator(tr("InChI"), statusBar());
   inchiIndicator->setToolTip(tr("Indicates if InChI format support is available.\n"
-                                "If InChI is unavailable, download the auxiliary OpenBabel formats package from molsketch.sf.net"));
+                                "Can be installed using the installer."));
 
   Indicator *gen2dIndicator = new Indicator(tr("gen2d"), statusBar());
   gen2dIndicator->setToolTip(tr("Indicates if 'gen2d' of OpenBabel is available.\n"

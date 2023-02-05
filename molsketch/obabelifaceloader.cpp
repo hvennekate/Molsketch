@@ -27,7 +27,7 @@
 #define ENCAPSULE_OB_CALL(CALL) try { CALL } catch (...) { \
   QMessageBox::critical(nullptr, "Error", "OpenBabel/obabeliface threw an exception. Please report to the author."); }
 
-static const char BABEL_LIBDIR_VARIABLE[] = "BABEL_LIBDIR";
+static const char BABEL_LIBDIR_VARIABLE[] = "BABEL_LIBDIR"; // TODO take from OpenBabel directly
 
 class OBabelIfaceLoaderPrivate {
   Q_DISABLE_COPY (OBabelIfaceLoaderPrivate)

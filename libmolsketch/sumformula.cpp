@@ -27,7 +27,7 @@ namespace Molsketch {
   class ElementSymbol : public QString {
   public:
     ElementSymbol(const QString& other) : QString(other) {}
-    bool operator<(const ElementSymbol &other) {
+    bool operator<(const ElementSymbol &other) const {
       if (*this == other) return false;
       if (*this == "C") return true;
       if (other == "C") return false;
