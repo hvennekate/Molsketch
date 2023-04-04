@@ -127,7 +127,7 @@ namespace Molsketch {
     {
       if (!grid->scene()) delete grid;
       if (!selectionRectangle->scene()) delete selectionRectangle;
-      delete stack;
+      if (stack) stack->disconnect(); // Stack should be deleted by scene (it's a child anyway) as it may be transferred to new private data
     }
 
     bool gridOn() const { return grid->scene(); }
@@ -209,6 +209,7 @@ namespace Molsketch {
   }
 
   MolScene::~MolScene() {
+    clearSelection();
     for(QObject *child : QObject::children())
       if (QAction *action = dynamic_cast<QAction*>(child))
         action->setChecked(false);
@@ -341,6 +342,7 @@ namespace Molsketch {
 
   void MolScene::clear()
   {
+    qDebug() << "Clearing scene";
     clearSelection();
     auto undoStack = d->stack; // TODO don't delete the privateData instead
     undoStack->clear();
