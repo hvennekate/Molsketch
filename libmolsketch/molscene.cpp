@@ -209,11 +209,13 @@ namespace Molsketch {
   }
 
   MolScene::~MolScene() {
+    blockSignals(true);
     clearSelection();
     for(QObject *child : QObject::children())
       if (QAction *action = dynamic_cast<QAction*>(child))
         action->setChecked(false);
     delete d;
+    blockSignals(false);
   }
 
   SceneSettings *MolScene::settings() const {

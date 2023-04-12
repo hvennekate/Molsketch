@@ -77,6 +77,7 @@ class XmlAssertion : private XmlAssertionBase {
   QScopedPointer<XmlAssertionPrivate> d_ptr;
 public:
   ~XmlAssertion();
+  // TODO add method for description
   static const XmlAssertion *assertThat(const QString& xml);
   static const XmlAssertion *assertThat(const Molsketch::XmlObjectInterface &object);
   const XmlNodesAssertion *hasNodes(const QString& xQuery) const;

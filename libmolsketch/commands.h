@@ -203,6 +203,7 @@ namespace Molsketch {
       void redo() override;
       MolScene *getScene() const override;
       QGraphicsScene *otherScene;
+      bool owning;
     public:
       ToggleScene(QGraphicsItem *item, QGraphicsScene *scene, const QString &text = "", QUndoCommand *parent = 0);
       ~ToggleScene();
