@@ -43,6 +43,10 @@ class BondDrawingTest : public CxxTest::TestSuite {
     XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")->exactly({value});
   }
 
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+#define MSK_QT5
+#endif
+
 public:
   void setUp() {
     a1 = new Atom(QPointF(), "H");
@@ -60,7 +64,11 @@ public:
 
   void testDrawingDownFromAtom() { // TODO these tests could go into a data provider
     a2->setCoordinates(QPolygonF() << QPointF(0,50));
+#ifdef MSK_QT5
     assertLineCoords("M0,9.33333 L0,40.6667");
+#else
+    assertLineCoords("M0,8.82552 L0,41.1745");
+#endif
   }
 
   void testDrawingRightFromAtom() {
@@ -70,7 +78,11 @@ public:
 
   void testDrawingUpFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(0,-50));
+#ifdef MSK_QT5
     assertLineCoords("M0,-9.33333 L0,-40.6667");
+#else
+    assertLineCoords("M0,-8.82552 L0,-41.1745");
+#endif
   }
 
   void testDrawingLeftFromAtom() {

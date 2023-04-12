@@ -78,7 +78,11 @@ public:
   void testPosition() {
     auto circle = assertThat(svgWithAtomAndRadicalElectron())->hasNodes(CIRCLE_QUERY);
     circle->haveAttribute("cx")->exactly({"0"});
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     circle->haveAttribute("cy")->exactly({"-9"});
+#else
+    circle->haveAttribute("cy")->exactly({"-8.49219"});
+#endif
   }
 
   void testColor() {

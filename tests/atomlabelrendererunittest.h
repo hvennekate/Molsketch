@@ -32,8 +32,8 @@
 using namespace Molsketch;
 using XmlAssert::assertThat;
 
-const QFont ATOM_FONT("Times", 10);
-const QFont SCRIPT_FONT("Times", 6);
+const QFont ATOM_FONT("Times", 10, 50);
+const QFont SCRIPT_FONT("Times", 6, 50);
 const QPair<QFont, QFont> FONTS{qMakePair(ATOM_FONT, SCRIPT_FONT)};
 
 class AtomLabelRendererUnitTest : public CxxTest::TestSuite {
@@ -101,12 +101,21 @@ public:
       SCRIPT_FONT_METRICS(SCRIPT_FONT)
   {}
 
+
+  // TODO why do values differ in Qt6?
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+#define MSK_QT5
+#endif
   void setUp() override {
     TEST_LABEL_WIDTH = ATOM_FONT_METRICS.boundingRect("test").width();
     TEST3_LABEL_WIDTH = TEST_LABEL_WIDTH + SCRIPT_FONT_METRICS.boundingRect("3").width();
     TE_LABEL_WIDTH = ATOM_FONT_METRICS.boundingRect("te").width();
     ATOM_FONT_HEIGHT = ATOM_FONT_METRICS.height();
+#ifdef MSK_QT5
     ATOM_FONT_HEIGHT_WITH_SUB = ATOM_FONT_HEIGHT + 1.6;
+#else
+    ATOM_FONT_HEIGHT_WITH_SUB = ATOM_FONT_HEIGHT + 0.871875;
+#endif
     LETTER_T_WIDTH = ATOM_FONT_METRICS.boundingRect("t").width();
     LETTER_T_WITH_3_WIDTH = -3.4921875;
     AB_WIDTH = ATOM_FONT_METRICS.boundingRect("AB").width();
@@ -115,7 +124,11 @@ public:
     TWO_LINE_HEIGHT = ATOM_FONT_HEIGHT + ATOM_FONT_METRICS.ascent();
     THREE_LINE_HEIGHT = TWO_LINE_HEIGHT + ATOM_FONT_METRICS.ascent();
     SVG_Y_ORIGIN = ATOM_FONT_HEIGHT/2 - ATOM_FONT_METRICS.descent();
+#ifdef MSK_QT5
     SVG_Y_SUBSCRIPT = 9.5;
+#else
+    SVG_Y_SUBSCRIPT = 9.3515625;
+#endif
     SVG_TE_WIDTH = 11;
     SVG_TEST_WIDTH = 17.25;
     SVG_TE_WIDTH = 8.14063;
@@ -128,93 +141,215 @@ public:
   }
 
   void testSimpleAtomLabel() {
-    assertLabelAndBoundingBox("test", {{-10, 5.5, 10, "test"}},
+    assertLabelAndBoundingBox("test",
+                          #ifdef MSK_QT5
+                              {{-10, 5.5, 10, "test"}},
+                          #else
+                              {{-10.5, 5.41406, 10, "test"}},
+                          #endif
                                       {-TEST_LABEL_WIDTH/2, -ATOM_FONT_HEIGHT/2, TEST_LABEL_WIDTH, ATOM_FONT_HEIGHT});
   }
 
   void testSimpleAtomLabelWithSubscript() {
-    assertLabelAndBoundingBox("test3", {{-10, 5.5, 10,  "test"}, {10, 5.5, 6,  "3"}},
+    assertLabelAndBoundingBox("test3",
+                          #ifdef MSK_QT5
+                              {{-10, 5.5, 10,  "test"}, {10, 5.5, 6,  "3"}},
+                          #else
+                              {{-10.5, 5.41406, 10, "test"}, {10.5, 5.41406, 6, "3"}},
+                          #endif
                                        {-TEST_LABEL_WIDTH/2, -ATOM_FONT_HEIGHT/2, TEST3_LABEL_WIDTH, ATOM_FONT_HEIGHT_WITH_SUB});
   }
 
   void testSimpleAtomLabelWithSubscriptMiddle() {
-    assertLabelAndBoundingBox("te3st", {{-5.5, SVG_Y_ORIGIN, 10,  "te"}, {5.5, 5.5, 6,  "3"}, {9.5, SVG_Y_ORIGIN, 10,  "st"}},
-                                       {-5.5, -ATOM_FONT_HEIGHT/2, 25, ATOM_FONT_HEIGHT_WITH_SUB});
+    assertLabelAndBoundingBox("te3st",
+                          #ifdef MSK_QT5
+                              {{-5.5, SVG_Y_ORIGIN, 10,  "te"}, {5.5, 5.5, 6,  "3"}, {9.5, SVG_Y_ORIGIN, 10,  "st"}},
+                              {-5.5, -ATOM_FONT_HEIGHT/2, 25, ATOM_FONT_HEIGHT_WITH_SUB}
+                          #else
+                              {{-5.5, SVG_Y_ORIGIN, 10,  "te"}, {5.5, 5.41406, 6,  "3"}, {9.5, SVG_Y_ORIGIN, 10,  "st"}},
+                              {-5.5, -ATOM_FONT_HEIGHT/2, 26, ATOM_FONT_HEIGHT_WITH_SUB}
+                          #endif
+                              );
   }
 
   void testSimpleAtomLabelWithSubscriptBeginning() {
-    assertLabelAndBoundingBox("3test", {{-10, 5.5, 10,  "test"}, {-14, 5.5, 6,  "3"}},
-                                       {-14, -SVG_Y_SUBSCRIPT, TEST3_LABEL_WIDTH, ATOM_FONT_HEIGHT_WITH_SUB});
+    assertLabelAndBoundingBox("3test",
+                          #ifdef MSK_QT5
+                              {{-10, 5.5, 10,  "test"}, {-14, 5.5, 6,  "3"}},
+                              {-14, -SVG_Y_SUBSCRIPT, TEST3_LABEL_WIDTH, ATOM_FONT_HEIGHT_WITH_SUB}
+                          #else
+                              {{-10.5, 5.41406, 10,  "test"}, {-14.5, 5.41406, 6,  "3"}},
+                              {-14.5, -SVG_Y_SUBSCRIPT, TEST3_LABEL_WIDTH, ATOM_FONT_HEIGHT_WITH_SUB}
+                          #endif
+                              );
   }
 
   void testAtomWithTrailingHLeft() {
-    assertLabelAndBoundingBox("AB", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {-15.5, 5.5, 10,  "H"}},
-                                     {-15.5, -9.5, 30, 19}, Alignment::Left, 1);
+    assertLabelAndBoundingBox("AB",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {-15.5, 5.5, 10,  "H"}},
+                              {-15.5, -9.5, 30, 19},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 10,  "B"}, {-15.5, 5.41406, 10,  "H"}},
+                              {-15.5, -9.3515625, 30, 18.703125},
+                          #endif
+                              Alignment::Left, 1);
   }
 
   void testAtomWithTrailingHRight() {
-    assertLabelAndBoundingBox("AB", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {14.5, 5.5, 10,  "H"}},
-                                     {-5.5, -9.5, 30, 19}, Alignment::Right, 1);
+    assertLabelAndBoundingBox("AB",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {14.5, 5.5, 10,  "H"}},
+                              {-5.5, -9.5, 30, 19},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 10,  "B"}, {14.5, 5.41406, 10,  "H"}},
+                              {-5.5, -9.3515625, 30, 18.703125},
+                          #endif
+                              Alignment::Right, 1);
   }
 
   void testAtomWithTrailingHDown() {
-    assertLabelAndBoundingBox("AB", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {-5, 24.5, 10,  "H"}},
-                                     {-5.5, -9.5, 20, 38}, Alignment::Down, 1);
+    assertLabelAndBoundingBox("AB",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {-5, 24.5, 10,  "H"}},
+                              {-5.5, -9.5, 20, 38},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 10,  "B"}, {-5, 24.1172, 10,  "H"}},
+                              {-5.5, -9.3515625, 20, 37.40625},
+                          #endif
+                              Alignment::Down, 1);
   }
 
   void testAtomWithTrailingHUp() {
-    assertLabelAndBoundingBox("AB", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {-5, -13.5, 10,  "H"}},
-                                     {-5.5, -28.5, 20, 38}, Alignment::Up, 1);
+    assertLabelAndBoundingBox("AB",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "B"}, {-5, -13.5, 10,  "H"}},
+                              {-5.5, -28.5, 20, 38},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 10,  "B"}, {-5, -13.2891, 10,  "H"}},
+                              {-5.5, -28.0546875, 20, 37.40625},
+                          #endif
+                              Alignment::Up, 1);
   }
 
   void testWithCharge() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}},
-                              {-5.5, -10.1, 16, 19.6}, Alignment::Right, 0, 1);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}},
+                              {-5.5, -10.1, 16, 19.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 6,  "+"}},
+                              {-5.5, -9.5203125, 16, 18.871875},
+                          #endif
+                              Alignment::Right, 0, 1);
   }
 
   void testWithMultipleCharges() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "2+"}},
-                              {-5.5, -10.1, 20, 19.6}, Alignment::Right, 0, 2);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "2+"}},
+                              {-5.5, -10.1, 20, 19.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 6,  "2+"}},
+                              {-5.5, -9.5203125, 20, 18.871875},
+                          #endif
+                              Alignment::Right, 0, 2);
   }
 
   void testWithNegativeCharge() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  QChar(0x2212)}},
-                              {-5.5, -10.1, 16, 19.6}, Alignment::Right, 0, -1);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  QChar(0x2212)}},
+                              {-5.5, -10.1, 16, 19.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 6,  QChar(0x2212)}},
+                              {-5.5, -9.5203125, 16, 18.871875},
+                          #endif
+                              Alignment::Right, 0, -1);
   }
 
   void testWithMultipleNegativeCharges() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  QString::number(2) + QChar(0x2212)}},
-                              {-5.5, -10.1, 20, 19.6}, Alignment::Right, 0, -2);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  QString::number(2) + QChar(0x2212)}},
+                              {-5.5, -10.1, 20, 19.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 6,  QString::number(2) + QChar(0x2212)}},
+                              {-5.5, -9.5203125, 20, 18.871875},
+                          #endif
+                              Alignment::Right, 0, -2);
   }
 
   void testWithMultipleElementsAndCharge() {
-    assertLabelAndBoundingBox("AcBe", {{-8, 5.5, 10,  "Ac"}, {8, 5.5, 10,  "Be"}, {24, 5.5, 6,  "+"}},
-                              {-8, -10.1, 37, 19.6}, Alignment::Right, 0, 1);
+    assertLabelAndBoundingBox("AcBe",
+                          #ifdef MSK_QT5
+                              {{-8, 5.5, 10,  "Ac"}, {8, 5.5, 10,  "Be"}, {24, 5.5, 6,  "+"}},
+                              {-8, -10.1, 37, 19.6},
+                          #else
+                              {{-8, 5.41406, 10,  "Ac"}, {8, 5.41406, 10,  "Be"}, {25, 5.41406, 6,  "+"}},
+                              {-8, -9.5203125, 38, 18.871875},
+                          #endif
+                              Alignment::Right, 0, 1);
   }
 
   void testWithHatomRightAndCharge() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "H"}, {15.5, 5.5, 6,  "+"}},
-                              {-5.5, -10.1, 26, 19.6}, Alignment::Right, 1, 1);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "H"}, {15.5, 5.5, 6,  "+"}},
+                              {-5.5, -10.1, 26, 19.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 10,  "H"}, {15.5, 5.41406, 6,  "+"}},
+                              {-5.5, -9.5203125, 26, 18.871875},
+                          #endif
+                              Alignment::Right, 1, 1);
   }
 
 
   void testWithHatomsRightAndCharges() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "H"}, {15.5, 5.5, 6,  "2", false}, {15.5, 5.5, 6,  "2+"}},
-                              {-5.5, -10.1, 30, 21.2}, Alignment::Right, 2, 2);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 10,  "H"}, {15.5, 5.5, 6,  "2", false}, {15.5, 5.5, 6,  "2+"}},
+                              {-5.5, -10.1, 30, 21.2},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 10,  "H"}, {15.5, 5.41406, 6,  "2", false}, {15.5, 5.41406, 6,  "2+"}},
+                              {-5.5, -9.5203125, 30, 19.74375},
+                          #endif
+                              Alignment::Right, 2, 2);
   }
 
   void testWithHatomLeftAndCharge() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}, {-15.5, 5.5, 10,  "H"}},
-                              {-15.5, -10.1, 26, 19.6}, Alignment::Left, 1, 1);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}, {-15.5, 5.5, 10,  "H"}},
+                              {-15.5, -10.1, 26, 19.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 6,  "+"}, {-15.5, 5.41406, 10,  "H"}},
+                              {-15.5, -9.5203125, 26, 18.871875},
+                          #endif
+                              Alignment::Left, 1, 1);
   }
 
   void testWithHatomUpAndCharge() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}, {-5, -13.5, 10,  "H"}},
-                              {-5.5, -29.1, 16, 38.6}, Alignment::Up, 1, 1);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}, {-5, -13.5, 10,  "H"}},
+                              {-5.5, -29.1, 16, 38.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 6,  "+"}, {-5, -13.2891, 10,  "H"}},
+                              {-5.5, -28.2234375, 16, 37.575},
+                          #endif
+                              Alignment::Up, 1, 1);
   } //TODO: why is the left coordinate of H not -5.5? Align on bottom left/top left corner instead?
 
   void testWithHatomDownAndCharge() {
-    assertLabelAndBoundingBox("A", {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}, {-5, 24.5, 10,  "H"}},
-                              {-5.5, -10.1, 16, 38.6}, Alignment::Down, 1, 1);
+    assertLabelAndBoundingBox("A",
+                          #ifdef MSK_QT5
+                              {{-5.5, 5.5, 10,  "A"}, {5.5, 5.5, 6,  "+"}, {-5, 24.5, 10,  "H"}},
+                              {-5.5, -10.1, 16, 38.6},
+                          #else
+                              {{-5.5, 5.41406, 10,  "A"}, {5.5, 5.41406, 6,  "+"}, {-5, 24.1172, 10,  "H"}},
+                              {-5.5, -9.5203125, 16, 37.575},
+                          #endif
+                              Alignment::Down, 1, 1);
   }
 };

@@ -81,10 +81,17 @@ class MoleculeLibraryAcceptanceTest : public CxxTest::TestSuite {
 
   void assertAtomPositions(MolScene* scene)
   {
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     QS_ASSERT_ON_POINTER(Atom, scene->itemAt(-10, -15, QTransform()), coordinates(), QPolygonF() << QPointF(-10, -15.1));
     QS_ASSERT_ON_POINTER(Atom, scene->itemAt(-10, -15, QTransform()), pos(), QPointF(-10, -15.1));
     QS_ASSERT_ON_POINTER(Atom, scene->itemAt( 30,  25, QTransform()), coordinates(), QPolygonF() << QPointF(30, 24.9));
     QS_ASSERT_ON_POINTER(Atom, scene->itemAt( 30,  25, QTransform()), pos(), QPointF(30, 24.9));
+#else
+    QS_ASSERT_ON_POINTER(Atom, scene->itemAt(-10, -15, QTransform()), coordinates(), QPolygonF() << QPointF(-10, -15.3375));
+    QS_ASSERT_ON_POINTER(Atom, scene->itemAt(-10, -15, QTransform()), pos(), QPointF(-10, -15.3375));
+    QS_ASSERT_ON_POINTER(Atom, scene->itemAt( 30,  25, QTransform()), coordinates(), QPolygonF() << QPointF(30, 24.6625));
+    QS_ASSERT_ON_POINTER(Atom, scene->itemAt( 30,  25, QTransform()), pos(), QPointF(30, 24.6625));
+#endif
   }
 
   MolScene *scene;

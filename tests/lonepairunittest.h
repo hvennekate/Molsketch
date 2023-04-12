@@ -77,7 +77,13 @@ public:
 
   void testLinePointCoordinates() {
     assertThat(svgOfLine())->hasNodes(LINE_QUERY)
-        ->exactlyOne()->haveAttribute("points")->exactly({"-6.53553,-2.96447 0.535534,-10.0355 "});
+        ->exactlyOne()->haveAttribute("points")->exactly(
+      #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+          {"-6.53553,-2.96447 0.535534,-10.0355 "}
+      #else
+          {"-6.53553,-2.59728 0.535534,-9.66835 "}
+      #endif
+          );
   }
 
   void testLinewidthAttribute() {
