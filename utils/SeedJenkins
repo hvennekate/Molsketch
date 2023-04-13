@@ -59,9 +59,10 @@ pipelineJob('Molsketch/sourceforge') {
   definition {
     cpsScm {
       lightweight
-      scriptPath 'utils/Jenkinsfile'
+      scriptPath 'sources/utils/Jenkinsfile'
       scm {
         git {
+          branch('main')
           remote {
             github 'hvennekate/Molsketch'
           }
@@ -82,9 +83,10 @@ pipelineJob('Molsketch/windows') {
   definition {
     cpsScm {
       lightweight
-      scriptPath 'utils/Jenkinsfile-windows'
+      scriptPath 'sources/utils/Jenkinsfile-windows'
       scm {
         git {
+          branch('main')
           remote {
             github 'hvennekate/Molsketch'
           }
