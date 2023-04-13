@@ -32,7 +32,7 @@ pipeline {
       steps {
         dir('winbuild') { // TODO make Qt version configurable
           sh '''
-            /opt/Qt6/6.4.0/windows-static/bin/qmake \
+            /opt/Qt6/6.5.0/windows-static/bin/qmake \
             CONFIG-=debug CONFIG+=release \
             DEFINES+=THIRD_PARTY_LICENSES \
             OB_LIBRARY_DIRS+=/opt/openbabel-3.1.1-static/lib/ \
