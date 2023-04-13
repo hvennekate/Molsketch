@@ -27,6 +27,7 @@
 
 #include <QDebug>
 #include <QRegularExpression>
+#include <cxxtest/TestSuite.h>
 
 // TODO make the stack trace facility an abstract parent
 const int MAX_STACK_TRACE_DEPTH = 15;
@@ -58,13 +59,10 @@ XmlAssertionBase::XmlAssertionBase(const QString &previousMessages)
 
 void XmlAssertionBase::printStackTraceAndThrow(const QString& message) const {
   Q_D(const XmlAssertionBase);
-  auto completeMessage = message + "\n" + d->previousMessages;
-  QTextStream out(stdout, QIODevice::WriteOnly);
-  out << completeMessage;
+  CxxTest::doFailAssert(__FILE__, __LINE__, message.toStdString().c_str(), (message + "\n" + d->previousMessages).toStdString().c_str());
 #ifdef MSKTEST_STACKTRACE
   std::cout << boost::stacktrace::stacktrace();
 #endif
-  throw completeMessage;
 }
 
 QString XmlAssertionBase::previousMessages() const {
