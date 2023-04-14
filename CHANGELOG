@@ -7,17 +7,17 @@
 </b>
 
 <h1>0.8.0 Fluorine</h1>
-<p>
+<ul>
     <li>Reimplemented rendering of atom labels (should also fix bounding box issues for charges)</li>
     <li>Enable build with Qt 6</li>
     <li>Dark mode icons</li>
-</p>
+</ul>
 
 <h2>0.7.3 Oxygen-18</h2>
-<p>
+<ul>
     <li>New bond types</li>
     <li>This release is mainly for testing the automated release pipeline</li>
-</p>
+</ul>
 
 <h2>0.7.2 Oxygen-17</h2>
 <ul>
