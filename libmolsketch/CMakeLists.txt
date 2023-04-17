@@ -24,7 +24,7 @@ else(MSK_STATIC_LIB)
         add_library(molsketch_LIB SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
 endif(MSK_STATIC_LIB)
 set_target_properties(molsketch_LIB PROPERTIES OUTPUT_NAME "molsketch")
-set_property(TARGET molsketch_LIB PROPERTY CXX_STANDARD 14)
+set_property(TARGET molsketch_LIB PROPERTY CXX_STANDARD 17)
 target_link_libraries(molsketch_LIB ${QT_LIBRARIES})
 
 # Install the executable and the library
