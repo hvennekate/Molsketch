@@ -6,6 +6,11 @@
     </ul>
 </b>
 
+<h2>0.8.1 Fluorine-13</h1>
+<ul>
+    <li></li>
+</ul>
+
 <h1>0.8.0 Fluorine</h1>
 <ul>
     <li>Reimplemented rendering of atom labels (should also fix bounding box issues for charges)</li>
