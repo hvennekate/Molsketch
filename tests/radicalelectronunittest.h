@@ -85,10 +85,34 @@ public:
 #endif
   }
 
-  void testColor() {
+  void assertSvgColor(const XmlNodesAssertion *parentAssertion, const QString &color) {
+    parentAssertion->haveAttribute("fill")->exactly({color});
+    parentAssertion->haveAttribute("stroke")->exactly({color});
+  }
+
+  void testColorWithExplicitColor_isExcplicitColor() {
     auto parent = assertThat(svgWithAtomAndRadicalElectron())->hasParentOf(CIRCLE_QUERY);
-    parent->haveAttribute("fill")->exactly({"#0000ff"});
-    parent->haveAttribute("stroke")->exactly({"#0000ff"});
+    assertSvgColor(parent, "#0000ff");
+  }
+
+  void testColorWithoutParent_isNotDrawn() {
+    auto radical = new RadicalElectron(DIAMETER);
+    scene->addItem(radical);
+    assertThat(scene->toSvg())->hasNodes(CIRCLE_QUERY)->none();
+  }
+
+  void testColorWithParentNoExplicitColor_isParentsColor() {
+    RadicalElectron *radical = new RadicalElectron(DIAMETER, BoundingBoxLinker::above());
+    radical->setParentItem(atom);
+    atom->setColor(Qt::red);
+    auto parent = assertThat(scene->toSvg())->hasParentOf(CIRCLE_QUERY);
+    assertSvgColor(parent, "#ff0000");
+  }
+
+  void testColorWithParentAndExplicitColor_isExplicitColor() {
+    atom->setColor(Qt::red);
+    auto parent = assertThat(svgWithAtomAndRadicalElectron())->hasParentOf(CIRCLE_QUERY);
+    assertSvgColor(parent, "#0000ff");
   }
 
   void testBoundingRectWithoutParent() {

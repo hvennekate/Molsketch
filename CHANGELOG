@@ -6,9 +6,10 @@
     </ul>
 </b>
 
-<h2>0.8.1 Fluorine-13</h1>
+<h2>0.8.1 Fluorine-13</h2>
 <ul>
     <li>Fix color of newly inserted atoms and bonds</li>
+    <li>Fix color of radical electrons</li>
 </ul>
 
 <h1>0.8.0 Fluorine</h1>
