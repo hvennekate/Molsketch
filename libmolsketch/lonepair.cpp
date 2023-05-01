@@ -19,6 +19,7 @@
 #include "graphicsitem.h"
 #include "lonepair.h"
 #include <QDebug>
+#include <QPainter>
 #include <QPen>
 
 namespace Molsketch {
@@ -83,7 +84,19 @@ void LonePair::paint (QPainter* painter, const QStyleOptionGraphicsItem* option,
   QRectF originalBounds = QGraphicsLineItem::boundingRect(); // TODO join with code from boundingRect()
   QPointF shift = d->linker.getShift(parentItem()->boundingRect(), originalBounds);
   setLine(line().translated(shift));
+
+  // TODO do not inherit from QGraphicsLineItem so we can handle/default color independently
+  const graphicsItem * parentGraphicsItem = nullptr;
+  auto originalPen = pen();
+  qDebug() << "pen color valid?" << pen().color().isValid();
+  if (!pen().color().isValid()
+      && (parentGraphicsItem = dynamic_cast<const graphicsItem *>(parentItem()))) {
+    QPen newPen(originalPen);
+    newPen.setColor(parentGraphicsItem->getColor());
+    setPen(newPen);
+  }
   QGraphicsLineItem::paint(painter, option, widget);
+  setPen(originalPen);
 }
 
 QString LonePair::xmlName () const {

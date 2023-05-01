@@ -97,6 +97,26 @@ public:
         ->exactlyOne()->haveAttribute("stroke")->exactly({"#ff0000"});
   }
 
+  void testColorWithoutParent_isNotDrawn() {
+    auto lonePair = new LonePair();
+    scene->addItem(lonePair);
+    assertThat(scene->toSvg())->hasNodes(LINE_QUERY)->none();
+  }
+
+  void testColorWithParentNoExplicitColor_isParentsColor() {
+    auto lonePair = new LonePair(ANGLE, LINE_WIDTH, LENGTH, BoundingBoxLinker::atTop());
+    lonePair->setParentItem(atom);
+    atom->setColor(Qt::green);
+    assertThat(scene->toSvg())->hasParentOf(LINE_QUERY)->exactlyOne()->haveAttribute("stroke")->exactly({"#00ff00"});
+    TSM_ASSERT("Pen color should still be invalid", !lonePair->pen().color().isValid())
+  }
+
+  void testColorWithParentAndExplicitColor_isExplicitColor() {
+    atom->setColor(Qt::green);
+    assertThat(svgOfRedLine())->hasParentOf(LINE_QUERY)
+        ->exactlyOne()->haveAttribute("stroke")->exactly({"#ff0000"});
+  }
+
   void testBoundingRectWithoutParent() {
     QS_ASSERT_EQUALS(SAMPLE_LONE_PAIR.boundingRect(), QRectF());
   }
