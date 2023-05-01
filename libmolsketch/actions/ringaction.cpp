@@ -230,6 +230,7 @@ namespace Molsketch {
       else
       {
         atom = new Atom(vertex, "C", scene()->settings()->autoAddHydrogen()->get());
+        atom->setColor(scene()->settings()->defaultColor()->get());
         newMolecule->addAtom(atom);
       }
       ringAtoms << atom;

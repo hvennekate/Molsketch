@@ -161,6 +161,7 @@ namespace Molsketch {
     QPixmap pixmap(QFontMetrics(font).boundingRect(currentElement()).size());
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
+    painter.setPen(palette().color(QPalette::ButtonText));
     painter.setFont(font);
     painter.drawText(QRectF(0,0, pixmap.width(), pixmap.height()), currentElement());
     return pixmap;
