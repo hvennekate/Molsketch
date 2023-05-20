@@ -7,6 +7,8 @@ GPATH
 *.kdev4
 /build/
 .cproject
+*.bak
+*.autosave
 
 # Eclipse
 .project

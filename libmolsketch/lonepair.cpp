@@ -89,8 +89,8 @@ void LonePair::paint (QPainter* painter, const QStyleOptionGraphicsItem* option,
   const graphicsItem * parentGraphicsItem = nullptr;
   auto originalPen = pen();
   qDebug() << "pen color valid?" << pen().color().isValid();
-  if (!pen().color().isValid()
-      && (parentGraphicsItem = dynamic_cast<const graphicsItem *>(parentItem()))) {
+  if (!pen().color().isValid() &&
+      (parentGraphicsItem = dynamic_cast<const graphicsItem *>(parentItem()))) {
     QPen newPen(originalPen);
     newPen.setColor(parentGraphicsItem->getColor());
     setPen(newPen);

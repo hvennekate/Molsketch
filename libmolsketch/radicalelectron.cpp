@@ -35,7 +35,8 @@ namespace Molsketch {
     }
 
     QColor getColor(const QGraphicsItem *parentItem) const {
-      if (color.isValid() || !parentItem) return color;
+      // TODO have flag to decide if color should be inherited or not
+//      if (color.isValid() || !parentItem) return color;
       auto graphicsItemParent = dynamic_cast<const graphicsItem *>(parentItem);
       if (!graphicsItemParent) return color;
       return graphicsItemParent->getColor();
