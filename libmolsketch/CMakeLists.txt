@@ -14,8 +14,8 @@ file(GLOB_RECURSE libmolsketch_RCS *.qrc)
 
 include("../generateTranslations.cmake")
 addTranslationResources(libmolsketch_TS_resource "libmolsketch_translations")
-qt5_add_resources(libmolsketch_SRCS ${libmolsketch_RCS} ${libmolsketch_TS_resource})
-qt5_wrap_ui(libmolsketch_UIS_H ${libmolsketch_UIS})
+qt_add_resources(libmolsketch_SRCS ${libmolsketch_RCS} ${libmolsketch_TS_resource})
+qt_wrap_ui(libmolsketch_UIS_H ${libmolsketch_UIS})
 
 # Create the molsKetch libraries
 if(MSK_STATIC_LIB)
@@ -24,7 +24,6 @@ else(MSK_STATIC_LIB)
         add_library(molsketch_LIB SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
 endif(MSK_STATIC_LIB)
 set_target_properties(molsketch_LIB PROPERTIES OUTPUT_NAME "molsketch")
-set_property(TARGET molsketch_LIB PROPERTY CXX_STANDARD 17)
 target_link_libraries(molsketch_LIB ${QT_LIBRARIES})
 
 # Install the executable and the library
