@@ -59,7 +59,6 @@ set(QtRequiredPackages
         PrintSupport
         Svg
         Network
-        LinguistTools
 )
 
 if(MSK_QT6)
@@ -68,7 +67,6 @@ if(MSK_QT6)
   qt_standard_project_setup()
 else(MSK_QT6)
   set(QT_MIN_VERSION "5.0.0")
-  find_package(QtRequiredPackages)
   foreach(package ${QtRequiredPackages})
           find_package(Qt5${package})
           INCLUDE_DIRECTORIES(${Qt5${package}_INCLUDE_DIRS})
@@ -76,6 +74,7 @@ else(MSK_QT6)
           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5${package}_EXECUTABLE_COMPILE_FLAGS}")
           set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::${package})
   endforeach(package)
+  find_package(Qt5LinguistTools)
 
   if(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
           message(FATAL_ERROR "Could not find Qt5. Required parts include: Widgets, Gui, PrintSupport, Svg.")
