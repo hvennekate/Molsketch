@@ -4,17 +4,17 @@
 <context>
     <name>AlignRowDialog</name>
     <message>
-        <location filename="alignrowdialog.ui" line="14"/>
+        <location filename="actions/alignrowdialog.ui" line="14"/>
         <source>Align</source>
         <translation>Ausrichten</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="20"/>
+        <location filename="actions/alignrowdialog.ui" line="20"/>
         <source>Distance</source>
         <translation>Zwischenraum</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="33"/>
+        <location filename="actions/alignrowdialog.ui" line="33"/>
         <source>Inter&amp;val</source>
         <translation>&amp;Position</translation>
     </message>
@@ -678,32 +678,32 @@ diameter</source>
 <context>
     <name>Molsketch::TypeListDialog</name>
     <message>
-        <location filename="typelistdialog.ui" line="14"/>
+        <location filename="actions/typelistdialog.ui" line="14"/>
         <source>Select types</source>
         <translation>Auswahl nach Typ</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="20"/>
+        <location filename="actions/typelistdialog.ui" line="20"/>
         <source>Molecules</source>
         <translation>Moleküle</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="27"/>
+        <location filename="actions/typelistdialog.ui" line="27"/>
         <source>Atoms</source>
         <translation>Atome</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="34"/>
+        <location filename="actions/typelistdialog.ui" line="34"/>
         <source>Bonds</source>
         <translation>Bindungen</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="41"/>
+        <location filename="actions/typelistdialog.ui" line="41"/>
         <source>Arrows</source>
         <translation>Pfeile</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="48"/>
+        <location filename="actions/typelistdialog.ui" line="48"/>
         <source>Decorations (frames, brackets)</source>
         <translation>Verzierungen (Rahmen, Klammern)</translation>
     </message>

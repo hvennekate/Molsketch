@@ -4,17 +4,17 @@
 <context>
     <name>AlignRowDialog</name>
     <message>
-        <location filename="alignrowdialog.ui" line="14"/>
+        <location filename="actions/alignrowdialog.ui" line="14"/>
         <source>Align</source>
         <translation>Στοίχιση</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="20"/>
+        <location filename="actions/alignrowdialog.ui" line="20"/>
         <source>Distance</source>
         <translation>Απόσταση</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="33"/>
+        <location filename="actions/alignrowdialog.ui" line="33"/>
         <source>Inter&amp;val</source>
         <translation>Διάστ&amp;ημα</translation>
     </message>
@@ -676,32 +676,32 @@ diameter</source>
 <context>
     <name>Molsketch::TypeListDialog</name>
     <message>
-        <location filename="typelistdialog.ui" line="14"/>
+        <location filename="actions/typelistdialog.ui" line="14"/>
         <source>Select types</source>
         <translation>Επιλογή ειδών</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="20"/>
+        <location filename="actions/typelistdialog.ui" line="20"/>
         <source>Molecules</source>
         <translation>Μόρια</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="27"/>
+        <location filename="actions/typelistdialog.ui" line="27"/>
         <source>Atoms</source>
         <translation>Άτομα</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="34"/>
+        <location filename="actions/typelistdialog.ui" line="34"/>
         <source>Bonds</source>
         <translation>Δεσμοί</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="41"/>
+        <location filename="actions/typelistdialog.ui" line="41"/>
         <source>Arrows</source>
         <translation>Βέλη</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="48"/>
+        <location filename="actions/typelistdialog.ui" line="48"/>
         <source>Decorations (frames, brackets)</source>
         <translation>Διακοσμήσεις (πλαίσια, αγκύλες)</translation>
     </message>

@@ -4,17 +4,17 @@
 <context>
     <name>AlignRowDialog</name>
     <message>
-        <location filename="alignrowdialog.ui" line="14"/>
+        <location filename="actions/alignrowdialog.ui" line="14"/>
         <source>Align</source>
         <translation>对齐</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="20"/>
+        <location filename="actions/alignrowdialog.ui" line="20"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="33"/>
+        <location filename="actions/alignrowdialog.ui" line="33"/>
         <source>Inter&amp;val</source>
         <translation>间隔</translation>
     </message>
@@ -672,32 +672,32 @@ diameter</source>
 <context>
     <name>Molsketch::TypeListDialog</name>
     <message>
-        <location filename="typelistdialog.ui" line="14"/>
+        <location filename="actions/typelistdialog.ui" line="14"/>
         <source>Select types</source>
         <translation>选择类型</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="20"/>
+        <location filename="actions/typelistdialog.ui" line="20"/>
         <source>Molecules</source>
         <translation>分子</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="27"/>
+        <location filename="actions/typelistdialog.ui" line="27"/>
         <source>Atoms</source>
         <translation>原子</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="34"/>
+        <location filename="actions/typelistdialog.ui" line="34"/>
         <source>Bonds</source>
         <translation>化学键</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="41"/>
+        <location filename="actions/typelistdialog.ui" line="41"/>
         <source>Arrows</source>
         <translation>箭头</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="48"/>
+        <location filename="actions/typelistdialog.ui" line="48"/>
         <source>Decorations (frames, brackets)</source>
         <translation>装饰（框架，括号）</translation>
     </message>

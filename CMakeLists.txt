@@ -64,6 +64,7 @@ set(QtRequiredPackages
 if(MSK_QT6)
   set(QT_MIN_VERSION "6.0.0")
   find_package(Qt6 REQUIRED COMPONENTS ${QtRequiredPackages})
+  find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
   qt_standard_project_setup()
 else(MSK_QT6)
   set(QT_MIN_VERSION "5.0.0")

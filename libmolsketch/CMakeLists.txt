@@ -18,13 +18,24 @@ qt_add_resources(libmolsketch_SRCS ${libmolsketch_RCS} ${libmolsketch_TS_resourc
 qt_wrap_ui(libmolsketch_UIS_H ${libmolsketch_UIS})
 
 # Create the molsKetch libraries
-if(MSK_STATIC_LIB)
-        add_library(molsketch_LIB STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
-else(MSK_STATIC_LIB)
-        add_library(molsketch_LIB SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
-endif(MSK_STATIC_LIB)
-set_target_properties(molsketch_LIB PROPERTIES OUTPUT_NAME "molsketch")
-target_link_libraries(molsketch_LIB ${QT_LIBRARIES})
+if(MSK_QT6)
+  if(MSK_STATIC_LIB)
+    qt_add_library(molsketch_LIB STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+  else(MSK_STATIC_LIB)
+    qt_add_library(molsketch_LIB SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+  endif(MSK_STATIC_LIB)
+  foreach(package ${QtRequiredPackages})
+    target_link_libraries(molsketch_LIB Qt6::${package})
+  endforeach(package)
+else(MSK_QT6)
+  if(MSK_STATIC_LIB)
+    add_library(molsketch_LIB STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+  else(MSK_STATIC_LIB)
+    add_library(molsketch_LIB SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+  endif(MSK_STATIC_LIB)
+  target_link_libraries(molsketch_LIB ${package})
+  target_link_libraries(molsketch_LIB ${QT_LIBRARIES})
+endif(MSK_QT6)
 
 # Install the executable and the library
 install(TARGETS molsketch_LIB
