@@ -21,9 +21,9 @@ qt_add_resources(molsketch_SRCS ${molsketch_RCS} ${molsketch_TS_resource})
 qt_wrap_ui(molsketch_UIS_H ${molsketch_UIS})
 
 # Add a program icon for windows
-if(WIN32)
-  set(molsketch_SRCS ${molsketch_SRCS} icon.rc)
-endif(WIN32)
+# if(WIN32) ## TODO check
+#   set(molsketch_SRCS ${molsketch_SRCS} icon.rc)
+# endif(WIN32)
 
 # Create the main executable
 add_definitions( -fexceptions )

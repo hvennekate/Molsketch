@@ -1,27 +1,30 @@
 function(findOpenBabel)
   find_path(OPENBABEL_INCLUDE_DIRS openbabel/obconversion.h
-      ${OB_INCLUDE_DIRS}
-      C:/openbabel/include
-      C:/openbabel/include/openbabel3
-      C:/openbabel/include/openbabel-2.0
-      /usr/local/include
-      /usr/local/include/openbabel3
-      /usr/local/include/openbabel-2.0
-      /usr/include
-      /usr/include/openbabel3
-      /usr/include/openbabel-2.0
-      ${GNUWIN32_DIR}/include
+      PATHS ${OB_INCLUDE_DIRS}
+            C:/openbabel/include
+            C:/openbabel/include/openbabel3
+            C:/openbabel/include/openbabel-2.0
+            /usr/local/include
+            /usr/local/include/openbabel3
+            /usr/local/include/openbabel-2.0
+            /usr/include
+            /usr/include/openbabel3
+            /usr/include/openbabel-2.0
+            ${GNUWIN32_DIR}/include
+      NO_CMAKE_FIND_ROOT_PATH
+      NO_DEFAULT_PATH
   )
 
   find_library(OPENBABEL_LINK_LIBRARIES NAMES openbabel
-      PATHS
-      ${OB_LIBRARY_DIRS}
-      C:/openbabel/lib
-      /usr/lib
-      /usr/lib64
-      /usr/local/lib
-      /usr/local/lib64
-      ${GNUWIN32_DIR}/lib
+      PATHS ${OB_LIBRARY_DIRS}
+            C:/openbabel/lib
+            /usr/lib
+            /usr/lib64
+            /usr/local/lib
+            /usr/local/lib64
+            ${GNUWIN32_DIR}/lib
+      NO_CMAKE_FIND_ROOT_PATH
+      NO_DEFAULT_PATH
   )
 
   if(NOT OPENBABEL_INCLUDE_DIRS)

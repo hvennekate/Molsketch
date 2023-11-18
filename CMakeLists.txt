@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5.0)
 if (MSK_QT6)
   cmake_minimum_required(VERSION 3.21.1)
 endif (MSK_QT6)
