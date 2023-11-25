@@ -21,7 +21,7 @@ if(WIN32 OR WIN64)
         set_target_properties(obabeliface_LIB PROPERTIES PREFIX "")
 endif(WIN32 OR WIN64)
 
-target_link_libraries(obabeliface_LIB molsketch_LIB ${QT_LIBRARIES} ${OPENBABEL_LINK_LIBRARIES})
+target_link_libraries(obabeliface_LIB mskcore ${QT_LIBRARIES} ${OPENBABEL_LINK_LIBRARIES})
 
 # Install the executable and the library
 install(TARGETS obabeliface_LIB

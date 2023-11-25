@@ -20,25 +20,25 @@ qt_wrap_ui(libmolsketch_UIS_H ${libmolsketch_UIS})
 # Create the molsKetch libraries
 if(MSK_QT6)
   if(MSK_STATIC_LIB)
-    qt_add_library(molsketch_LIB STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+    qt_add_library(mskcore STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
   else(MSK_STATIC_LIB)
-    qt_add_library(molsketch_LIB SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+    qt_add_library(mskcore SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
   endif(MSK_STATIC_LIB)
   foreach(package ${QtRequiredPackages})
-    target_link_libraries(molsketch_LIB Qt6::${package})
+    target_link_libraries(mskcore Qt6::${package})
   endforeach(package)
 else(MSK_QT6)
   if(MSK_STATIC_LIB)
-    add_library(molsketch_LIB STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+    add_library(mskcore STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
   else(MSK_STATIC_LIB)
-    add_library(molsketch_LIB SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
+    add_library(mskcore SHARED ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
   endif(MSK_STATIC_LIB)
-  target_link_libraries(molsketch_LIB ${package})
-  target_link_libraries(molsketch_LIB ${QT_LIBRARIES})
+  target_link_libraries(mskcore ${package})
+  target_link_libraries(mskcore ${QT_LIBRARIES})
 endif(MSK_QT6)
 
 # Install the executable and the library
-install(TARGETS molsketch_LIB
+install(TARGETS mskcore
     RUNTIME DESTINATION ${MSK_INSTALL_BINS}
     LIBRARY DESTINATION ${MSK_INSTALL_LIBS}
     ARCHIVE DESTINATION ${MSK_INSTALL_LIBS}/static)
