@@ -56,6 +56,9 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 int main(int argc, char *argv[])
 {
   qInstallMessageHandler(messageOutput);
+  Q_INIT_RESOURCE(toolicons);
+  Q_INIT_RESOURCE(toolicons_inverted);
+
   QApplication app(argc, argv);
 
   QCoreApplication::setOrganizationName("SourceForge");

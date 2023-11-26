@@ -36,8 +36,4 @@ namespace Molsketch {
     QImage getInternalImage(const QString &fileName) {
         return QImage(getPrefix() + fileName);
     }
-
-
-
-
 }

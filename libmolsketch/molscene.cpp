@@ -74,15 +74,7 @@
 #include "graphicsitem.h"
 #endif
 
-#ifdef QT_STATIC_BUILD
-inline void initToolBarIcons() { Q_INIT_RESOURCE(toolicons); }
-#endif
-
 namespace Molsketch {
-
-#ifdef QT_STATIC_BUILD
-  void initToolBarIconsMsk() { initToolBarIcons(); }
-#endif
 
   const QString MolScene::mouseWheelForCyclingTools = "mouse-wheel-cycle-tools";
 
