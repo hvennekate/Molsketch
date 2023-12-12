@@ -1,4 +1,4 @@
-"Global prefix";MSK_PREFIX;/usr;"C:/Program\ Files/MolsKetch"
+"Global prefix";MSK_PREFIX;/usr;
 "Executable destination dir";MSK_INSTALL_BINS;/bin;/bin
 "Headers destination dir";MSK_INSTALL_INCLUDES;/include;/include
 "Libraries (64bit) destination dir";MSK_INSTALL_LIBS64;/lib64/molsketch;/lib

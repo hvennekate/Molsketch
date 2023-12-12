@@ -17,12 +17,11 @@ include_directories(${OPENBABEL_INCLUDE_DIRS}
 # Create the obabeliface library
 add_library(obabeliface_LIB SHARED ${obabeliface_SRCS})
 set_target_properties(obabeliface_LIB PROPERTIES OUTPUT_NAME "obabeliface")
-set_property(TARGET obabeliface_LIB PROPERTY CXX_STANDARD 17)
 if(WIN32 OR WIN64)
         set_target_properties(obabeliface_LIB PROPERTIES PREFIX "")
 endif(WIN32 OR WIN64)
 
-target_link_libraries(obabeliface_LIB molsketch_LIB ${QT_LIBRARIES} ${OPENBABEL_LINK_LIBRARIES})
+target_link_libraries(obabeliface_LIB mskcore ${QT_LIBRARIES} ${OPENBABEL_LINK_LIBRARIES})
 
 # Install the executable and the library
 install(TARGETS obabeliface_LIB

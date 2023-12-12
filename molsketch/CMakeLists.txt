@@ -15,30 +15,35 @@ file(GLOB_RECURSE molsketch_MOC_HDRS *.h)
 file(GLOB_RECURSE molsketch_RCS *.qrc)
 file(GLOB_RECURSE molsketch_UIS *.ui)
 
-find_package(Qt5Widgets)
-
 include("../generateTranslations.cmake")
 addTranslationResources(molsketch_TS_resource "molsketch_translations")
-qt5_add_resources(molsketch_SRCS ${molsketch_RCS} ${molsketch_TS_resource})
-qt5_wrap_ui(molsketch_UIS_H ${molsketch_UIS})
+qt_add_resources(molsketch_SRCS ${molsketch_RCS} ${molsketch_TS_resource})
+qt_wrap_ui(molsketch_UIS_H ${molsketch_UIS})
 
 # Add a program icon for windows
-if(WIN32)
-  set(molsketch_SRCS ${molsketch_SRCS} icon.rc)
-endif(WIN32)
+# if(WIN32) ## TODO check
+#   set(molsketch_SRCS ${molsketch_SRCS} icon.rc)
+# endif(WIN32)
 
 # Create the main executable
 add_definitions( -fexceptions )
 link_directories(${CMAKE_BINARY_DIR}/lib)
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/images/molsketch.ico")
-add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
+if(MSK_QT6)
+  qt_add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
+  target_link_libraries(molsketch PRIVATE mskcore)
+  foreach(package ${QtRequiredPackages})
+    target_link_libraries(molsketch PRIVATE Qt6::${package})
+  endforeach(package)
+else(MSK_QT6)
+  add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
+  target_link_libraries(molsketch mskcore)
+  foreach(package ${QtRequiredPackages})
+    target_link_libraries(molsketch $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::${package})
+  endforeach(package)
+endif(MSK_QT6)
 install(TARGETS molsketch DESTINATION ${MSK_INSTALL_BINS})
-set_property(TARGET molsketch PROPERTY CXX_STANDARD 17)
 set_property(TARGET molsketch PROPERTY INSTALL_RPATH ${MSK_INSTALL_LIBS})
-target_link_libraries(molsketch molsketch_LIB)
-foreach(package ${Qt5RequiredPackages})
-        target_link_libraries(molsketch Qt5::${package})
-endforeach(package)
 set_target_properties(molsketch PROPERTIES OUTPUT_NAME "molsketch")
 
 # Install menu entries on Linux

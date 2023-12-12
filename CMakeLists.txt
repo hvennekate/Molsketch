@@ -1,9 +1,14 @@
-## CMakeLists.txt for Molsketch
-cmake_minimum_required(VERSION 2.8.12) # Depend on CMake 2.6 or better
+cmake_minimum_required(VERSION 3.5.0)
+if (MSK_QT6)
+  cmake_minimum_required(VERSION 3.21.1)
+endif (MSK_QT6)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 cmake_policy(SET CMP0005 NEW)
 cmake_policy(SET CMP0020 NEW)
 
-# The name of the project
 project(Molsketch)
 
 ###########################################################
@@ -45,10 +50,9 @@ set(BUILD_SHARED_LIBS ON)
 set(_obIncDir ${CMAKE_SOURCE_DIR}/include)
 set(_obLinkDir ${CMAKE_SOURCE_DIR}/lib)
 
-# Find and setup Qt5
-set(QT_MIN_VERSION "5.0.0")
+# Find and setup Qt
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(Qt5RequiredPackages
+set(QtRequiredPackages
         Core
         Widgets
         Gui
@@ -57,19 +61,27 @@ set(Qt5RequiredPackages
         Network
 )
 
-find_package(Qt5LinguistTools)
-foreach(package ${Qt5RequiredPackages})
-        find_package(Qt5${package})
-        INCLUDE_DIRECTORIES(${Qt5${package}_INCLUDE_DIRS})
-        add_definitions(${Qt5${package}_DEFINITIONS})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5${package}_EXECUTABLE_COMPILE_FLAGS}")
-        set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::${package})
-endforeach(package)
+if(MSK_QT6)
+  set(QT_MIN_VERSION "6.0.0")
+  find_package(Qt6 REQUIRED COMPONENTS ${QtRequiredPackages})
+  find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+  qt_standard_project_setup()
+else(MSK_QT6)
+  set(QT_MIN_VERSION "5.0.0")
+  foreach(package ${QtRequiredPackages})
+          find_package(Qt5${package})
+          INCLUDE_DIRECTORIES(${Qt5${package}_INCLUDE_DIRS})
+          add_definitions(${Qt5${package}_DEFINITIONS})
+          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5${package}_EXECUTABLE_COMPILE_FLAGS}")
+          set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::${package})
+  endforeach(package)
+  find_package(Qt5LinguistTools)
 
-if(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
-        message(FATAL_ERROR "Could not find Qt5. Required parts include: Widgets, Gui, PrintSupport, Svg.")
-endif(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
-set(CMAKE_AUTOMOC ON)
+  if(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
+          message(FATAL_ERROR "Could not find Qt5. Required parts include: Widgets, Gui, PrintSupport, Svg.")
+  endif(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
+  set(CMAKE_AUTOMOC ON)
+endif(MSK_QT6)
 
 ################ Reading installation settings
 
