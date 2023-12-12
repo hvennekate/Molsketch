@@ -21,6 +21,7 @@
 #include "molecule.h"
 #include "stringify.h"
 #include "moleculemodelitem.h"
+#include "qtdeprecations.h"
 
 #include <QElapsedTimer>
 #include <QIcon>
@@ -28,6 +29,7 @@
 #include <QSet>
 #include <QTimer>
 #include <iterator>
+#include <QDebug>
 
 namespace Molsketch {
   const int itemIncrement = 10;
@@ -39,8 +41,9 @@ namespace Molsketch {
     QList<MoleculeModelItem*> items;
     int fetchCount;
     void cleanMolecules() {
-      qInfo("Clearing list of molecules. Count: %d", items.size());
-      for (auto molecule : items.toSet()) delete molecule;
+      qInfo() << "Clearing list of molecules. Count:" << items.size();
+      auto itemSet = toSet(items);
+      for (auto molecule : itemSet) delete molecule;
       items.clear();
       fetchCount = 0;
     }

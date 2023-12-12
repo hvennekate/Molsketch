@@ -35,7 +35,8 @@ using Molsketch::Molecule;
 using namespace Molsketch::Commands;
 
 ItemAction::ItemAction(QGraphicsItem* newItem, MolScene* addScene, const QString & text)
-  : ItemCommand(newItem, text), m_scene(addScene), owning(!newItem->scene())
+  : ItemCommand(newItem, text), m_scene(addScene), owning(!newItem->scene()),
+    parent(newItem->parentItem())
 {}
 
 ItemAction::~ItemAction() {
@@ -44,8 +45,14 @@ ItemAction::~ItemAction() {
 
 void ItemAction::redo() {
   if (!getItem() || !m_scene) return;
-  if (owning) m_scene->addItem(getItem());
-  else m_scene->removeItem(getItem());
+  auto item = getItem();
+  if (owning) {
+    m_scene->addItem(item);
+    item->setParentItem(parent);
+  } else {
+    parent = item->parentItem();
+    m_scene->removeItem(item);
+  }
   owning = !owning;
 }
 
@@ -113,8 +120,13 @@ void ChildItemCommand::redo() {
 
 
 void ToggleScene::redo() {
-  if (getItem()->scene()) getItem()->scene()->removeItem(getItem());
-  else otherScene->addItem(getItem());
+  if (getItem()->scene()) {
+    getItem()->scene()->removeItem(getItem());
+    owning = true;
+  } else {
+    otherScene->addItem(getItem());
+    owning = false;
+  }
 }
 
 Molsketch::MolScene *Molsketch::Commands::ToggleScene::getScene() const {
@@ -124,11 +136,12 @@ Molsketch::MolScene *Molsketch::Commands::ToggleScene::getScene() const {
 
 ToggleScene::ToggleScene(QGraphicsItem *item, QGraphicsScene *scene, const QString &text, QUndoCommand *parent)
   : SceneCommand(item, text, parent),
-    otherScene(scene)
+    otherScene(scene),
+    owning(!item->scene())
 {}
 
 ToggleScene::~ToggleScene() {
-  if (!getItem()->scene()) delete getItem();
+  if (owning) delete getItem();
 }
 
 void Molsketch::Commands::addItemToMolecule(Molsketch::graphicsItem *item, Molsketch::Molecule *molecule, Molsketch::MolScene *scene, const QString &text) {

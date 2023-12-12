@@ -23,8 +23,8 @@
 
 namespace Molsketch {
 
-  class reactionArrowAction : public multiAction
-  {
+  class reactionArrowAction : public multiAction {
+    Q_OBJECT
   public:
     explicit reactionArrowAction(MolScene* scene);
     ~reactionArrowAction();

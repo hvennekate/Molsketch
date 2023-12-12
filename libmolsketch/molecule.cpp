@@ -29,6 +29,8 @@
 
 #include "molecule.h"
 
+#include "qtdeprecations.h"
+
 #include "atom.h"
 #include "bond.h"
 #include "molscene.h"
@@ -38,6 +40,8 @@
 #include "electronsystem.h"
 #include "scenesettings.h"
 #include "settingsitem.h"
+#include "core/coreatom.h"
+#include "core/corebond.h"
 
 namespace Molsketch {
 
@@ -95,16 +99,16 @@ namespace Molsketch {
 
 #define DEFAULTINITIALIZER d_ptr(new MoleculePrivate(this)), m_electronSystemsUpdate(true)
 
-  Molecule::Molecule(QGraphicsItem* parent GRAPHICSSCENESOURCE )
-    : graphicsItem(parent GRAPHICSSCENEINIT ),
+  Molecule::Molecule(QGraphicsItem* parent)
+    : graphicsItem(parent),
       DEFAULTINITIALIZER
   {
     setDefaults();
   }
 
   Molecule::Molecule(QSet<Atom*> atomSet, QSet<Bond*> bondSet,
-                     QGraphicsItem* parent GRAPHICSSCENESOURCE)
-    : graphicsItem (parent GRAPHICSSCENEINIT ),
+                     QGraphicsItem* parent)
+    : graphicsItem (parent),
       DEFAULTINITIALIZER
   {
     setDefaults();
@@ -121,15 +125,66 @@ namespace Molsketch {
     }
   }
 
-  Molecule::Molecule(const Molecule &mol GRAPHICSSCENESOURCE)
-    : graphicsItem (mol GRAPHICSSCENEINIT),
+  Molecule::Molecule(const Molecule &mol)
+    : graphicsItem (mol),
       DEFAULTINITIALIZER
   {
     setDefaults();
-    clone(mol.atoms().toSet());
+    auto atoms = mol.atoms();
+    auto atomSet = toSet(atoms);
+    clone(atomSet);
     setPos(mol.pos());
     updateElectronSystems();
     updateTooltip();
+  }
+
+  Bond::BondType fromCoreBondType(const Core::Bond::Type &type) {
+    switch (type) {
+      case Core::Bond::Invalid: return Bond::Invalid;
+      case Core::Bond::DativeDot: return Bond::DativeDot;
+      case Core::Bond::DativeDash : return Bond::DativeDash;
+      case Core::Bond::Single : return Bond::Single;
+      case Core::Bond::Wedge : return Bond::Wedge;
+      case Core::Bond::Hash : return Bond::Hash;
+      case Core::Bond::WedgeOrHash : return Bond::WedgeOrHash;
+      case Core::Bond::Thick : return Bond::Thick;
+      case Core::Bond::Striped : return Bond::Striped;
+      case Core::Bond::DoubleLegacy : return Bond::DoubleLegacy;
+      case Core::Bond::CisOrTrans : return Bond::CisOrTrans;
+      case Core::Bond::DoubleAsymmetric : return Bond::DoubleAsymmetric;
+      case Core::Bond::DoubleSymmetric : return Bond::DoubleSymmetric;
+      case Core::Bond::Triple : return Bond::Triple;
+      case Core::Bond::TripleAsymmetric : return Bond::TripleAsymmetric;
+    }
+    return Bond::Invalid;
+  }
+
+  Molecule::Molecule(const Core::Molecule &coreMolecule, qreal scaling, QGraphicsItem *parent)
+    : graphicsItem(parent),
+      DEFAULTINITIALIZER
+  {
+    setName(coreMolecule.name());
+
+    QList<Atom*> newAtoms;
+    QMap<Atom*, QPair<unsigned, int>> hAtomsAndCharges;
+    for (auto atom : coreMolecule.atoms()) {
+      auto newAtom = new Atom(atom.position() * scaling, atom.element());
+      hAtomsAndCharges[newAtom] = qMakePair(atom.hAtoms(), atom.charge());
+      newAtoms << newAtom;
+      addAtom(newAtom);
+    }
+    for (auto bond : coreMolecule.bonds())
+      if (auto start = newAtoms.value(bond.start()))
+        if(auto end = newAtoms.value(bond.end()))
+          addBond(new Bond(start, end, fromCoreBondType(bond.type())));
+    for (auto it = hAtomsAndCharges.cbegin(); it != hAtomsAndCharges.cend(); ++it) {
+      it.key()->setNumImplicitHydrogens(it.value().first);
+      it.key()->setCharge(it.value().second);
+    }
+  }
+
+  Molecule *Molecule::fromCoreMolecule(const Core::Molecule &coreMolecule, qreal scaling) {
+    return coreMolecule.isValid() ? new Molecule(coreMolecule, scaling) : nullptr;
   }
 
   Molecule::Molecule(const Molecule &mol, const QSet<Atom *> &atoms, QGraphicsItem *parent)
@@ -221,26 +276,20 @@ namespace Molsketch {
 
   Bond* Molecule::addBond(Bond* bond)
   {
-    //pre(1): bond is a valid pointer to a bond
     Q_CHECK_PTR(bond);
-    //pre(2): the bond is between two atoms of this molecule
-    // TODO this is broken...
-//    Q_ASSERT(m_atomList.contains(bond->beginAtom()));
-//    Q_ASSERT(m_atomList.contains(bond->endAtom()));
 
-    if (scene ()) bond ->setColor(scene()->settings()->defaultColor()->get()); // TODO ??
+    if (scene ()) bond->setColor(scene()->settings()->defaultColor()->get());
     // Checking if and altering when a bond exists
     Bond* bondX = bondBetween(bond->beginAtom(), bond->endAtom());
     if (bondX) {
       delete bond;
-      if (scene ()) bondX ->setColor(scene()->settings()->defaultColor()->get());
+      if (scene()) bondX->setColor(scene()->settings()->defaultColor()->get());
       return bondX;
     }
 
-    // Adding the bond the the molecule
     bond->setParentItem(this);
 
-    bond->setAtoms(bond->beginAtom(), bond->endAtom()); // TODO huh?
+    bond->setAtoms(bond->beginAtom(), bond->endAtom()); // updates pos and atom shapes
 
     m_electronSystemsUpdate = true;
     updateTooltip();
@@ -296,8 +345,9 @@ namespace Molsketch {
     while (lastSize < connectedAtoms.size())
     {
       lastSize = connectedAtoms.size();
-      foreach(Atom* atom, connectedAtoms)
-        connectedAtoms += atom->neighbours().toSet();
+      for(auto atom : connectedAtoms)
+        for (auto neighbor : atom->neighbours())
+          connectedAtoms += neighbor;
     }
     return connectedAtoms;
   }
@@ -306,7 +356,8 @@ namespace Molsketch {
   {
     QList<Molecule*> molList;
 
-    QSet<Atom*> atomSet = atoms().toSet();
+    auto atomList = atoms();
+    auto atomSet = toSet(atomList);
     while (!atomSet.empty())
     {
       QSet<Atom*> subgroup = getConnectedAtoms(*(atomSet.begin()));
@@ -397,7 +448,9 @@ namespace Molsketch {
   bool Molecule::canSplit() const
   {
     if (atoms().isEmpty()) return false;
-    return getConnectedAtoms(atoms().first()) != atoms().toSet();
+    auto atomList = atoms();
+    auto atomSet = toSet(atomList);
+    return getConnectedAtoms(atoms().first()) != atomSet;
   }
 
   QVariant Molecule::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -594,8 +647,10 @@ void Molecule::paintElectronSystems(QPainter *painter) const {
 
 bool canMerge(const ElectronSystem *es1, const ElectronSystem *es2)
 {
-  auto firstSetOfAtoms = es1->atoms().toSet();
-  auto secondSetOfAtoms = es2->atoms().toSet();
+  auto firstListOfAtoms = es1->atoms();
+  auto firstSetOfAtoms = toSet(firstListOfAtoms);
+  auto secondListOfAtoms = es2->atoms();
+  auto secondSetOfAtoms = toSet(secondListOfAtoms); // TODO utility function
   // may not share an atom
   if (!(firstSetOfAtoms & secondSetOfAtoms).empty()) return false;
 
@@ -651,16 +706,16 @@ void Molecule::collectElectronSystems() {
   m_electronSystems.clear();
 
   foreach (Bond *bond, bonds()) {
-    int piOrder = bond->bondOrder() - 1;
+    unsigned int piOrder = qMax(bond->bondOrder() - 1, 0);
     while (piOrder--) m_electronSystems << new PiElectrons(bond->atoms(), 2);
   }
 
   foreach (Atom *atom, atoms()) {
-    int unboundElectronPairs = atom->numNonBondingElectrons() / 2;
+    unsigned int unboundElectronPairs = qMax(atom->numNonBondingElectrons() / 2, 0);
     while (unboundElectronPairs--) m_electronSystems << new PiElectrons({atom}, 2);
     if (atom->numNonBondingElectrons() % 2) m_electronSystems << new PiElectrons({atom}, 1);
   }
-  qSort(m_electronSystems.begin(), m_electronSystems.end(), NumAtomsMoreThan); // TODO this should be redundant
+  std::sort(m_electronSystems.begin(), m_electronSystems.end(), NumAtomsMoreThan); // TODO this should be redundant
 }
 
 void Molecule::mergeElectronSystems() {
@@ -734,11 +789,7 @@ void Molecule::updateElectronSystems()
   void Molecule::setDefaults()
   {
     setHandlesChildEvents(false);
-#if QT_VERSION < 0x050000
-    setAcceptsHoverEvents(true);
-#else
     setAcceptHoverEvents(true) ;
-#endif
     setZValue(-50);
   }
 
@@ -770,24 +821,36 @@ void Molecule::updateElectronSystems()
     name = value;
   }
 
-  QPixmap renderMolecule(const Molecule &input) {
-    Molecule *molecule = new Molecule(input);
-    MolScene renderScene;
-    qDebug() << "rendering molecule" << &input;
-    if (molecule->atoms().size() > 20)
-      renderScene.setRenderMode(MolScene::RenderColoredCircles);
-    renderScene.addItem(molecule);
-    renderScene.settings()->chargeVisible()->set(true);
-    renderScene.setSceneRect(molecule->boundingRect());
-    QPixmap pixmap(qCeil(renderScene.width()), qCeil(renderScene.height()));
-    if (pixmap.isNull()) return pixmap;
+  /* This is to let the compiler check that we properly convert all bond types */
+  Core::Bond::Type toCoreBondType(const Bond::BondType &type) {
+    switch (type) {
+      case Bond::Invalid: return Core::Bond::Invalid;
+      case Bond::DativeDot: return Core::Bond::DativeDot;
+      case Bond::DativeDash : return Core::Bond::DativeDash;
+      case Bond::Single : return Core::Bond::Single;
+      case Bond::Wedge : return Core::Bond::Wedge;
+      case Bond::Hash : return Core::Bond::Hash;
+      case Bond::WedgeOrHash : return Core::Bond::WedgeOrHash;
+      case Bond::Thick : return Core::Bond::Thick;
+      case Bond::Striped : return Core::Bond::Striped;
+      case Bond::DoubleLegacy : return Core::Bond::DoubleLegacy;
+      case Bond::CisOrTrans : return Core::Bond::CisOrTrans;
+      case Bond::DoubleAsymmetric : return Core::Bond::DoubleAsymmetric;
+      case Bond::DoubleSymmetric : return Core::Bond::DoubleSymmetric;
+      case Bond::Triple : return Core::Bond::Triple;
+      case Bond::TripleAsymmetric : return Core::Bond::TripleAsymmetric;
+    }
+    return Core::Bond::Invalid;
+  }
 
-    pixmap.fill();
-    // Creating and setting the painter
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    renderScene.render(&painter);
-    qDebug() << "rendered molecule" << &input;
-    return pixmap;
+  Core::Molecule Molecule::toCoreMolecule(qreal scaling) const {
+    QVector<Core::Atom> catoms;
+    QVector<Core::Bond> cbonds;
+    for (auto atom : atoms())
+      catoms << Core::Atom(atom->element(), atom->pos() / scaling, atom->numImplicitHydrogens(), atom->charge());
+    for (auto bond : bonds())
+      cbonds << Core::Bond(atoms().indexOf(bond->beginAtom()), atoms().indexOf(bond->endAtom()),
+                           toCoreBondType(bond->bondType()));
+    return Core::Molecule(catoms, cbonds, getName());
   }
 } // namespace

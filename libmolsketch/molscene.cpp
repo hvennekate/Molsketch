@@ -37,19 +37,15 @@
 #include <QSvgGenerator>
 #include <QPushButton>
 #include <QBuffer>
-#if QT_VERSION < 0x050000
 #include <QtMath>
-#include <QDesktopServices>
-#else
-#include <QtCore/qmath.h>
-#include <QStandardPaths>
-#endif
 #include <QDebug>
 #include <QDockWidget>
+#include <QInputDialog>
 #include <QLabel>
 #include <QMainWindow>
 #include <QPair>
 #include <QVBoxLayout>
+#include <QMimeData>
 
 #include "molscene.h"
 
@@ -58,7 +54,6 @@
 #include "bond.h"
 #include "molecule.h"
 #include "commands.h"
-#include "mimemolecule.h"
 #include "TextInputItem.h"
 #include "math2d.h"
 #include "grid.h"
@@ -75,6 +70,9 @@
 #include "settingsfacade.h"
 #include "settingsitem.h"
 #include "scenepropertieswidget.h"
+#ifdef QT_DEBUG
+#include "graphicsitem.h"
+#endif
 
 #ifdef QT_STATIC_BUILD
 inline void initToolBarIcons() { Q_INIT_RESOURCE(toolicons); }
@@ -87,6 +85,8 @@ namespace Molsketch {
 #endif
 
   const QString MolScene::mouseWheelForCyclingTools = "mouse-wheel-cycle-tools";
+
+  using namespace Commands;
 
   struct MolScene::privateData
   {
@@ -125,15 +125,12 @@ namespace Molsketch {
 
     ~privateData()
     {
-//      if (inputItem && !inputItem->scene()) // TODO compare with this scene
-//        delete inputItem; // TODO should clean up this item...
-//      delete selectionRectangle; // TODO why?
       if (!grid->scene()) delete grid;
       if (!selectionRectangle->scene()) delete selectionRectangle;
-      delete stack;
+      if (stack) stack->disconnect(); // Stack should be deleted by scene (it's a child anyway) as it may be transferred to new private data
     }
 
-    bool gridOn()const { return grid->scene(); }
+    bool gridOn() const { return grid->scene(); }
 
     void moveDragItem(QGraphicsSceneDragDropEvent* event) {
       if (!dragItem) return;
@@ -177,9 +174,25 @@ namespace Molsketch {
         hoverItem->update();
       }
     }
-  };
 
-  using namespace Commands;
+    void cleanScene(const std::function<void (QGraphicsItem* item, QGraphicsItem* parent)> &addMoleculeParts,
+                    const std::function<void (QGraphicsItem* item)> &cleanItem) {
+      for (auto item : scene->items()) {
+        auto molecule = dynamic_cast<Molecule*>(item);
+        if (!molecule || !molecule->canSplit()) continue;
+        auto subMolecules = molecule->split();
+        auto parent = molecule->parentItem();
+        for (auto subMolecule : subMolecules) addMoleculeParts(subMolecule, parent);
+        cleanItem(molecule);
+      }
+
+      for (auto item : scene->items()) {
+        auto molecule = dynamic_cast<Molecule*>(item);
+        if (!molecule || !molecule->atoms().isEmpty()) continue;
+        cleanItem(molecule);
+      }
+    }
+  };
 
   MolScene::MolScene(QObject* parent)
     : MolScene(nullptr, parent)
@@ -196,30 +209,17 @@ namespace Molsketch {
   }
 
   MolScene::~MolScene() {
+    blockSignals(true);
+    clearSelection();
     for(QObject *child : QObject::children())
       if (QAction *action = dynamic_cast<QAction*>(child))
         action->setChecked(false);
     delete d;
+    blockSignals(false);
   }
 
   SceneSettings *MolScene::settings() const {
     return d->settings;
-  }
-
-  QFont MolScene::getAtomFont() const {
-    return d->settings->atomFont()->get(); // FIXME connect signal/slot
-  }
-
-  qreal MolScene::getRadicalDiameter() const {
-    return d->settings->radicalDiameter()->get(); // FIXME connect signal/slot
-  }
-
-  qreal MolScene::getLonePairLength() const {
-    return d->settings->lonePairLength()->get(); // FIXME connect signal/slot
-  }
-
-  qreal MolScene::getLonePairLineWidth() const {
-    return d->settings->lonePairLineWidth()->get(); // FIXME connect signal/slot
   }
 
   QWidget *MolScene::getPropertiesWidget() {
@@ -234,56 +234,101 @@ namespace Molsketch {
   }
 
   void MolScene::cut() {
-        if (selectedItems().isEmpty()) return;
-        copy();
-        d->stack->beginMacro(tr("cutting items"));
-        foreach (QGraphicsItem* item, selectedItems())
-          ItemAction::removeItemFromScene(item);
-        d->stack->endMacro();
+    if (selectedItems().isEmpty()) return;
+    copy();
+
+    d->stack->beginMacro(tr("cutting items"));
+    foreach (QGraphicsItem* selectedItem, selectedItems())
+      ItemAction::removeItemFromScene(selectedItem);
+
+    d->cleanScene([&](QGraphicsItem *item, QGraphicsItem *parent) {
+      ItemAction::addItemToScene(item, this);
+      if (parent) (new Commands::SetParentItem(item, parent))->execute();
+    }, [] (QGraphicsItem * item) { ItemAction::removeItemFromScene(item); });
+
+    d->stack->endMacro();
   }
 
   void MolScene::copy() {
     if (selectedItems().isEmpty()) return;
-    QRectF selectionRect;
+    QMimeData *mimeData = new QMimeData;
+
+    QMap<Molecule*, QSet<Atom*>> partiallySelectedMolecules;
     QList<const graphicsItem*> items;
     for (auto item : selectedItems()) {
-      selectionRect |= item->boundingRect();
-      items << dynamic_cast<graphicsItem*>(item);
+      if (auto atom = dynamic_cast<Atom*>(item)) {
+        partiallySelectedMolecules[atom->molecule()] += atom;
+      } else if (auto bond = dynamic_cast<Bond*>(item)) {
+        (partiallySelectedMolecules[bond->molecule()] += bond->beginAtom()) += bond->endAtom();
+      } else items << dynamic_cast<graphicsItem*>(item);
     }
-
-    // Clear selection
-    QList<QGraphicsItem*> selList(selectedItems());
-    clearSelection();
-    QMimeData *mimeData = new QMimeData;
-    mimeData->setImageData(renderImage(selectionRect));
+    QList<Molecule*> temporaryMolecules;
+    for (auto partiallySelectedMolecule : partiallySelectedMolecules.keys())
+      temporaryMolecules << Molecule(*partiallySelectedMolecule,
+                                     partiallySelectedMolecules[partiallySelectedMolecule])
+                            .split();
+    for (auto molecule : temporaryMolecules) items << molecule;
     mimeData->setData(moleculeMimeType, graphicsItem::serialize(items));
+    for (auto molecule : temporaryMolecules) delete molecule;
+
+    // add image
+    QRectF selectionArea;
+    for (auto item : selectedItems()) selectionArea |= item->boundingRect();
+    QList<QGraphicsItem*> selectedList(selectedItems());
+    clearSelection();
+    mimeData->setImageData(renderImage(selectionArea));
+
+    // add SVG
+    mimeData->setData("image/svg+xml", toSvg());
+
     QApplication::clipboard()->setMimeData(mimeData);
 
-    foreach(QGraphicsItem* item, selList) item->setSelected(true);
+    // restore selection
+    foreach(QGraphicsItem* item, selectedList) item->setSelected(true);
   }
 
   void MolScene::paste() {
     const QMimeData *mimeData = QApplication::clipboard()->mimeData();
     if (!mimeData->hasFormat(moleculeMimeType)) return;
+    QList<QGraphicsItem*> itemsToAdd;
+    for (auto newItem : graphicsItem::deserialize(mimeData->data(moleculeMimeType))) {
+      if (auto atom = dynamic_cast<Atom*>(newItem)) {
+        newItem = new Molecule(QSet<Atom*>{atom}, {});
+      }
+      if (dynamic_cast<Bond*>(newItem)) continue;
+      itemsToAdd << newItem;
+    }
+    if (itemsToAdd.empty()) {
+      qWarning() << "No qualifying items to insert!";
+      return;
+    }
+
     d->stack->beginMacro(tr("Paste"));
-    for (auto newItem : graphicsItem::deserialize(mimeData->data(moleculeMimeType)))
-      ItemAction::addItemToScene(newItem, this);
+    for(auto itemToInsert : itemsToAdd) ItemAction::addItemToScene(itemToInsert, this);
+    d->cleanScene([&](QGraphicsItem *item, QGraphicsItem *parent) {
+      ItemAction::addItemToScene(item, this);
+      if (parent) (new Commands::SetParentItem(item, parent))->execute();
+    }, [] (QGraphicsItem * item) { ItemAction::removeItemFromScene(item); });
     d->stack->endMacro();
   }
 
 #ifdef QT_DEBUG
   void MolScene::debugScene()
   {
-    QtMessageHandler originalMessageHander = qInstallMessageHandler(0);
     qDebug() << "================= Scene debug =================";
     foreach(QGraphicsItem *item, items())
     {
-      qDebug() << "Item:" << item
-               << "Type:" << item->type()
-               << "Pos:"  << item->pos()
-               << "Scene Pos:" << item->scenePos()
-               << "Bounds:" << item->boundingRect()
-               << "Children:" << item->childItems() ;
+      if (auto graphicsIt = dynamic_cast<graphicsItem*>(item)) {
+        qDebug() << *graphicsIt;
+      } else {
+        qDebug() << "Item:" << item
+                 << "Type:" << item->type()
+                 << "Parent:" << (void*) item->parentItem()
+                 << "Pos:"  << item->pos()
+                 << "Scene Pos:" << item->scenePos()
+                 << "Bounds:" << item->boundingRect()
+                    ;
+      }
     }
     qDebug() << "============== Undo stack debug ===============";
     qDebug() << "position:" << stack()->index();
@@ -291,14 +336,15 @@ namespace Molsketch {
     {
       const QUndoCommand* command = stack()->command(i);
       qDebug() << i << command << command->id() << command->text();
+      // TODO expand macros, print more info on items that are operated on
     }
     qDebug() << "===============================================";
-    qInstallMessageHandler(originalMessageHander);
   }
 #endif
 
   void MolScene::clear()
   {
+    qDebug() << "Clearing scene";
     clearSelection();
     auto undoStack = d->stack; // TODO don't delete the privateData instead
     undoStack->clear();
@@ -311,7 +357,7 @@ namespace Molsketch {
 
   QByteArray MolScene::toSvg()
   {
-    QList<QGraphicsItem*> selection(selectedItems()); // TODO unused?
+    QList<QGraphicsItem*> selList(selectedItems());
     clearSelection();
     QByteArray ba;
     QBuffer buffer(&ba);
@@ -328,39 +374,22 @@ namespace Molsketch {
     render(&painter, bounds, bounds);
     painter.end();
     buffer.close();
-    // TODO reselect items
+    foreach(QGraphicsItem* item, selList) item->setSelected(true);
     return ba;
   }
 
 
-  QImage MolScene::renderImage(const QRectF &rect)
+  QImage MolScene::renderImage(const QRectF &rect, const qreal &scalingFactor)
   {
-        // Creating an image
-        QImage image(int(rect.width()),int(rect.height()),QImage::Format_RGB32);
+        QImage image(int(rect.width()) * scalingFactor,int(rect.height()) * scalingFactor, QImage::Format_RGB32);
         image.fill(QColor("white").rgb());
 
-        // Creating and setting the painter
         QPainter painter(&image);
         painter.setRenderHint(QPainter::Antialiasing);
+        painter.scale(scalingFactor, scalingFactor);
 
-        // Rendering in the image and saving to file
         render(&painter,QRectF(0,0,rect.width(),rect.height()),rect);
-
         return image;
-  }
-
-  void MolScene::addMolecule(Molecule* mol) // TODO decommission this
-  {
-        Q_CHECK_PTR(mol);
-        if (!mol) return;
-        d->stack->beginMacro(tr("add molecule"));
-        ItemAction::addItemToScene(mol, this);
-        if (mol->canSplit()) {
-          for(Molecule* molecule : mol->split())
-            ItemAction::addItemToScene(molecule, this);
-          ItemAction::removeItemFromScene(mol);
-        }
-        d->stack->endMacro();
   }
 
   void MolScene::selectAll()
@@ -422,20 +451,26 @@ namespace Molsketch {
 
   XmlObjectInterface *MolScene::produceChild(const QString &childName, const QXmlStreamAttributes &attributes)
   {
+    if (d->settings->xmlName() == childName) return d->settings;
     XmlObjectInterface *object = 0 ;
     if (Frame::xmlClassName() == childName) object = new Frame;
     if (Molecule::xmlClassName() == childName)  object = new Molecule;
     if (Arrow::xmlClassName() == childName) object = new Arrow;
     if (TextItem::xmlClassName() == childName) object = new TextItem;
-    if (d->settings->xmlName() == childName) object = d->settings;
     if (childName == "object")
     {
       auto type = attributes.value("type").toString();
       if (type == "ReactionArrow") object = new Arrow ;
       if (type == "MechanismArrow") object = new Arrow ;
     }
-    if (QGraphicsItem* item = dynamic_cast<QGraphicsItem*>(object)) // TODO w/o dynamic_cast
+    if (auto item = dynamic_cast<QGraphicsItem*>(object))
       addItem(item) ;
+    // Handle legacy error: there may be lone atoms
+    if (Atom::xmlClassName() == childName) {
+      auto atom = new Atom;
+      addItem(new Molecule(QSet<Atom*>{atom}, {}));
+      object = atom;
+    }
     return object ;
   }
 
@@ -468,6 +503,11 @@ namespace Molsketch {
     return attributes;
   }
 
+  void MolScene::afterReadFinalization() {
+    d->cleanScene([&](QGraphicsItem *item, QGraphicsItem *parent) { addItem(item); item->setParentItem(parent); },
+    [&](QGraphicsItem *item) { delete item; });
+  }
+
   Molecule* MolScene::moleculeAt(const QPointF &pos) {
         foreach(QGraphicsItem* item,items(pos))
           if (auto molecule = dynamic_cast<Molecule*>(item)) return molecule;
@@ -487,6 +527,14 @@ namespace Molsketch {
       Atom* atom = dynamic_cast<Atom*>(item);
       if (atom) result << atom;
     }
+    return result;
+  }
+
+  QList<Molecule *> MolScene::molecules() const {
+    QList<Molecule *> result;
+    for (auto item : items())
+      if (auto molecule = dynamic_cast<Molecule*>(item))
+        result << molecule;
     return result;
   }
 
@@ -625,6 +673,13 @@ namespace Molsketch {
     d->dragItem = new Molecule;
     QXmlStreamReader reader(event->mimeData()->data(mimeType()));
     reader >> *(d->dragItem);
+    if (event->mimeData()->hasFormat(bondLengthMimeType)) {
+      QDataStream in(event->mimeData()->data(bondLengthMimeType));
+      qreal originalScaling;
+      in >> originalScaling;
+      qreal scaling = settings()->bondLength()->get() / originalScaling;
+      if (qIsFinite(scaling) && scaling != 0.) d->dragItem->scale(scaling);
+    }
     d->moveDragItem(event);
     addItem(d->dragItem); // TODO loop until stream is exhausted
     updateAll();
@@ -675,15 +730,6 @@ namespace Molsketch {
 
   QList<genericAction *> MolScene::sceneActions() const
   {
-    QList<genericAction *> actions;
-#if QT_VERSION < 0x050000
-        QList<genericAction*> allActionChildren = findChildren<genericAction*>() ;
-        std::copy_if(allActionChildren.begin(), allActionChildren.end(), std::back_inserter(actions),
-                     [&](QAction* a) { return a->parent() == this; });
-#else
-        actions = findChildren<genericAction*>(QString(), Qt::FindDirectChildrenOnly);
-#endif
-
-        return actions;
+    return findChildren<genericAction*>(QString(), Qt::FindDirectChildrenOnly);
   }
 } // namespace

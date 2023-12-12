@@ -32,25 +32,63 @@
 using namespace Molsketch;
 using XmlAssert::assertThat;
 
-const QString ATOM_XML_WITH_RADICAL("<atom id=\"\" elementType=\"\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"0,0\">"
+const QString ATOM_XML_WITH_RADICAL("<atom"
+                                    " id=\"\""
+                                    " elementType=\"\""
+                                    " userCharge=\"0\""
+                                    " disableHydrogens=\"0\""
+                                    " hydrogens=\"0\""
+                                    " shapeType=\"0\""
+                                    " hydrogenAlignment=\"0\""
+                                    " colorR=\"0\""
+                                    " colorG=\"0\""
+                                    " colorB=\"0\""
+                                    " scalingParameter=\"1\""
+                                    " zLevel=\"3\""
+                                    " coordinates=\"0,0\">"
                                     "<radicalElectron diameter=\"3\" colorR=\"0\" colorG=\"0\" colorB=\"0\">"
                                     "<bbLinker originAnchor=\"Top\" targetAnchor=\"Bottom\" xOffset=\"0\" yOffset=\"0\"/>"
                                     "</radicalElectron>"
                                     "</atom>");
-const QString ATOM_XML_WITH_LONE_PAIR("<atom id=\"\" elementType=\"\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"0,0\">"
+const QString ATOM_XML_WITH_LONE_PAIR("<atom"
+                                      " id=\"\""
+                                      " elementType=\"\""
+                                      " userCharge=\"0\""
+                                      " disableHydrogens=\"0\""
+                                      " hydrogens=\"0\""
+                                      " shapeType=\"0\""
+                                      " hydrogenAlignment=\"0\""
+                                      " colorR=\"0\""
+                                      " colorG=\"0\""
+                                      " colorB=\"0\""
+                                      " scalingParameter=\"1\""
+                                      " zLevel=\"3\""
+                                      " coordinates=\"0,0\">"
                                       "<lonePair angle=\"45\" length=\"10\" lineWidth=\"1.5\" colorR=\"0\" colorG=\"0\" colorB=\"0\">"
                                       "<bbLinker originAnchor=\"TopLeft\" targetAnchor=\"Center\" xOffset=\"0\" yOffset=\"0\"/>"
                                       "</lonePair>"
                                       "</atom>");
-const QString ATOM_XML_WITH_LONE_PAIR_AND_RADICAL(
-    "<atom id=\"\" elementType=\"\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"0,0\">"
-    "<lonePair angle=\"45\" length=\"10\" lineWidth=\"1.5\" colorR=\"0\" colorG=\"0\" colorB=\"0\">"
-    "<bbLinker originAnchor=\"TopLeft\" targetAnchor=\"Center\" xOffset=\"0\" yOffset=\"0\"/>"
-    "</lonePair>"
-    "<radicalElectron diameter=\"3\" colorR=\"0\" colorG=\"0\" colorB=\"0\">"
-    "<bbLinker originAnchor=\"Top\" targetAnchor=\"Bottom\" xOffset=\"0\" yOffset=\"0\"/>"
-    "</radicalElectron>"
-    "</atom>");
+const QString ATOM_XML_WITH_LONE_PAIR_AND_RADICAL("<atom"
+                                                  " id=\"\""
+                                                  " elementType=\"\""
+                                                  " userCharge=\"0\""
+                                                  " disableHydrogens=\"0\""
+                                                  " hydrogens=\"0\""
+                                                  " shapeType=\"0\""
+                                                  " hydrogenAlignment=\"0\""
+                                                  " colorR=\"0\""
+                                                  " colorG=\"0\""
+                                                  " colorB=\"0\""
+                                                  " scalingParameter=\"1\""
+                                                  " zLevel=\"3\""
+                                                  " coordinates=\"0,0\">"
+                                                  "<lonePair angle=\"45\" length=\"10\" lineWidth=\"1.5\" colorR=\"0\" colorG=\"0\" colorB=\"0\">"
+                                                  "<bbLinker originAnchor=\"TopLeft\" targetAnchor=\"Center\" xOffset=\"0\" yOffset=\"0\"/>"
+                                                  "</lonePair>"
+                                                  "<radicalElectron diameter=\"3\" colorR=\"0\" colorG=\"0\" colorB=\"0\">"
+                                                  "<bbLinker originAnchor=\"Top\" targetAnchor=\"Bottom\" xOffset=\"0\" yOffset=\"0\"/>"
+                                                  "</radicalElectron>"
+                                                  "</atom>");
 const QString LEGACY_ATOM_XML("<atom "
                               "id=\"testIndex\" "
                               "elementType=\"M\" "
@@ -68,7 +106,9 @@ const QString ATOM_XML("<atom "
                        "userCharge=\"-2\" "
                        "disableHydrogens=\"0\" "
                        "hydrogens=\"8\" "
+                       "shapeType=\"0\" "
                        "newmanDiameter=\"3.5\" "
+                       "hydrogenAlignment=\"0\" "
                        "colorR=\"0\" "
                        "colorG=\"0\" "
                        "colorB=\"0\" "
@@ -84,7 +124,6 @@ const struct
   const QString INDEX = "testIndex";
   const int HYDROGENS = 8;
 } XML_DATA;
-const char NEWMAN_XQUERY[] = "//*:atom/@newmanDiameter/data(.)";
 const qreal RADICAL_DIAMETER = 3;
 const qreal LONE_PAIR_ANGLE = 45;
 const qreal LONE_PAIR_LINE_WIDTH = 1.5;
@@ -178,14 +217,14 @@ public:
 
   void testNormalAtomHasNoNewmanDiameter() {
     Atom atom(QPointF(), "C");
-    assertThat(atom)->contains(NEWMAN_XQUERY)->never();
+    assertThat(atom)->hasNodes("atom")->exactlyOne()->withNoAttribute("newmanDiameter");
   }
 
   void testNewmanAtomHasNewmanDiameter() {
     Atom atom(QPointF(), "C");
     atom.setNewmanDiameter(5.5);
     TS_ASSERT_EQUALS(atom.getNewmanDiameter(), 5.5);
-    assertThat(atom)->contains(NEWMAN_XQUERY)->exactlyOnceWithContent("5.5");
+    assertThat(atom)->hasNodes("atom")->haveAttribute("newmanDiameter")->exactly({"5.5"});
   }
 
   void testDisabledNewmanAtomHasNoNewmanDiameter() {
@@ -193,7 +232,7 @@ public:
     atom.setNewmanDiameter(5.5);
     TS_ASSERT_EQUALS(atom.getNewmanDiameter(), 5.5);
     atom.disableNewman();
-    assertThat(atom)->contains(NEWMAN_XQUERY)->never();
+    assertThat(atom)->hasNodes("atom")->exactlyOne()->withNoAttribute("newmanDiameter");
   }
 
   void testAtomWithNewmanDiameterCanBeRead() {
@@ -233,7 +272,7 @@ public:
     auto atomBounds = atom->boundingRect();
     auto rightEdge = QLineF(atomBounds.topRight(), atomBounds.bottomRight());
     QPointF intersectionOfRightEdgeAndConnectingLine;
-    QS_ASSERT_EQUALS(rightEdge.intersect(QLineF(QPointF(0,0), otherAtomPosition), &intersectionOfRightEdgeAndConnectingLine),
+    QS_ASSERT_EQUALS(rightEdge.intersects(QLineF(QPointF(0,0), otherAtomPosition), &intersectionOfRightEdgeAndConnectingLine),
                      QLineF::BoundedIntersection);
 
     QS_ASSERT_EQUALS(atom->bondDrawingStart(&otherAtom, 0), intersectionOfRightEdgeAndConnectingLine);
@@ -290,5 +329,100 @@ public:
     legacyAtom->afterMoleculeReadFinalization();
     TS_ASSERT_EQUALS(legacyAtom->numImplicitHydrogens(), XML_DATA.HYDROGENS);
     delete legacyAtom;
+  }
+
+  void testBondStartForRectangleWithHydrogenRight() {
+    Atom atom({}, "C");
+    Atom otherAtom({20,0});
+    atom.setNumImplicitHydrogens(5);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    TS_ASSERT_DELTA(bondStart.x(), atom.boundingRect().right(), 1e-5);
+  }
+
+  void testBondStartForCircularShapeWithHydrogenRight() {
+    Atom atom({}, "C");
+    Atom otherAtom({50,0});
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be greater than " + QString::number(atom.boundingRect().right()),
+          bondStart.x() > atom.boundingRect().right());
+  }
+
+  void testBondStartForCircularShapeWithHydrogenLeft() {
+    Atom atom({}, "C");
+    Atom otherAtom({-50,0});
+    atom.setNumImplicitHydrogens(5);
+    atom.setHAlignment(NeighborAlignment::west);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be smaller than " + QString::number(atom.boundingRect().left()),
+               bondStart.x() < atom.boundingRect().left());
+  }
+
+  void testBondStartForCircularShapeWithHydrogenTop() {
+    Atom atom({}, "C");
+    Atom otherAtom({0,-50});
+    atom.setNumImplicitHydrogens(5);
+    atom.setHAlignment(NeighborAlignment::north);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be smaller than " + QString::number(atom.boundingRect().top()),
+          bondStart.y() < atom.boundingRect().top());
+  }
+
+  void testBondStartForCircularShapeWithHydrogenBottom() {
+    Atom atom({}, "C");
+    Atom otherAtom({0,50});
+    atom.setNumImplicitHydrogens(5);
+    atom.setHAlignment(NeighborAlignment::south);
+    atom.setShapeType(Atom::Circle);
+    auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be greater than " + QString::number(atom.boundingRect().bottom()),
+          bondStart.y() > atom.boundingRect().bottom());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensRight() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::east);
+    QLineF testBondAxis({}, {50, 0});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be greater than " + QString::number(atom.boundingRect().right()),
+          bondStart.x() > atom.boundingRect().right());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensLeft() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::west);
+    QLineF testBondAxis({}, {-50, 0});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.x()) + " to be smaller than " + QString::number(atom.boundingRect().left()),
+          bondStart.x() < atom.boundingRect().left());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensTop() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::north);
+    QLineF testBondAxis({}, {0, -50});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be smaller than " + QString::number(atom.boundingRect().top()),
+          bondStart.y() < atom.boundingRect().top());
+  }
+
+  void testBondExtentForCircularShapeWithHydrogensBottom() {
+    Atom atom({}, "C");
+    atom.setNumImplicitHydrogens(5);
+    atom.setShapeType(Atom::Circle);
+    atom.setHAlignment(NeighborAlignment::south);
+    QLineF testBondAxis({}, {0, 50});
+    auto bondStart = testBondAxis.pointAt(atom.getBondExtent(testBondAxis, testBondAxis, 1));
+    QSM_ASSERT("Expected " + QString::number(bondStart.y()) + " to be greater than " + QString::number(atom.boundingRect().bottom()),
+          bondStart.y() > atom.boundingRect().bottom());
   }
 };

@@ -22,6 +22,7 @@
 #include <QButtonGroup>
 #include <QPainter>
 #include <QDebug>
+#include <QRegularExpression>
 
 namespace Molsketch {
 
@@ -53,7 +54,7 @@ namespace Molsketch {
       delete button ;
     }
 
-    QStringList periodicTable(buttonDescription.split(QRegExp("(?=[A-Z \\n])")).mid(1)) ;
+    QStringList periodicTable(buttonDescription.split(QRegularExpression("(?=[A-Z \\n])")).mid(1)) ; // TODO extract
     int periodCounter = 0,
         groupCounter  = 0;
     foreach (const QString& element, periodicTable)
@@ -160,6 +161,7 @@ namespace Molsketch {
     QPixmap pixmap(QFontMetrics(font).boundingRect(currentElement()).size());
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
+    painter.setPen(palette().color(QPalette::ButtonText));
     painter.setFont(font);
     painter.drawText(QRectF(0,0, pixmap.width(), pixmap.height()), currentElement());
     return pixmap;

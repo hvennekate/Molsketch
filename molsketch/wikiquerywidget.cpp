@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2017 by Hendrik Vennekate                               *
- *   HVennekate@gmx.de                                                     *
+ *   Copyright (C) 2017 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,6 +20,7 @@
 #include "ui_wikiquerywidget.h"
 #include "molecule.h"
 #include "obabelifaceloader.h"
+#include "constants.h"
 
 #include <QJsonDocument>
 #include <QLibrary>
@@ -33,8 +33,9 @@
 #include <moleculemodelitem.h>
 #include <QDebug>
 #include <QFileDialog>
+#include <QMimeData>
 
-#ifdef _WIN32
+#ifdef Q_OS_WINDOWS
 #define OBABELOSSUFFIX ".dll"
 #else
 #define OBABELOSSUFFIX
@@ -42,15 +43,30 @@
 
 using namespace Molsketch;
 
-WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, QWidget *parent) :
+class ScalingLibraryModel : public LibraryModel {
+public:
+  explicit ScalingLibraryModel(QObject *parent = nullptr) : LibraryModel(parent) {}
+  QMimeData *mimeData(const QModelIndexList &indexes) const override {
+    auto data = LibraryModel::mimeData(indexes);
+    QByteArray ba;
+    QDataStream out(&ba, QIODevice::WriteOnly);
+    qreal scalingFactor = 1.;
+    out << scalingFactor;
+    data->setData(bondLengthMimeType, ba);
+    return data;
+  }
+};
+
+WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, const QString &queryUrl, QWidget *parent) :
   QDockWidget(parent),
   ui(new Ui::WikiQueryWidget),
   manager(new QNetworkAccessManager(this)),
-  obloader(loader)
+  obloader(loader),
+  queryUrl(queryUrl)
 {
   setObjectName("wikidata-query-widget");
   ui->setupUi(this);
-  ui->moleculeListView->setModel(new LibraryModel(this));
+  ui->moleculeListView->setModel(new ScalingLibraryModel(this));
   connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processMoleculeQuery(QNetworkReply*)));
   connect(loader, SIGNAL(inchiAvailable(bool)), ui->dockWidgetContents, SLOT(setEnabled(bool)));
   ui->progressWidget->hide();
@@ -62,6 +78,10 @@ WikiQueryWidget::WikiQueryWidget(OBabelIfaceLoader *loader, QWidget *parent) :
 WikiQueryWidget::~WikiQueryWidget()
 {
   delete ui;
+}
+
+void WikiQueryWidget::setQueryUrl(const QString &newQueryUrl) {
+  queryUrl = newQueryUrl;
 }
 
 void WikiQueryWidget::on_searchButton_clicked() {
@@ -76,6 +96,9 @@ class InChIItem : public MoleculeModelItem {
   QString inchi;
   QString name;
   OBabelIfaceLoader *obloader;
+  bool performScaling() const override {
+    return true;
+  }
 public:
   InChIItem(QString name, QString inchi, OBabelIfaceLoader* obloader) : inchi(inchi), name(name), obloader(obloader) {}
   Molecule* produceMolecule() const override {
@@ -113,7 +136,7 @@ void WikiQueryWidget::processMoleculeQuery(QNetworkReply *reply) {
     qInfo() << "obtained molecule from wikidata:" << label << smiles << inchi << isomer;
     namesAndInchiStrings << qMakePair(label, inchi);
   }
-  qSort(namesAndInchiStrings);
+  std::sort(namesAndInchiStrings.begin(), namesAndInchiStrings.end());
   QList<MoleculeModelItem*> items;
   for (auto item : namesAndInchiStrings)
     items << new InChIItem(item.first, item.second, obloader);
@@ -138,8 +161,10 @@ void WikiQueryWidget::startMoleculeQuery(const QString& queryString) {
                                 "FILTER(REGEX(?label, \"" + queryString + "\", \"i\")) "
                                 "} GROUP BY ?qnumber"
 //                                " LIMIT 100 ORDER BY DESC(?label)"
+                                // TODO allow for use of smiles ("isomer" column)
+                                // TODO take language from locale
                                 ));
-  QUrl url("https://query.wikidata.org/sparql");
+  QUrl url(queryUrl);
   url.setQuery(query);
   QNetworkRequest request(url);
   request.setRawHeader("Accept", "application/json");

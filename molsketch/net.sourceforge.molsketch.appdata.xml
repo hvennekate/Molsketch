@@ -3,7 +3,7 @@
 <component type="desktop-application">
   <id>net.sourceforge.molsketch</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>GPL-2.0</project_license>
+  <project_license>GPL-2.0-only</project_license>
   <name>Molsketch</name>
   <summary>2D Molecular Structures Editor</summary>
 
@@ -51,7 +51,11 @@
   <url type="homepage">http://molsketch.sourceforge.net/</url>
 
   <provides>
-    <binary>molsketch-qt5</binary>
+    <binary>molsketch</binary>
   </provides>
-
+  <content_rating type="oars-1.1"/>
+  <releases>
+      <release version="0.8.0" date="2022-11-07">
+      </release>
+  </releases>
 </component>

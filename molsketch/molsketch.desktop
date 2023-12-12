@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Name=Molsketch
-Exec=molsketch-qt5
+Exec=molsketch
 Icon=molsketch
 DocPath=molsketch/index.html
 MimeType=application/x-molsketch;application/x-molsketch-molecule;

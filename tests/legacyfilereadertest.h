@@ -20,6 +20,7 @@
 #include <cxxtest/TestSuite.h>
 #include <QDebug>
 #include <QDir>
+#include <QRegularExpression>
 #include <fileio.h>
 #include <molscene.h>
 
@@ -49,7 +50,7 @@ public:
       readMskFile(mskFileName, &scene);
       QString resultFileName(mskFileName + "-current.svg");
       saveToSVG(resultFileName, &scene);
-      QByteArray result(fileContent(resultFileName)), original(fileContent(mskFileName.replace(QRegExp("msk$"), "svg")));
+      QByteArray result(fileContent(resultFileName)), original(fileContent(mskFileName.replace(QRegularExpression("msk$"), "svg")));
       TSM_ASSERT_EQUALS("Legacy file " + mskFileName + " not correctly rendered", original, result);
     }
   }

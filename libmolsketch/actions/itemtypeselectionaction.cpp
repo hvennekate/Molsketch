@@ -27,6 +27,7 @@
 #include <frame.h>
 #include <molecule.h>
 #include <molscene.h>
+#include "iconutils.h"
 
 namespace Molsketch {
 
@@ -34,8 +35,8 @@ ItemTypeSelectionAction::ItemTypeSelectionAction(MolScene *parent)
   : AbstractItemAction(parent){
   setMinimumItemCount(0);
   setCheckable(false);
-  setIcon(QIcon(":images/select-by-type.svg"));
-  setWhatsThis(tr("Select items by type within the current selection or the entire document if nowthing is selected"));
+  setIcon(getInternalIcon("select-by-type"));
+  setWhatsThis(tr("Select items by type within the current selection or the entire document if nothing is selected"));
   setToolTip(tr("Select by type"));
   setText(tr("Select by type..."));
   setObjectName("item-type-selection-action");

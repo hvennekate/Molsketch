@@ -23,10 +23,11 @@
 #include "molscene.h"
 #include "commands.h"
 #include "frame.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
-#define FRAMEMACRO(ARROWSTRING, ICON, DESCRIPTION) { auto a = new QAction(QIcon(":images/" ICON ".svg"), tr(DESCRIPTION), this); a->setData(ARROWSTRING); addSubAction(a); }
+#define FRAMEMACRO(ARROWSTRING, ICON, DESCRIPTION) { auto a = new QAction(getInternalIcon(ICON), tr(DESCRIPTION), this); a->setData(ARROWSTRING); addSubAction(a); }
 
   // TODO this leads to ugly doubling with FrameTypeWidget
   struct FrameAction::privateData
@@ -139,7 +140,6 @@ namespace Molsketch {
   void FrameAction::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
   {
     if (!d->currentFrame) return ;
-    if (!scene() || !scene()->stack()) return ; // TODO
     Commands::ItemAction::addItemToScene(d->currentFrame, scene(), tr("Add frame or brackets"));
     d->currentFrame = 0 ;
     event->accept();

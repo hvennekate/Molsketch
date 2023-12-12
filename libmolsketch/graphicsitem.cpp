@@ -23,12 +23,8 @@
 #include "molscene.h"
 #include "actions/coloraction.h"
 #include "actions/linewidthaction.h"
-#if QT_VERSION >= 0x050000
 #include <QPainter>
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include <QDebug>
 #include <actions/rotateaction.h>
 #include "scenesettings.h"
@@ -55,7 +51,7 @@ namespace Molsketch {
         shift(p), // if index <0: implicitly the position of the first point
         items(a)
     {
-      setText(QObject::tr("Move command"));
+      setText(QObject::tr("Move"));
     }
     void redo() override
     {
@@ -88,8 +84,8 @@ namespace Molsketch {
     privateData() : selectedPoint(-1), hovering(false) {}
   };
 
-  graphicsItem::graphicsItem(QGraphicsItem *parent GRAPHICSSCENESOURCE)
-    : QGraphicsItem(parent GRAPHICSSCENEINIT),
+  graphicsItem::graphicsItem(QGraphicsItem *parent)
+    : QGraphicsItem(parent),
       lineWidthScaling(1),
       d(new privateData)
   {
@@ -99,8 +95,8 @@ namespace Molsketch {
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
   }
 
-  graphicsItem::graphicsItem(const graphicsItem &other GRAPHICSSCENESOURCE)
-    : QGraphicsItem(0 GRAPHICSSCENEINIT),
+  graphicsItem::graphicsItem(const graphicsItem &other)
+    : QGraphicsItem(0),
       m_color(other.m_color),
       lineWidthScaling(other.lineWidthScaling),
       d(new privateData)
@@ -159,9 +155,10 @@ namespace Molsketch {
   { // TODO this is pretty broken! cf. Commands::MoveItem
     QPointF shift = event->scenePos() - event->lastScenePos();
     QSet<graphicsItem*> selection;
-    if (d->selectedPoint < 0 && scene())
+    if (d->selectedPoint < 0 && scene()) {
       foreach(QGraphicsItem* gItem, scene()->selectedItems())
         selection << dynamic_cast<graphicsItem*>(gItem);
+    }
     selection.remove(0);
     if (selection.isEmpty())
       selection << this;
@@ -216,6 +213,10 @@ namespace Molsketch {
 
   void graphicsItem::setCoordinates(const QPolygonF &c) {
     setCoordinates((const QVector<QPointF>&) c);
+  }
+
+  void graphicsItem::scale(qreal scaling) {
+    setCoordinates(coordinates() * scaling);
   }
 
   void graphicsItem::readAttributes(const QXmlStreamAttributes &attributes)
@@ -348,12 +349,25 @@ namespace Molsketch {
     {
       if (parentItem() && parentItem()->isSelected())
         retVal.setValue(false);
-      if (value.toBool())
+      if (value.toBool()) {
         foreach(QGraphicsItem* child, childItems())
           child->setSelected(false);
+      }
     }
     return retVal;
   }
+
+#ifdef QT_DEBUG
+  QDebug operator <<(QDebug debug, const graphicsItem &item){
+    return debug << "Item:" << &item
+                 << "Type:" << item.xmlName()
+                 << "Parent:" << (void*) item.parentItem()
+                 << "Pos:"  << item.pos()
+                 << "Scene Pos:" << item.scenePos()
+                 << "Bounds:" << item.boundingRect()
+                    ;
+  }
+#endif
 
   void graphicsItem::setCoordinate(const int &index, const QPointF &p)
   {
@@ -522,3 +536,15 @@ namespace Molsketch {
   }
 
 } // namespace
+
+QPolygonF operator *(const QPolygonF &polygon, qreal scaling) {
+  QPolygonF result;
+  for (auto point : polygon) {
+    result << point * scaling;
+  }
+  return result.translated(polygon.boundingRect().center() - result.boundingRect().center());
+}
+
+QPolygonF operator *(qreal scaling, const QPolygonF &polygon) {
+  return polygon * scaling;
+}

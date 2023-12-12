@@ -25,8 +25,8 @@
 
 namespace Molsketch {
 
-  class mechanismArrowAction : public reactionArrowAction
-  {
+  class mechanismArrowAction : public reactionArrowAction {
+    Q_OBJECT
   public:
     explicit mechanismArrowAction(MolScene* scene);
     ~mechanismArrowAction();

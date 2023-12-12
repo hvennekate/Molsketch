@@ -24,9 +24,7 @@
 #include "librarylistwidget.h"
 
 #include <QMainWindow>
-#if QT_VERSION >= 0x050000
 #include <QPrinter>
-#endif
 
 class QAction;
 class QMenu;
@@ -40,11 +38,7 @@ class QTableWidget;
 class QTableWidgetItem;
 class QPushButton;
 class OBabelIfaceLoader;
-#if QT_VERSION <= 0x040603
-class QAssistantClient;
-#else
 class QProcess ;
-#endif
 class QTimer;
 class QActionGroup;
 class ApplicationSettings;
@@ -105,7 +99,6 @@ private slots:
   /** Open the preferences editor. */
   void editPreferences();
 
-  void openAssistant();
   void submitBug();
   void goToYouTube();
   /** Open the molsKetch about dialog. */
@@ -138,16 +131,6 @@ private:
   // Timers
   /** The timer for the auto-save action */
   QTimer * m_autoSaveTimer;
-
-  // Documentation classes
-  /** The help client */
-#if QT_VERSION <= 0x040603
-  QAssistantClient* assistantClient;
-#else
-  QProcess* assistantClient ;
-#endif
-  /** Initialize the help client. */
-  void initializeAssistant();
 
   Molsketch::MolView* m_molView;
 

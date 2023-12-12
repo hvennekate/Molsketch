@@ -26,6 +26,7 @@
 
 #include <math.h>
 
+#include "qtdeprecations.h"
 #include "bond.h"
 
 #include "atom.h"
@@ -44,6 +45,14 @@
 
 namespace Molsketch {
 
+  const QVector<QPair<qreal, qreal> > &HASH_SECTIONS {
+    {0., .08},
+    {.23, .31},
+    {.46, .54},
+    {.69, .77},
+    {.92, 1.}
+  };
+
   int Bond::orderFromType(const Bond::BondType &type) {
     return type / 10;
   }
@@ -59,21 +68,15 @@ namespace Molsketch {
     }
   }
 
-  Bond::Bond(Atom* atomA, Atom* atomB, Bond::BondType type, QGraphicsItem* parent GRAPHICSSCENESOURCE )
-    : graphicsItem (parent GRAPHICSSCENEINIT ),
+  Bond::Bond(Atom* atomA, Atom* atomB, Bond::BondType type, QGraphicsItem* parent)
+    : graphicsItem (parent),
       m_bondType(type),
       m_beginAtom(0),
       m_endAtom(0)
   {
     setAtoms(atomA, atomB);
 
-    MolScene* molScene = dynamic_cast<MolScene*>(
-      #if QT_VERSION < 0x050000
-          scene
-      #else
-          scene()
-      #endif
-          );
+    MolScene* molScene = dynamic_cast<MolScene*>(scene());
     if (molScene)
       setColor(molScene->settings()->defaultColor()->get());
     else
@@ -123,7 +126,7 @@ namespace Molsketch {
                      limitLineToExtents(lines.second, beginExtent, endExtent));
   }
 
-  QPainterPath getWedgeBondPath(const QPair<QLineF, QLineF> &outerLines) {
+  QPainterPath toClosedBondPath(const QPair<QLineF, QLineF> &outerLines) {
     QPainterPath path(outerLines.first.p1());
     path.lineTo(outerLines.first.p2());
     path.lineTo(outerLines.second.p2());
@@ -132,27 +135,21 @@ namespace Molsketch {
     return path;
   }
 
-  QPainterPath Bond::drawHashBond() const
-  {
-    auto outerLines = getOuterLimitsOfStereoBond();
+  QPainterPath Bond::drawBondComprisedOfStripes(const QPair<QLineF, QLineF> &outerLines) const {
     auto beginExtent = getExtentForStereoBond(beginAtom(), outerLines, false),
         endExtent = getExtentForStereoBond(endAtom(), outerLines, true);
 
     auto outerLinesToDraw = limitLinesToExtents(outerLines, beginExtent, endExtent);
 
-    QVector<QPair<qreal, qreal> > sections {
-      {0., .08},
-      {.23, .31},
-      {.46, .54},
-      {.69, .77},
-      {.92, 1.}
-    };
-
     QPainterPath path;
-    for (auto range : sections)
-      path.addPath(getWedgeBondPath(limitLinesToExtents(outerLinesToDraw, range.first, range.second)));
+    for (auto range : HASH_SECTIONS)
+      path.addPath(toClosedBondPath(limitLinesToExtents(outerLinesToDraw, range.first, range.second)));
 
     return path;
+  }
+
+  QPainterPath Bond::drawHashBond() const {
+    return drawBondComprisedOfStripes(getOuterLimitsOfStereoBond());
   }
 
   QPair<QLineF, QLineF> Bond::getOuterLimitsOfStereoBond() const {
@@ -164,6 +161,17 @@ namespace Molsketch {
 
     return qMakePair(QLineF{axis.p1(), normalVector.p2()},
                      QLineF{axis.p1(), normalVector.pointAt(-1)});
+  }
+
+  QPair<QLineF, QLineF> Bond::getOuterLimitsOfThickBond() const {
+    auto axis = bondAxis();
+    auto normalVector = axis.normalVector().unitVector();
+    if (MolScene* s = qobject_cast<MolScene*>(scene()))
+      normalVector.setLength(s->settings()->bondWedgeWidth()->get()/2.);
+    auto endNormalVector = normalVector.translated(axis.dx(), axis.dy());
+
+    return qMakePair(QLineF{normalVector.p2(), endNormalVector.p2()},
+                     QLineF{normalVector.pointAt(-1), endNormalVector.pointAt(-1)});
   }
 
   QLineF Bond::mapOuterLineToAtom(const Atom *atom, const QLineF& line, bool reverse) const {
@@ -186,7 +194,39 @@ namespace Molsketch {
     auto beginExtent = getExtentForStereoBond(beginAtom(), outerLines, false),
         endExtent = getExtentForStereoBond(endAtom(), outerLines, true);
     auto outerLinesToDraw = limitLinesToExtents(outerLines, beginExtent, endExtent);
-    return getWedgeBondPath(outerLinesToDraw);
+    return toClosedBondPath(outerLinesToDraw);
+  }
+
+  QPainterPath Bond::drawWavyBond() const {
+    auto outerLines = getOuterLimitsOfThickBond();
+    auto beginExtent = getExtentForStereoBond(beginAtom(), outerLines, false),
+        endExtent = getExtentForStereoBond(endAtom(), outerLines, true);
+
+    MolScene* s = qobject_cast<MolScene*>(scene());
+    auto circleDiameter = s ? s->settings()->bondWedgeWidth()->get() : 1; // TODO use dedicated setting
+    auto axis = limitLineToExtents(bondAxis(), beginExtent, endExtent);
+    int segments = qCeil(axis.length() / circleDiameter);
+    QPainterPath path(axis.p1());
+    for (int i = 0 ; i < segments ; ++i) {
+      QRectF rect;
+      rect.setWidth(circleDiameter);
+      rect.setHeight(circleDiameter);
+      rect.moveCenter(axis.pointAt((i + 0.5) * circleDiameter / axis.length()));
+      path.arcTo(rect, axis.angle() + 180, i % 2 ? 180 : -180);
+    }
+    return path;
+  }
+
+  QPainterPath Bond::drawThickBond() const {
+    auto outerLines = getOuterLimitsOfThickBond();
+    auto beginExtent = getExtentForStereoBond(beginAtom(), outerLines, false),
+        endExtent = getExtentForStereoBond(endAtom(), outerLines, true);
+    auto outerLinesToDraw = limitLinesToExtents(outerLines, beginExtent, endExtent);
+    return toClosedBondPath(outerLinesToDraw);
+  }
+
+  QPainterPath Bond::drawStripedBond() const {
+    return drawBondComprisedOfStripes(getOuterLimitsOfThickBond());
   }
 
   QLineF shiftAndElongate(const QLineF &line, const QPointF &shift, const QPointF &elongation) {
@@ -195,8 +235,7 @@ namespace Molsketch {
     return newLine;
   }
 
-  QPainterPath Bond::getWedgeBondShape() const {
-    auto outerLines = getOuterLimitsOfStereoBond();
+  QPainterPath Bond::getBondShapeFromOuterLines(const QPair<QLineF, QLineF> &outerLines) const {
     auto beginExtent = getExtentForStereoBond(beginAtom(), outerLines, false),
         endExtent = getExtentForStereoBond(endAtom(), outerLines, true);
 
@@ -210,7 +249,16 @@ namespace Molsketch {
     auto shiftedOuterLines = qMakePair(shiftAndElongate(outerLinesToDraw.first, normalShift, bondShift),
               shiftAndElongate(outerLinesToDraw.second, -normalShift, bondShift));
 
-    return getWedgeBondPath(shiftedOuterLines);
+    return toClosedBondPath(shiftedOuterLines);
+  }
+
+  QPainterPath Bond::getWedgeBondShape() const {
+    return getBondShapeFromOuterLines(getOuterLimitsOfStereoBond());
+  }
+
+  QPainterPath Bond::getThickBondShape() const
+  {
+    return getBondShapeFromOuterLines(getOuterLimitsOfThickBond());
   }
 
   double minimumAngle(const Bond* reference, const QSet<Bond*>& others, const Atom* origin, bool clockwise)
@@ -230,9 +278,11 @@ namespace Molsketch {
   {
     if (m_bondType != DoubleLegacy) return;
     m_bondType = DoubleSymmetric;
-    QSet<Bond*> beginBonds = m_beginAtom->bonds().toSet();
+    auto beginBondList = m_beginAtom->bonds();
+    auto beginBonds = toSet(beginBondList);
     beginBonds -= this;
-    QSet<Bond*> endBonds = m_endAtom->bonds().toSet();
+    auto endBondList = m_endAtom->bonds();
+    auto endBonds = toSet(endBondList);
     endBonds -= this;
     // no other bonds: symmetric
     if (beginBonds.empty() && endBonds.empty()) return;
@@ -289,10 +339,15 @@ namespace Molsketch {
       case Bond::Single:
       case Bond::DativeDot:
       case Bond::DativeDash:
-      case Bond::WedgeOrHash:
         result.moveTo(begin);
         result.lineTo(end);
         break;
+      case Bond::WedgeOrHash:
+        return drawWavyBond();
+      case Bond::Thick:
+        return drawThickBond();
+      case Bond::Striped:
+        return drawStripedBond();
       case Bond::Wedge:
         return drawWedgeBond();
       case Bond::Hash:
@@ -512,11 +567,10 @@ namespace Molsketch {
       case Bond::DativeDash:
         pen.setStyle(Qt::DashLine);
         break;
-      case Bond::WedgeOrHash:
-        pen.setDashPattern(QVector<qreal>() << 2 << 5);
-        break;
       case Bond::Wedge:
       case Bond::Hash:
+      case Bond::Thick:
+      case Bond::Striped:
           painter->setBrush( QBrush(getColor()) );
       default: ;
     }
@@ -593,10 +647,10 @@ namespace Molsketch {
     m_beginAtom = A ;
     m_endAtom = B ;
     if (m_beginAtom) {
-      m_beginAtom->updateShape();
+      m_beginAtom->updateLabel();
       setPos(m_beginAtom->scenePos()) ;
     }
-    if (m_endAtom) m_endAtom->updateShape();
+    if (m_endAtom) m_endAtom->updateLabel();
   }
 
   void Bond::setAtoms(const QPair<Atom *, Atom *> &atoms) {
@@ -654,8 +708,9 @@ namespace Molsketch {
     QStringList atomIndexes = attributes.value("atomRefs2").toString().split(" ") ;
     if (atomIndexes.size() != 2) return ;
 
-    setAtoms(molecule()->atom(atomIndexes.first()),
-             molecule()->atom(atomIndexes.last())) ;
+    if (auto mol = molecule())
+      setAtoms(mol->atom(atomIndexes.first()),
+               mol->atom(atomIndexes.last())) ;
     m_bondType = (BondType) (attributes.value("type").toString().toInt());
     if (attributes.hasAttribute("order"))
       m_bondType = (BondType) (10 *attributes.value("order").toInt());
@@ -734,12 +789,16 @@ namespace Molsketch {
       case Bond::Single:
       case Bond::DativeDot:
       case Bond::DativeDash:
-      case WedgeOrHash:
         result.moveTo(begin + gap * (-bondUnitVector + bondNormalVector));
         result.lineTo(begin + gap * (-bondUnitVector - bondNormalVector));
         result.lineTo(end + gap * (bondUnitVector - bondNormalVector));
         result.lineTo(end + gap * (bondUnitVector + bondNormalVector));
         result.closeSubpath();
+        break;
+      case Bond::WedgeOrHash:
+      case Bond::Thick:
+      case Bond::Striped:
+        result = getThickBondShape();
         break;
       case Bond::Wedge:
       case Bond::Hash:

@@ -24,6 +24,7 @@
 #include <QGraphicsScene>
 #include <QSet>
 #include <actions/itemtypeselectionaction.h>
+#include "utilities.h"
 
 class TestGraphicsItem : public QGraphicsItem {
 public:
@@ -137,7 +138,7 @@ public:
     TS_ASSERT(scene->selectedItems().isEmpty());
     ItemTypeSelectionAction::selectItems(scene, items);
     TS_ASSERT_EQUALS(scene->selectedItems().size(), items.size());
-    TS_ASSERT_EQUALS(scene->selectedItems().toSet(), items.toSet());
+    TS_ASSERT_EQUALS(toSet(scene->selectedItems()), toSet(items));
     TS_ASSERT_EQUALS(signalCounter.count, items.count());
     TS_ASSERT(testItem->isSelected());
     TS_ASSERT(secondTestItem->isSelected());

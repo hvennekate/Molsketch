@@ -25,6 +25,7 @@
 #include <settingsitem.h>
 #include <QSettings>
 #include <QRegularExpression>
+#include <stringify.h>
 #include "xmlassertion.h"
 #include "utilities.h"
 
@@ -34,7 +35,7 @@ using XmlAssert::assertThat;
 const QString SERIALIZED_SETTINGS("");
 const QFont ATOM_FONT("Helvetica", 15, QFont::Cursive);
 const qreal BOND_ANGLE = 1.25;
-const QString BASE64_ATOM_FONT("AAAAEgBIAGUAbAB2AGUAdABpAGMAYf////9ALgAAAAAAAP////8FAAEABhAAAAEAAAAAAAAAAAAAAAAAAA==");
+const QString BASE64_ATOM_FONT(stringify(ATOM_FONT));
 const QString BOND_ANGLE_NAME("bond-angle");
 const QString BOND_ANGLE_OLD_NAME("MolsceneBondAngle");
 const QString ATOM_FONT_NAME("atom-font");
@@ -98,8 +99,8 @@ public:
     QString actualXml;
     QXmlStreamWriter writer(&actualXml);
     settings->writeXml(writer);
-    assertThat(actualXml)->contains("/settings/atom-font/@value/data(.)")->exactlyOnceWithContent(BASE64_ATOM_FONT);
-    assertThat(actualXml)->contains("/settings/bond-angle/@value/data(.)")->exactlyOnceWithContent(QString::number(BOND_ANGLE));
+    assertThat(actualXml)->hasNodes("settings/atom-font")->haveAttribute("value")->exactly({BASE64_ATOM_FONT});
+    assertThat(actualXml)->hasNodes("settings/bond-angle")->haveAttribute("value")->exactly({QString::number(BOND_ANGLE)});
   }
 
   void testSettingsDeserialization() {

@@ -45,48 +45,52 @@ public:
   }
 
   void testRegularAtomIsDrawn() {
-    assertThat(scene->toSvg())->contains("/*:svg/*:g/*:g/*:text/text()/data(.)")->exactlyOnceWithContent("Xe");
+    assertThat(scene->toSvg())->hasNodes("svg/g/g/text")->times(1)->haveTexts()->exactly({"Xe"});
   }
 
   void testNewmanAtomSymbolIsNotDrawn() { // TODO define precedence with regard to colored circle/square/wireframe
     // TODO check color
     atom->setNewmanDiameter(6);
     QString svg = scene->toSvg();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:text")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:rect")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle/@r/data(.)")->exactlyOnceWithContent("3");
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle/@cx/data(.)")->exactlyOnceWithContent("0");
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle/@cy/data(.)")->exactlyOnceWithContent("0");
+    assertThat(svg)->hasNodes("svg/g/g/text")->none();
+    assertThat(svg)->hasNodes("svg/g/g/rect")->none();
+    auto circleAssert = assertThat(svg)->hasNodes("svg/g/g/circle")->exactlyOne();
+    circleAssert->haveAttribute("r")->exactly({"3"});
+    circleAssert->haveAttribute("cx")->exactly({"0"});
+    circleAssert->haveAttribute("cy")->exactly({"0"});
     // TODO why does cx and cy get moved to 0.5 if diameter is odd?
   }
 
   void testDrawingColoredCircle() {
     scene->setRenderMode(MolScene::RenderColoredCircles);
     QString svg = scene->toSvg();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:text")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:rect")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle/@r/data(.)")->exactlyOnceWithContent("10");
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle/@cx/data(.)")->exactlyOnceWithContent("0");
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle/@cy/data(.)")->exactlyOnceWithContent("0");
+    assertThat(svg)->hasNodes("svg/g/g/text")->none();
+    assertThat(svg)->hasNodes("svg/g/g/rect")->none();
+    auto  circleAssert = assertThat(svg)->hasNodes("svg/g/g/circle")->exactlyOne();
+    circleAssert->haveAttribute("r")->exactly({"10"});
+    circleAssert->haveAttribute("cx")->exactly({"0"});
+    circleAssert->haveAttribute("cy")->exactly({"0"});
+
   }
 
   void testDrawingColoredSquare() {
     scene->setRenderMode(MolScene::RenderColoredSquares);
     QString svg = scene->toSvg();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:text")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:rect/@x/data(.)")->exactlyOnceWithContent("-10");
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:rect/@y/data(.)")->exactlyOnceWithContent("-10");
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:rect/@width/data(.)")->exactlyOnceWithContent("20");
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:rect/@height/data(.)")->exactlyOnceWithContent("20");
+    assertThat(svg)->hasNodes("svg/g/g/text")->none();
+    assertThat(svg)->hasNodes("svg/g/g/circle")->none();
+    auto  rectAssert = assertThat(svg)->hasNodes("svg/g/g/rect")->exactlyOne();
+    rectAssert->haveAttribute("x")->exactly({"-10"});
+    rectAssert->haveAttribute("y")->exactly({"-10"});
+    rectAssert->haveAttribute("width")->exactly({"20"});
+    rectAssert->haveAttribute("height")->exactly({"20"});
   }
 
   void testDrawingColoredWireframe() {
     scene->setRenderMode(MolScene::RenderColoredWireframe);
     QString svg = scene->toSvg();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:text")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:rect")->never();
-    assertThat(svg)->contains("/*:svg/*:g/*:g/*:circle")->never();
+    assertThat(svg)->hasNodes("svg/g/g/text")->none();
+    assertThat(svg)->hasNodes("svg/g/g/rect")->none();
+    assertThat(svg)->hasNodes("svg/g/g/circle")->none();
   }
 
   void testCenteringOfNewmanAtom() {
@@ -99,8 +103,10 @@ public:
   }
 
   void assertCircleIsCentered() {
-    assertThat(scene->toSvg())->contains("/*:svg/*:g/*:g/*:circle/@cx/data(.)")->exactlyOnceWithContent("0");
-    assertThat(scene->toSvg())->contains("/*:svg/*:g/*:g/*:circle/@cy/data(.)")->exactlyOnceWithContent("0");
+    auto svg = scene->toSvg();
+    auto circleAssert = assertThat(svg)->hasNodes("svg/g/g/circle")->exactlyOne();
+    circleAssert->haveAttribute("cx")->exactly({"0"});
+    circleAssert->haveAttribute("cy")->exactly({"0"});
   }
 
   // TODO check unbound electrons and charge are drawn in the same color

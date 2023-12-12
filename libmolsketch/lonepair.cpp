@@ -19,11 +19,13 @@
 #include "graphicsitem.h"
 #include "lonepair.h"
 #include <QDebug>
+#include <QPainter>
 #include <QPen>
 
 namespace Molsketch {
 
-struct LonePairPrivate {
+class LonePairPrivate {
+public:
   BoundingBoxLinker linker;
 };
 
@@ -82,7 +84,19 @@ void LonePair::paint (QPainter* painter, const QStyleOptionGraphicsItem* option,
   QRectF originalBounds = QGraphicsLineItem::boundingRect(); // TODO join with code from boundingRect()
   QPointF shift = d->linker.getShift(parentItem()->boundingRect(), originalBounds);
   setLine(line().translated(shift));
+
+  // TODO do not inherit from QGraphicsLineItem so we can handle/default color independently
+  const graphicsItem * parentGraphicsItem = nullptr;
+  auto originalPen = pen();
+  qDebug() << "pen color valid?" << pen().color().isValid();
+  if (!pen().color().isValid() &&
+      (parentGraphicsItem = dynamic_cast<const graphicsItem *>(parentItem()))) {
+    QPen newPen(originalPen);
+    newPen.setColor(parentGraphicsItem->getColor());
+    setPen(newPen);
+  }
   QGraphicsLineItem::paint(painter, option, widget);
+  setPen(originalPen);
 }
 
 QString LonePair::xmlName () const {
@@ -112,7 +126,6 @@ XmlObjectInterface* LonePair::produceChild (const QString& name, const QXmlStrea
 }
 
 void LonePair::readAttributes (const QXmlStreamAttributes& attributes) {
-  Q_D(LonePair);
   QPen newPen = pen();
   newPen.setWidthF(attributes.value("lineWidth").toDouble());
   newPen.setColor(graphicsItem::extractColor(attributes));
@@ -127,7 +140,6 @@ QList<const XmlObjectInterface*> LonePair::children () const {
 }
 
 QXmlStreamAttributes LonePair::xmlAttributes () const {
-  Q_D(const LonePair);
   QXmlStreamAttributes attributes;
   attributes.append("angle", QString::number(line().angle()));
   attributes.append("length", QString::number(line().length()));

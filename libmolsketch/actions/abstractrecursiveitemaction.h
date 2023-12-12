@@ -24,7 +24,7 @@
  * This class provides the infrastructure for an action that operates on
  * one or more items.
  *
- * @author Hendrik Vennekate <HVennekate@gmx.de>
+ * @author Hendrik Vennekate <Hendrik.Vennekate@posteo.de>
  * @since Lithium
  */
 

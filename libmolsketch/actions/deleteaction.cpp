@@ -19,6 +19,7 @@
 #include "deleteaction.h"
 #include "molscene.h"
 #include "commands.h"
+#include "iconutils.h"
 #include <QDebug>
 #include <molecule.h>
 
@@ -30,7 +31,7 @@ namespace Molsketch {
     setCheckable(false);
     connect(this, SIGNAL(triggered()), this, SLOT(deleteSelection()));
     setText(tr("Delete"));
-    setIcon(QIcon(":images/delete.svg"));
+    setIcon(getInternalIcon("delete"));
     setShortcut(QKeySequence::Delete);
   }
 

@@ -32,7 +32,7 @@ struct LibraryToolBoxPrivate {
     layout->addWidget(refreshLibraries = new QPushButton(QIcon::fromTheme("view-refresh", QIcon(":icons/view-refresh.svg")), "", parent));
     layout->addWidget(toolBox = new QToolBox(parent));
     layout->addWidget(new HelpForEmptyToolBox(QObject::tr("Define libraries using <b>File > Preferences... > Libraries</b>."), toolBox, parent));
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
   }
 };
 

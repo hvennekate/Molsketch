@@ -204,4 +204,6 @@ namespace Molsketch {
     }
   }
 
+  Linkable::~Linkable() {}
+
 } // namespace Molsketch

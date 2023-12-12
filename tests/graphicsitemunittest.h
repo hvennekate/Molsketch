@@ -27,11 +27,11 @@ using namespace Molsketch;
 
 const QByteArray EMPTY_LIST_XML("<?xml version=\"1.0\" encoding=\"UTF-8\"?><molsketchItems/>\n");
 const QByteArray ONE_ATOM_XML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                               "<atom id=\"\" elementType=\"A\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"3,3\"/>\n");
+                               "<atom id=\"\" elementType=\"A\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" shapeType=\"0\" hydrogenAlignment=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"3,3\"/>\n");
 const QByteArray TWO_ATOMS_XML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                "<molsketchItems>"
-                               "<atom id=\"\" elementType=\"A\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"3,3\"/>"
-                               "<atom id=\"\" elementType=\"B\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"4,5\"/>"
+                               "<atom id=\"\" elementType=\"A\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" shapeType=\"0\" hydrogenAlignment=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"3,3\"/>"
+                               "<atom id=\"\" elementType=\"B\" userCharge=\"0\" disableHydrogens=\"0\" hydrogens=\"0\" shapeType=\"0\" hydrogenAlignment=\"0\" colorR=\"0\" colorG=\"0\" colorB=\"0\" scalingParameter=\"1\" zLevel=\"3\" coordinates=\"4,5\"/>"
                                "</molsketchItems>\n"
                                );
 

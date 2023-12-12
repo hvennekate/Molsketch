@@ -27,6 +27,8 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 
+#include "qtdeprecations.h"
+
 #include "atompopup.h"
 #include "bond.h"
 #include "lonepair.h"
@@ -37,14 +39,12 @@
 #include "molscene.h"
 #include "TextInputItem.h"
 #include <iostream>
-#if QT_VERSION >= 0x050000
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include "scenesettings.h"
 #include "settingsitem.h"
 #include <QDebug>
+#include "painting/textfield.h"
+#include "math2d.h"
 
 #define REQ_MOLECULE auto m_molecule = molecule(); if (!m_molecule) return
 
@@ -56,8 +56,18 @@ namespace Molsketch {
   //                                        //
   //   Left   Right   Down     Up           //
   //                                        //
-  Alignment Atom::labelAlignment() const
-  {
+  Alignment Atom::labelAlignment() const {
+    switch (hydrogenAlignment) {
+      case north: return Up;
+      case south: return Down;
+      case east: return Right;
+      case west: return Left;
+      case automatic: return autoLabelAlignment();
+      default: return autoLabelAlignment();
+    }
+  }
+
+  Alignment Atom::autoLabelAlignment() const {
     // compute the sum of the bond vectors, this gives
     QPointF direction(0.0, 0.0);
     foreach (Atom *nbr, this->neighbours())
@@ -69,16 +79,15 @@ namespace Molsketch {
         ? Left : Right;
   }
 
-
   Atom::Atom(const QPointF &position, const QString &element, bool implicitHydrogens,
-             QGraphicsItem* parent GRAPHICSSCENESOURCE )
-    : graphicsItem (parent GRAPHICSSCENEINIT )
+             QGraphicsItem* parent)
+    : graphicsItem (parent)
   {
     initialize(position, element, implicitHydrogens);
   }
 
-  Atom::Atom(const Atom &other GRAPHICSSCENESOURCE)
-    : graphicsItem (other GRAPHICSSCENEINIT)
+  Atom::Atom(const Atom &other)
+    : graphicsItem (other)
   { // TODO unit test copy constructor
     initialize(other.scenePos(), other.element(), other.m_implicitHydrogens);
     m_newmanDiameter = other.m_newmanDiameter;
@@ -89,64 +98,38 @@ namespace Molsketch {
 
   Atom::~Atom() {}
 
-  QPair<QFont, QFont> Atom::getFonts() const
-  {
-    QFont symbolFont = getSymbolFont();
-    return qMakePair(symbolFont, getSubscriptFont(symbolFont));
-  }
-
   QFont Atom::getSymbolFont() const
   {
     QFont symbolFont;
     MolScene *sc = qobject_cast<MolScene*>(scene());
-    if (sc) symbolFont = sc->getAtomFont();
+    if (sc) symbolFont = sc->settings()->atomFont()->get();
     if (symbolFont.pointSizeF() > 0)
       symbolFont.setPointSizeF(symbolFont.pointSizeF() * relativeWidth());
     return symbolFont;
   }
 
-  QFont Atom::getSubscriptFont(const QFont& symbolFont) const
-  {
-    QFont subscriptFont = symbolFont;
-    if (symbolFont.pointSizeF() > 0)
-      subscriptFont.setPointSizeF(0.75 * symbolFont.pointSizeF());
-    return subscriptFont;
-  }
-
-  QString Atom::composeLabel(bool leftAligned) const
-  {
-    int hCount = numImplicitHydrogens();
-    QString lbl;
-    if (hCount && leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && leftAligned)
-      lbl += QString::number(hCount);
-
-    lbl += m_elementSymbol;
-
-    if (hCount && !leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && !leftAligned)
-      lbl += QString::number(hCount);
-    return lbl;
-  }
-
   QRectF Atom::computeBoundingRect()
   {
     if (m_newmanDiameter > 0.) return QRectF(-m_newmanDiameter/2., -m_newmanDiameter/2., m_newmanDiameter, m_newmanDiameter);
+
+    if (Circle == m_shapeType) {
+      auto radius = radiusForCircularShape();
+      return QRectF(-radius, -radius, radius, radius);
+    }
     // TODO do proper prepareGeometryChange() call
     // TODO call whenever boundingRect() is called
 
-    return renderer.computeBoundingRect(m_elementSymbol, getSymbolFont(), numImplicitHydrogens(), labelAlignment(), charge());
+    return label->boundingRect();
   }
 
   void Atom::initialize(const QPointF &position,
                         const QString &element,
                         bool implicitHydrogens)
   {
-    //pre: position is a valid position in scene coordinates
+    hydrogenAlignment = automatic;
     setPos(position);
     setZValue(3);
+    setShapeType(Rectangle);
 
     MolScene *molScene = qobject_cast<MolScene*>(scene());
 
@@ -155,11 +138,7 @@ namespace Molsketch {
     }
     else setColor (QColor (0, 0, 0));
     // Enabling hovereffects
-#if QT_VERSION < 0x050000
-    setAcceptsHoverEvents(true);
-#else
     setAcceptHoverEvents(true) ;
-#endif
 
     // Setting private fields
     m_elementSymbol = element;
@@ -169,7 +148,9 @@ namespace Molsketch {
     m_userImplicitHydrogens =  0;
     m_newmanDiameter = 0;
     m_implicitHydrogens = implicitHydrogens;
-    updateShape();
+    setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
+    updateLabel();
   }
 
   QRectF Atom::boundingRect() const
@@ -178,21 +159,9 @@ namespace Molsketch {
       auto centeringDistance = QPointF(pointSelectionDistance(), pointSelectionDistance());
       return QRectF(-centeringDistance, centeringDistance);
     }
-    return m_shape;
-  }
-
-  bool Atom::hasLabel() const
-  { // TODO what is the difference between this and isDrawn() ?
-    MolScene* molScene = dynamic_cast<MolScene*>(scene());
-    if (!molScene) return true ;
-
-    if ((m_elementSymbol == "C")
-        && !molScene->settings()->carbonVisible()->get()
-        && (numBonds() > 1 || (numBonds() == 1 && !molScene->settings()->showTerminalMethyls()->get()))
-        && ((charge() == 0) || !molScene->settings()->chargeVisible()->get()))
-      return false;
-
-    return true;
+    if (m_newmanDiameter > 0.)
+      return QRectF(-m_newmanDiameter/2., -m_newmanDiameter/2., m_newmanDiameter, m_newmanDiameter);
+    return label->boundingRect();
   }
 
   void Atom::drawElectrons(QPainter* painter)
@@ -304,19 +273,6 @@ namespace Molsketch {
     painter->restore();
   }
 
-  void Atom::drawCharge(QPainter* painter)
-  {
-    QString chargeId = chargeString();
-    QFont superscriptFont = getSymbolFont();
-    superscriptFont.setPointSize(0.75 * superscriptFont.pointSize());
-    QFontMetrics fmSymbol(superscriptFont);
-    int offset = 0.5 * fmSymbol.width("+");
-    painter->save();
-    painter->setFont(superscriptFont);
-    painter->drawText(m_shape.right() - offset, m_shape.top() + offset, chargeId);
-    painter->restore();
-  }
-
   void Atom::renderColoredSquare(QPainter* painter) {
     renderColoredShape(painter, &QPainter::drawRect);
   }
@@ -338,42 +294,19 @@ namespace Molsketch {
     }
   }
 
+  qreal Atom::radiusForCircularShape() const {
+    auto bounds = boundingRect();
+    return QLineF(bounds.center(), bounds.topRight()).length();
+  }
+
   void Atom::drawSelectionHighlight(QPainter* painter)
   {
     if (this->isSelected()) {
       painter->save();
       painter->setPen(Qt::blue);
-      painter->drawRect(m_shape); // TODO draw rectangle around this and children rectangle to include electrons (possibly move this method to graphicsItem)
+      painter->drawRect(label->boundingRect());
       painter->restore();
     }
-  }
-
-  QString Atom::getLabelWithHydrogens()
-  {
-    bool leftAligned = false;
-    switch (labelAlignment()) {
-      case Left:
-        leftAligned = true;
-      default:
-        break;
-    }
-
-    int hCount = numImplicitHydrogens();
-
-    QString lbl;
-    if (hCount && leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && leftAligned)
-      lbl += QString::number(hCount);
-
-    lbl += m_elementSymbol;
-
-    if (hCount && !leftAligned)
-      lbl += "H";
-    if ((hCount > 1) && !leftAligned)
-      lbl += QString::number(hCount);
-
-    return lbl;
   }
 
   void Atom::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -409,10 +342,8 @@ namespace Molsketch {
     painter->save();
     painter->setPen(getColor());
 
-    renderer.drawAtomLabel(painter, m_elementSymbol, getSymbolFont(), numImplicitHydrogens(), labelAlignment(), charge());
+    label->paint(painter);
     drawSelectionHighlight(painter);
-    if (molScene->settings()->chargeVisible()->get() && !m_elementSymbol.isEmpty())
-      drawCharge(painter); // TODO unite with subscript drawing and align appropriately
     if (molScene->settings()->lonePairsVisible()->get()) drawElectrons(painter);
     painter->restore();
 
@@ -430,41 +361,17 @@ namespace Molsketch {
     painter->restore();
   }
 
-  qreal Atom::annotationDirection() const
-  {
-    // Determine optimum direction if angleDirection negative
-    auto m_bonds = bonds();
-    //   No preference & no bonds => downward
-    if (m_bonds.isEmpty())
-      return 270 ;
-    if (m_bonds.size() == 1)
-      return Molecule::toDegrees(m_bonds.first()->bondAngle(this)+180.) ;
-    //   Have bonds? determine largest free angle
-    QVector<qreal> angles ;
-    foreach (Bond *bond, m_bonds)
-      angles << bond->bondAngle(this) ;
-    qSort(angles) ;
-    angles << angles.first() + 360. ;
-    qreal maxAngleGap = -1, result = 270 ;
-    for (int i = 0 ; i < angles.size()-1 ; ++i)
-    {
-      qreal gap = angles[i+1] - angles[i] ;
-      if (gap > maxAngleGap)
-      {
-        maxAngleGap = gap ;
-        result = (angles[i+1]+angles[i]) / 2. ;
-      }
-    }
-    return Molecule::toDegrees(result) ;
-  }
-
   QVariant Atom::itemChange(GraphicsItemChange change, const QVariant &value)
   {
-    if (change == ItemPositionChange && parentItem()) {
-      parentItem()->update();
-      dynamic_cast<Molecule*>(parentItem())->rebuild();
-    };
-    updateShape();
+    updateLabel();
+    if (change == ItemPositionChange) {
+      for (auto neighbor : neighbours())
+        neighbor->updateLabel();
+      if (parentItem()) {
+        parentItem()->update();
+        dynamic_cast<Molecule*>(parentItem())->rebuild();
+      }
+    }
     return graphicsItem::itemChange(change, value);
   }
 
@@ -485,6 +392,8 @@ namespace Molsketch {
   const char *DISABLE_HYDROGENS_ATTRIBUTE = "disableHydrogens";
   const char *HYDROGEN_COUNT_ATTRIBUTE = "hydrogens";
   const char *NEWMAN_DIAMETER_ATTRIBUTE = "newmanDiameter";
+  const char *SHAPE_TYPE_ATTRIBUTE = "shapeType";
+  const char *HYDROGEN_ALIGNMENT = "hydrogenAlignment";
 
   void Atom::readGraphicAttributes(const QXmlStreamAttributes &attributes)
   {
@@ -494,7 +403,10 @@ namespace Molsketch {
     m_userImplicitHydrogens = attributes.value(HYDROGEN_COUNT_ATTRIBUTE).toInt();
     m_implicitHydrogens = !attributes.value(DISABLE_HYDROGENS_ATTRIBUTE).toInt();
     m_userCharge = attributes.value(CHARGE_ATTRIBUTE).toInt();
-    updateShape();
+    m_shapeType = (ShapeType) attributes.value(SHAPE_TYPE_ATTRIBUTE).toInt();
+    auto hAlignment = attributes.value(HYDROGEN_ALIGNMENT).toInt();
+    hydrogenAlignment = (NeighborAlignment) hAlignment;
+    updateLabel();
   }
 
   QXmlStreamAttributes Atom::graphicAttributes() const
@@ -505,27 +417,46 @@ namespace Molsketch {
     attributes.append(CHARGE_ATTRIBUTE, QString::number(m_userCharge));
     attributes.append(DISABLE_HYDROGENS_ATTRIBUTE, QString::number(!m_implicitHydrogens));
     attributes.append(HYDROGEN_COUNT_ATTRIBUTE, QString::number(m_userImplicitHydrogens));
+    attributes.append(SHAPE_TYPE_ATTRIBUTE, QString::number(m_shapeType));
     if (m_newmanDiameter > 0) attributes.append(NEWMAN_DIAMETER_ATTRIBUTE, QString::number(m_newmanDiameter));
+    attributes.append(HYDROGEN_ALIGNMENT, QString::number(hydrogenAlignment));
     return attributes ;
   }
 
   void Atom::setElement(const QString &element)
   {
     m_elementSymbol = element;
-    updateShape();
+    updateLabel();
     if (Molecule *m = molecule()) {
       m->invalidateElectronSystems();
-      m->updateTooltip();
     }
+  }
+
+  Atom::ShapeType Atom::shapeType() const {
+    return m_shapeType;
+  }
+
+  void Atom::setShapeType(const Atom::ShapeType &shapeType) {
+    m_shapeType = shapeType;
+    updateLabel();
   }
 
   void Atom::setNewmanDiameter(const qreal &diameter) {
     m_newmanDiameter = diameter;
-    updateShape();
+    updateLabel();
   }
 
   qreal Atom::getNewmanDiameter() const {
     return m_newmanDiameter;
+  }
+
+  void Atom::setHAlignment(const NeighborAlignment &hAlignment) {
+    hydrogenAlignment = hAlignment;
+    updateLabel();
+  }
+
+  NeighborAlignment Atom::hAlignment() const {
+    return hydrogenAlignment;
   }
 
   void Atom::disableNewman() {
@@ -539,7 +470,7 @@ namespace Molsketch {
     return  result;
   }
 
-  void Atom::setNumImplicitHydrogens(const int& number)
+  void Atom::setNumImplicitHydrogens(const quint8 &number)
   {
     m_implicitHydrogens = true;
 
@@ -547,7 +478,7 @@ namespace Molsketch {
     int deltaH = number - numImplicitHydrogens();
 
     m_userImplicitHydrogens = deltaH;
-    if (auto m = molecule()) m->updateTooltip();
+    updateLabel();
   }
 
   int Atom::numBonds() const {
@@ -598,21 +529,7 @@ namespace Molsketch {
     }
   }
 
-  QString Atom::string () const {
-    QString el = element ();
-    int n = numImplicitHydrogens();
-    QString hs;
-    QString num = "";
-    if (n) {
-      if (n > 1) num.setNum (n);
-      hs = QString ("H") + num;
-    }
-    else hs = QString ("");
-    QString q = chargeString();
-    return el+hs+q;
-  }
-
-  int Atom::numImplicitHydrogens() const {
+  quint8 Atom::numImplicitHydrogens() const {
     if (!m_implicitHydrogens) return 0;
     int bosum = 0;
     foreach (Bond *bond, bonds())
@@ -626,7 +543,7 @@ namespace Molsketch {
     return m_elementSymbol;
   }
 
-  int Atom::charge()  const
+  int Atom::charge() const
   {
     // non element atoms have no charge unless explicitly set (m_userCharge)
     int atomicNumber = Element::strings.indexOf(m_elementSymbol);
@@ -644,28 +561,7 @@ namespace Molsketch {
   {
     int computedCharge = charge() - m_userCharge;
     m_userCharge = requiredCharge - computedCharge;
-    if (auto m = molecule()) m->updateTooltip();
-  }
-
-  QString Atom::chargeString() const
-  {
-    int c = charge();
-
-    // Drawing text
-    QString string;
-    string.setNum(c);
-    if (c < -1) // ..., "3-", "2-"
-      string =  string.remove(0,1) + "-";
-    if (c == -1) // "-"
-      string = "-";
-    if (c == 0) // ""
-      string = "";
-    if (c == 1) // "+"
-      string = "+";
-    if (c > 1) // "2+", "3+", ...
-      string = string + "+";
-
-    return string;
+    updateLabel();
   }
 
   Molecule * Atom::molecule() const
@@ -734,6 +630,28 @@ namespace Molsketch {
     return widget;
   }
 
+
+
+  qreal bondExtentForCircularShape(const QLineF &connectionLine,
+                                   const QPointF &circleCenter,
+                                   const qreal &circleRadius) {
+    auto originRelativeToCircle = connectionLine.p1() - circleCenter;
+    auto unitLine = connectionLine.unitVector();
+    QPointF unitVector(unitLine.dx(), unitLine.dy());
+    auto dotProduct = QPointF::dotProduct(unitVector, originRelativeToCircle);
+    auto squaredNorm = QPointF::dotProduct(originRelativeToCircle, originRelativeToCircle);
+    return qMax(0.,
+                qMax(-dotProduct + sqrt(pow(dotProduct, 2) + pow(circleRadius, 2) - squaredNorm),
+                     -dotProduct - sqrt(pow(dotProduct, 2) + pow(circleRadius, 2) - squaredNorm)))
+        / connectionLine.length();
+  }
+
+  QPointF endPointOfBondForCircularShape(const QLineF &connectionLine,
+                                         const QPointF &circleCenter,
+                                         const qreal &circleRadius) {
+    return connectionLine.pointAt(bondExtentForCircularShape(connectionLine, circleCenter, circleRadius));
+  }
+
   QPointF Atom::bondDrawingStart(const Atom *other, qreal bondLineWidth) const
   {
     if (!isDrawn()) return pos();
@@ -744,6 +662,13 @@ namespace Molsketch {
       connection.setLength((m_newmanDiameter + qMax(lineWidth(), bondLineWidth))/2. );
       return connection.p2();
     }
+
+    if (Circle == m_shapeType) {
+      auto bounds = boundingRect();
+      return endPointOfBondForCircularShape(connection, mapToScene(bounds.center()), // TODO why do we need to map here and not in the "extent" functions?
+                                            QLineF(bounds.center(), bounds.topRight()).length() + bondLineWidth/2.);
+    }
+
 
     return getBondDrawingStartFromBoundingBox(connection, bondLineWidth/1.5); // TODO: why 1.5?
   }
@@ -767,19 +692,19 @@ namespace Molsketch {
     QPointF intersection;
 
     QLineF topEdge{bounds.topLeft(), bounds.topRight()};
-    if (topEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(topEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, topEdge);
 
     QLineF bottomEdge{bounds.bottomLeft(), bounds.bottomRight()};
-    if (bottomEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(bottomEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, bottomEdge);
 
     QLineF leftEdge{bounds.topLeft(), bounds.bottomLeft()};
-    if (leftEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(leftEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, leftEdge);
 
     QLineF rightEdge{bounds.topRight(), bounds.bottomRight()};
-    if (rightEdge.intersect(line, &intersection) == QLineF::BoundedIntersection)
+    if (intersectionType(rightEdge, line, &intersection) == QLineF::BoundedIntersection)
       return IntersectionData(intersection, rightEdge);
     // TODO pick the edge it intersects with first (i.e. closest to the middle)
     return IntersectionData(QPointF(), QLineF());
@@ -798,12 +723,9 @@ namespace Molsketch {
     return closestPoint;
   }
 
-
+  // TODO inline
   qreal getBondExtentForNewmanAtom(const QLineF &middleLine, qreal lineWidth, qreal newmanDiameter) {
-    qreal f = pow(middleLine.dx(), 2) + pow(middleLine.dy(), 2);
-    qreal p = 2*(middleLine.p1().x() * middleLine.dx() + middleLine.p1().y() * middleLine.dy()) / f / 2.;
-    qreal q = (pow(middleLine.p1().x(), 2) + pow(middleLine.p1().y(), 2) - pow((newmanDiameter + lineWidth)/2., 2))/f;
-    return qMax(-p + sqrt(p*p - q), -p - sqrt(p*p - q));
+    return bondExtentForCircularShape(middleLine, {}, (newmanDiameter + lineWidth)/2.);
   }
 
   qreal Atom::getExtentForEndOnCorner(const QPolygonF &fullBondPolygon, const QLineF& middleLine, const QPointF& corner) const {
@@ -816,7 +738,7 @@ namespace Molsketch {
 
   qreal Atom::getExtentForIntersectionOfOuterLineAndEdge(const IntersectionData &edgeIntersection, const QLineF &outer) const {
     QPointF intersectionOfOuterAndEdge;
-    QLineF::IntersectType intersectType = edgeIntersection.getEdge().intersect(outer, &intersectionOfOuterAndEdge);
+    QLineF::IntersectType intersectType = intersectionType( edgeIntersection.getEdge(), outer, &intersectionOfOuterAndEdge);
     return QLineF::BoundedIntersection == intersectType
         ? QLineF(intersectionOfOuterAndEdge, outer.p1()).length() / outer.length()
         : 0;
@@ -830,6 +752,11 @@ namespace Molsketch {
 
     if (m_newmanDiameter > 0) return getBondExtentForNewmanAtom(middleLine, lineWidth, m_newmanDiameter);
 
+    if (Circle == m_shapeType) {
+      auto bounds = boundingRect();
+      return bondExtentForCircularShape(middleLine, bounds.center(), QLineF(bounds.center(), bounds.topRight()).length() + lineWidth/2.);
+    }
+
     IntersectionData edgeIntersection{intersectedEdge(middleLine, lineWidth)};
 
     QPolygonF fullBondPolygon({outer1.p1(), outer1.p2(), outer2.p2(), outer2.p1(), outer1.p1()});
@@ -840,8 +767,7 @@ namespace Molsketch {
           getExtentForIntersectionOfOuterLineAndEdge(edgeIntersection, outer2)
     };
 
-    qSort(possibleExtents);
-    return possibleExtents.last();
+    return *(std::max_element(possibleExtents.begin(), possibleExtents.end()));
   }
 
   bool Atom::contains(const QPointF &point) const {
@@ -854,9 +780,10 @@ namespace Molsketch {
     return coordinates();
   }
 
-  void Atom::updateShape() {
+  void Atom::updateLabel() {
     prepareGeometryChange();
-    m_shape = computeBoundingRect();
+    label.reset(TextField::generateLabelForAtom(m_elementSymbol, getSymbolFont(), labelAlignment(), numImplicitHydrogens(), charge()));
+    if (auto m = molecule()) m->updateTooltip();
   }
 
   void Atom::setIndex(const QString &index) {
@@ -879,7 +806,7 @@ namespace Molsketch {
     {
       QLineF edge(corners[i], corners[i+1]);
       QPointF result;
-      if (connection.intersect(edge, &result) == QLineF::BoundedIntersection)
+      if (intersectionType(connection, edge, &result) == QLineF::BoundedIntersection)
         return result;
     }
     return connection.p1();
@@ -923,7 +850,7 @@ namespace Molsketch {
     m_elementSymbol = attributes.value(ELEMENT_ATTRIBUTE).toString();
     m_index = attributes.value(ID_ATTRIBUTE).toString();
     m_newmanDiameter = qAbs(attributes.value(NEWMAN_DIAMETER_ATTRIBUTE).toDouble());
-    updateShape();
+    updateLabel();
   }
 
   void LegacyAtom::afterMoleculeReadFinalization() {

@@ -22,6 +22,7 @@
 #include <cxxtest/TestSuite.h>
 #include <settingsfacade.h>
 #include <settingsitem.h>
+#include <stringify.h>
 
 using namespace Molsketch;
 
@@ -45,15 +46,21 @@ const QString ALTERNATE_COLOR_AS_STRING("Af//AAAAAP//AAA=");
 
 const QString FONT_KEY("TestFontKey");
 const QFont FONT_VALUE("Times", 10, QFont::Bold);
-const QString FONT_AS_STRING("AAAACgBUAGkAbQBlAHP/////QCQAAAAAAAD/////BQABAEsQAAABAAAAAAAAAAAAAAAAAAA=");
+const QString FONT_AS_STRING(stringify(FONT_VALUE));
 const QFont ALTERNATE_FONT("Helvetica", 15, QFont::Cursive);
-const QString ALTERNATE_FONT_AS_STRING("AAAAEgBIAGUAbAB2AGUAdABpAGMAYf////9ALgAAAAAAAP////8FAAEABhAAAAEAAAAAAAAAAAAAAAAAAA==");
+const QString ALTERNATE_FONT_AS_STRING(stringify(ALTERNATE_FONT));
 
 const QString STRING_LIST_KEY("TestStringListKey");
 const QStringList STRING_LIST_VALUE{"testString1", "testString2"};
 const QString STRING_LIST_AS_STRING("AAAAAgAAABYAdABlAHMAdABTAHQAcgBpAG4AZwAxAAAAFgB0AGUAcwB0AFMAdAByAGkAbgBnADI=");
 const QStringList ALTERNATE_STRING_LIST{"alternate1", "Alternate2"};
 const QString ALTERNATE_STRING_LIST_AS_STRING("AAAAAgAAABQAYQBsAHQAZQByAG4AYQB0AGUAMQAAABQAQQBsAHQAZQByAG4AYQB0AGUAMg==");
+
+const QString STRING_KEY("TestStringKey");
+const QString STRING_VALUE{"testString"};
+const QString STRING_AS_STRING("testString");
+const QString ALTERNATE_STRING{"alternate"};
+const QString ALTERNATE_STRING_AS_STRING("alternate");
 
 
 template<typename T, typename SETTINGS_ITEM_TYPE, typename SIGNAL_COUNTER_TYPE>
@@ -189,6 +196,17 @@ public:
 class StringListSettingsItemUnitTest : public SettingsItemTestCase<QStringList, StringListSettingsItem, StringListSignalCounter> {
 public:
   StringListSettingsItemUnitTest() : SettingsItemTestCase(STRING_LIST_KEY, STRING_LIST_VALUE, ALTERNATE_STRING_LIST, STRING_LIST_AS_STRING, ALTERNATE_STRING_LIST_AS_STRING) {}
+  void testReading() { readValue(); }
+  void testWritingXml() { assertWritingXml(); }
+  void testReadingXml() { assertWritingXml(); }
+  void testSettingValue() { performSettingCycle(alternate); }
+  void testSettingVariant() { performSettingCycle(alternateVariant); }
+  void testSettingString() { performSettingCycle(alternateAsString); }
+};
+
+class StringSettingsItemUnitTest : public SettingsItemTestCase<QString, StringSettingsItem, StringSignalCounter> {
+public:
+  StringSettingsItemUnitTest() : SettingsItemTestCase(STRING_KEY, STRING_VALUE, ALTERNATE_STRING, STRING_AS_STRING, ALTERNATE_STRING_AS_STRING) {}
   void testReading() { readValue(); }
   void testWritingXml() { assertWritingXml(); }
   void testReadingXml() { assertWritingXml(); }

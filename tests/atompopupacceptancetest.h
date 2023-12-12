@@ -68,7 +68,7 @@ public:
     popup = new AtomPopup;
     scene = new MolScene();
     atom = new Atom;
-    Molecule *molecule = new Molecule(QSet<Atom*>() << atom, QSet<Bond*>());
+    Molecule *molecule = new Molecule(QSet<Atom*>{atom}, {});
     scene->addItem(molecule);
 
     elementEditor = popup->findChild<QLineEdit*>("element");
@@ -156,6 +156,20 @@ public:
     popup->connectAtom(atom);
     chargeBox->setValue(newCharge);
     TS_ASSERT_EQUALS(atom->charge(), newCharge);
+  }
+
+  void testHydrogenCountTransferFromCommand() {
+    int newHydrogenCount(5);
+    popup->connectAtom(atom);
+    scene->stack()->push(new Commands::setImplicitHydrogensCommand(atom, newHydrogenCount));
+    TS_ASSERT_EQUALS(hydrogenBox->value(), newHydrogenCount);
+  }
+
+  void testHydrogenCountTransferFromGui() {
+    int newHydrogenCount = 5;
+    popup->connectAtom(atom);
+    hydrogenBox->setValue(newHydrogenCount);
+    TS_ASSERT_EQUALS(atom->numImplicitHydrogens(), newHydrogenCount);
   }
 
   void testCoordinateTransferFromCommand() {
@@ -378,7 +392,7 @@ public:
   }
 
   void testElementSymbolInLonePairAndRadicalWidget() {
-
+    // TODO implement
   }
 
 // TODO when opening edit mode, selection is lost

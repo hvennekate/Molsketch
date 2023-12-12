@@ -23,22 +23,23 @@
 #include "atom.h"
 #include "bond.h"
 #include "molscene.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
-  template<class T>
+  template<class T, typename I>
   class incDecCommand : public QUndoCommand
   {
   private:
     T* t ;
     bool plus ;
-    int (T::*getFunction)()const ;
-    void (T::*setFunction)(const int&) ;
+    I (T::*getFunction)()const ;
+    void (T::*setFunction)(const I&) ;
   public:
     incDecCommand(T* a,
                   bool increment,
-                  int (T::*gf)()const,
-                  void (T::*sf)(const int&),
+                  I (T::*gf)()const,
+                  void (T::*sf)(const I&),
                   QString text,
                   QUndoCommand* parent = 0)
       : QUndoCommand(text, parent),
@@ -49,19 +50,18 @@ namespace Molsketch {
     {
     }
 
-    void redo() override
-    {
+    void redo() override {
       (t->*setFunction)((t->*getFunction)() + (plus ? 1 : -1)) ;
     }
-    void undo() override
-    {
+
+    void undo() override {
       (t->*setFunction)((t->*getFunction)() + (plus ? -1 : 1)) ;
     }
     // TODO mergeable
   };
 
-  template <class T>
-  struct incDecAction<T>::privateData
+  template <class T, typename I>
+  struct incDecAction<T, I>::privateData
   {
     privateData() :
       plusAction(0),
@@ -76,24 +76,24 @@ namespace Molsketch {
     }
     QAction *plusAction ;
     QAction *minusAction ;
-    int (T::*getFunction)() const;
-    void (T::*setFunction)(const int&) ;
+    I (T::*getFunction)() const;
+    void (T::*setFunction)(const I&) ;
   };
 
-  template <class T>
-  incDecAction<T>::incDecAction(MolScene *scene)
+  template <class T, typename I>
+  incDecAction<T, I>::incDecAction(MolScene *scene)
     : multiAction(scene),
       d(new privateData)
   {}
 
-  template <class T>
-  incDecAction<T>::~incDecAction()
+  template <class T, typename I>
+  incDecAction<T, I>::~incDecAction()
   {
     delete d ;
   }
 
-  template <class T>
-  void incDecAction<T>::mousePressEvent(QGraphicsSceneMouseEvent *event)
+  template <class T, typename I>
+  void incDecAction<T, I>::mousePressEvent(QGraphicsSceneMouseEvent *event)
   {
     if (event->button() != Qt::LeftButton || event->modifiers()) return;
     event->accept();
@@ -101,22 +101,21 @@ namespace Molsketch {
     T* t = getItem(event->buttonDownScenePos(event->button()));
     if (!t) return;
 
-    undoStack()->push(new incDecCommand<T>(t,
+    undoStack()->push(new incDecCommand<T, I>(t,
                                         activeSubAction() == d->plusAction,
                                         d->getFunction,
                                         d->setFunction,
                                         activeSubAction()->text())) ;
   }
 
-  template <class T>
-  void incDecAction<T>::initialize(QIcon UpIcon,
+  template <class T, typename I>
+  void incDecAction<T, I>::initialize(QIcon UpIcon,
                                    QIcon DownIcon,
                                    QString UpText,
                                    QString DownText,
-                                   int (T::*getFunction)()const,
-                                   void (T::*setFunction)(const int&))
+                                   I (T::*getFunction)()const,
+                                   void (T::*setFunction)(const I&))
   {
-    // TODO remove old actions
     d->clear();
     d->plusAction = new QAction(UpIcon, UpText, this) ;
     d->minusAction = new QAction(DownIcon, DownText, this) ;
@@ -127,29 +126,34 @@ namespace Molsketch {
     d->getFunction = getFunction ;
   }
 
-  template<>
-  Atom *incDecAction<Atom>::getItem(const QPointF &p)
-  {
-    return scene()->atomNear(p) ;
+  template<class T>
+  T *getItemAt(MolScene *scene, const QPointF &p) {
+    Q_UNUSED(scene)
+    Q_UNUSED(p)
+    return nullptr;
   }
 
   template<>
-  Bond *incDecAction<Bond>::getItem(const QPointF &p) {
-    return scene()->bondAt(p);
+  Atom *getItemAt(MolScene *scene, const QPointF &p) {
+    return scene->atomNear(p) ;
   }
 
-  template <class T>
-  T *incDecAction<T>::getItem(const QPointF &p)
-  {
-    return 0 ;
+  template<>
+  Bond *getItemAt(MolScene *scene, const QPointF &p) {
+    return scene->bondAt(p);
+  }
+
+  template <class T, typename I>
+  T *incDecAction<T, I>::getItem(const QPointF &p){
+    return getItemAt<T>(scene(), p);
   }
 
   chargeAction::chargeAction(MolScene *scene)
     : incDecAction(scene)
   {
     setText(tr("Charge"));
-    initialize(QIcon(":images/incCharge.svg"),
-               QIcon(":images/decCharge.svg"),
+    initialize(getInternalIcon("incCharge"),
+               getInternalIcon("decCharge"),
                tr("Increase charge"),
                tr("Decrease charge"),
                &Atom::charge,
@@ -160,23 +164,22 @@ namespace Molsketch {
     : incDecAction(scene)
   {
     setText(tr("Hydrogens"));
-    initialize(QIcon(":images/incHydrogens.svg"),
-               QIcon(":images/decHydrogens.svg"),
+    initialize(getInternalIcon("incHydrogens"),
+               getInternalIcon("decHydrogens"),
                tr("Add implicit hydrogen"),
                tr("Remove implicit hydrogen"),
                &Atom::numImplicitHydrogens,
                &Atom::setNumImplicitHydrogens);
   }
 
-  template <class T>
-
-  QAction *incDecAction<T>::decrementAction() const
+  template <class T, typename I>
+  QAction *incDecAction<T, I>::decrementAction() const
   {
     return d->minusAction;
   }
 
-  template <class T>
-  QAction *incDecAction<T>::incrementAction() const
+  template <class T, typename I>
+  QAction *incDecAction<T, I>::incrementAction() const
   {
     return d->plusAction;
   }
@@ -185,8 +188,8 @@ namespace Molsketch {
     : incDecAction(scene)
   {
     setText(tr("Drawing Level"));
-    initialize(QIcon(":images/layerup.svg"),
-               QIcon(":images/layerdown.svg"),
+    initialize(getInternalIcon("layerup"),
+               getInternalIcon("layerdown"),
                tr("Move up"),
                tr("Move down"),
                &Bond::roundedZValue,
@@ -195,6 +198,7 @@ namespace Molsketch {
 
   // instantiation
   template class incDecAction<Atom>;
+  template class incDecAction<Atom, quint8>;
   template class incDecAction<Bond>;
 
 } // namespace

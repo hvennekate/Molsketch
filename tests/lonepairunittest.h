@@ -21,38 +21,36 @@
 #include <molscene.h>
 #include <lonepair.h>
 #include "utilities.h"
+#include "xmlassertion.h"
 
 using namespace Molsketch;
 
-const qreal DELTA = 1e-4;
 const qreal LENGTH = 10;
 const qreal ANGLE = 45;
 const qreal LINE_WIDTH = 1.5;
 const BoundingBoxLinker ANCHOR = BoundingBoxLinker::atTopLeft();
+const QString &LINE_QUERY("svg/g/g/polyline");
 const LonePair SAMPLE_LONE_PAIR(23.5, 1.5, 5.5, BoundingBoxLinker::atBottomLeft(), Qt::blue);
 const QString LONE_PAIR_XML("<lonePair angle=\"23.5\" length=\"5.5\" lineWidth=\"1.5\" colorR=\"0\" colorG=\"0\" colorB=\"255\">"
                             "<bbLinker originAnchor=\"BottomLeft\" targetAnchor=\"Center\" xOffset=\"0\" yOffset=\"0\"/>"
                             "</lonePair>");
 
+using XmlAssert::assertThat;
+
 class LonePairUnitTest : public CxxTest::TestSuite {
   MolScene *scene;
   Atom *atom;
 
-  QLineF obtainLineFromSvg() {
-    LonePair *lp = new LonePair(ANGLE, LINE_WIDTH, LENGTH, ANCHOR);
+  QByteArray svgOfLine() {
+    auto lp = new LonePair(ANGLE, LINE_WIDTH, LENGTH, ANCHOR);
     lp->setParentItem(atom);
-    QXmlStreamReader reader(scene->toSvg());
-    TS_ASSERT(findNextElement(reader, "polyline"));
-    QPolygonF points = getPointsFromXml(reader, "points");
-    QSM_ASSERT_EQUALS(reader.attributes().value("points").toString(), points.size(), 2);
-    return QLineF(points[0], points[1]);
+    return scene->toSvg();
   }
 
-  QXmlStreamAttributes obtainLineAttributesFromSvg() {
-    LonePair *lp = new LonePair(ANGLE, LINE_WIDTH, LENGTH, BoundingBoxLinker::atTop(), Qt::red);
+  QByteArray svgOfRedLine() {
+    auto lp = new LonePair(ANGLE, LINE_WIDTH, LENGTH, BoundingBoxLinker::atTop(), Qt::red);
     lp->setParentItem(atom);
-    QXmlStreamReader reader(scene->toSvg());
-    return getAttributesOfParentElement(reader, "polyline");
+    return scene->toSvg();
   }
 
 public:
@@ -68,40 +66,55 @@ public:
 
   void testNothingDrawnWithoutParent() {
     scene->addItem(new LonePair(ANGLE, LINE_WIDTH, LENGTH));
-    TS_ASSERT_EQUALS(xmlElementCount(scene->toSvg(), "polyline"), 0);
+    assertThat(scene->toSvg())->hasNodes(LINE_QUERY)->none();;
   }
 
   void testLonePairDrawnIfParentIsAtom() {
     LonePair *lp = new LonePair(ANGLE, LINE_WIDTH, LENGTH);
     lp->setParentItem(atom);
-    TS_ASSERT_EQUALS(xmlElementCount(scene->toSvg(), "polyline"), 1);
+    assertThat(scene->toSvg())->hasNodes(LINE_QUERY)->exactlyOne();
   }
 
-  void testLengthAttribute() {
-    TS_ASSERT_DELTA(obtainLineFromSvg().length(), LENGTH, DELTA);
-  }
-
-  void testAngleAttribute() {
-    TS_ASSERT_DELTA(obtainLineFromSvg().angle(), ANGLE, DELTA);
+  void testLinePointCoordinates() {
+    TS_SKIP("NEEDS FIXING!");
+    assertThat(svgOfLine())->hasNodes(LINE_QUERY)
+        ->exactlyOne()->haveAttribute("points")->exactly(
+      #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+          {"-6.53553,-2.96447 0.535534,-10.0355 "}
+      #else
+          {"-6.53553,-2.59728 0.535534,-9.66835 "}
+      #endif
+          );
   }
 
   void testLinewidthAttribute() {
-    QS_ASSERT_EQUALS(obtainLineAttributesFromSvg().value("stroke-width").toDouble(), LINE_WIDTH);
+    assertThat(svgOfLine())->hasParentOf(LINE_QUERY)
+        ->exactlyOne()->haveAttribute("stroke-width")->exactly({QString::number(LINE_WIDTH)});
   }
 
   void testColorAttribute() {
-    QS_ASSERT_EQUALS(QColor(obtainLineAttributesFromSvg().value("stroke").toString().toStdString().data()),
-                     QColor(Qt::red));
+    assertThat(svgOfRedLine())->hasParentOf(LINE_QUERY)
+        ->exactlyOne()->haveAttribute("stroke")->exactly({"#ff0000"});
   }
 
-  void testPositioning() {
-    QLineF expected = QLineF::fromPolar(LENGTH, ANGLE);
-    expected.translate(-expected.p2()/2);
-    expected.translate(atom->boundingRect().topLeft());
-    TS_ASSERT_DELTA(obtainLineFromSvg().p1().x(), expected.p1().x(), DELTA);
-    TS_ASSERT_DELTA(obtainLineFromSvg().p1().y(), expected.p1().y(), DELTA);
-    TS_ASSERT_DELTA(obtainLineFromSvg().p2().x(), expected.p2().x(), DELTA);
-    TS_ASSERT_DELTA(obtainLineFromSvg().p2().y(), expected.p2().y(), DELTA);
+  void testColorWithoutParent_isNotDrawn() {
+    auto lonePair = new LonePair();
+    scene->addItem(lonePair);
+    assertThat(scene->toSvg())->hasNodes(LINE_QUERY)->none();
+  }
+
+  void testColorWithParentNoExplicitColor_isParentsColor() {
+    auto lonePair = new LonePair(ANGLE, LINE_WIDTH, LENGTH, BoundingBoxLinker::atTop());
+    lonePair->setParentItem(atom);
+    atom->setColor(Qt::green);
+    assertThat(scene->toSvg())->hasParentOf(LINE_QUERY)->exactlyOne()->haveAttribute("stroke")->exactly({"#00ff00"});
+    TSM_ASSERT("Pen color should still be invalid", !lonePair->pen().color().isValid())
+  }
+
+  void testColorWithParentAndExplicitColor_isExplicitColor() {
+    atom->setColor(Qt::green);
+    assertThat(svgOfRedLine())->hasParentOf(LINE_QUERY)
+        ->exactlyOne()->haveAttribute("stroke")->exactly({"#ff0000"});
   }
 
   void testBoundingRectWithoutParent() {

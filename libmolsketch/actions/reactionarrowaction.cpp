@@ -20,6 +20,7 @@
 #include "arrow.h"
 #include "molscene.h"
 #include "commands.h"
+#include "iconutils.h"
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 
@@ -29,7 +30,7 @@ namespace Molsketch {
   {
   public:
     privateData(QObject* parent)
-#define ARROWACTION(NAME,DESCRIPTION,ICON) NAME(new QAction(QIcon(":images/" ICON ".svg"), tr(DESCRIPTION), parent))
+#define ARROWACTION(NAME,DESCRIPTION,ICON) NAME(new QAction(getInternalIcon(ICON), tr(DESCRIPTION), parent))
       : ARROWACTION(normalArrow, "Single arrow", "simplearrow"),
         ARROWACTION(doubleArrow, "Double arrow", "doublearrow"),
         ARROWACTION(hookArrow, "Half arrow", "halfarrow"),
@@ -94,8 +95,7 @@ namespace Molsketch {
   void reactionArrowAction::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
   {
     if (!d->currentArrow) return ;
-    if (!scene() || !scene()->stack()) return ; // TODO
-    Commands::ItemAction::addItemToScene(d->currentArrow, scene(), tr("draw arrow")) ; // TODO this might be problematic: the code assumes that an item will be added to the scene regardless -- right now we're just not doing anything in that case.
+    Commands::ItemAction::addItemToScene(d->currentArrow, scene(), tr("draw arrow")) ;
     d->currentArrow = 0 ;
     event->accept();
   }

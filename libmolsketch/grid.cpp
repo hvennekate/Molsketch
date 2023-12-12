@@ -21,11 +21,7 @@
 #include "settingsitem.h"
 #include <QGraphicsScene>
 #include <QPainter>
-#if QT_VERSION >= 0x050000
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include <QDebug>
 
 namespace Molsketch {
@@ -39,7 +35,7 @@ namespace Molsketch {
   Grid::Grid(SceneSettings *settings)
     : d(new privateData) {
     setZValue(-INFINITY);
-    setFlags(0);
+    setFlags(GraphicsItemFlags());
     d->settings = settings;
   }
 

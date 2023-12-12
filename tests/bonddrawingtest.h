@@ -25,15 +25,13 @@
 #include <molecule.h>
 #include <QSet>
 #include <QDebug>
-#include <QXmlQuery>
-#include <QXmlResultItems>
 #include "xmlassertion.h"
 #include <scenesettings.h>
 #include <settingsitem.h>
 
 using namespace Molsketch;
 
-const char QUERY_LINE_COORDS[] = "//*:path/@d/data(.)";
+const char QUERY_LINE_COORDS[] = "svg/g/g/path";
 
 class BondDrawingTest : public CxxTest::TestSuite {
   MolScene *scene;
@@ -42,8 +40,12 @@ class BondDrawingTest : public CxxTest::TestSuite {
   Molecule *m;
 
   void assertLineCoords(const QString& value) {
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)->exactlyOnceWithContent(value);
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")->exactly({value});
   }
+
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+#define MSK_QT5
+#endif
 
 public:
   void setUp() {
@@ -62,42 +64,50 @@ public:
 
   void testDrawingDownFromAtom() { // TODO these tests could go into a data provider
     a2->setCoordinates(QPolygonF() << QPointF(0,50));
-    assertLineCoords("M0,7.33333 L0,42.6667");
+#ifdef MSK_QT5
+    assertLineCoords("M0,9.33333 L0,40.6667");
+#else
+    assertLineCoords("M0,8.82552 L0,41.1745");
+#endif
   }
 
   void testDrawingRightFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(50,0));
-    assertLineCoords("M4.29427,0 L45.7057,0");
+    assertLineCoords("M4.83333,0 L45.1667,0");
   }
 
   void testDrawingUpFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(0,-50));
-    assertLineCoords("M0,-7.33333 L0,-42.6667");
+#ifdef MSK_QT5
+    assertLineCoords("M0,-9.33333 L0,-40.6667");
+#else
+    assertLineCoords("M0,-8.82552 L0,-41.1745");
+#endif
   }
 
   void testDrawingLeftFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(-50,0));
-    assertLineCoords("M-4.29427,0 L-45.7057,0");
+    assertLineCoords("M-4.83333,0 L-45.1667,0");
   }
 
   void testDrawingUpLeftFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(-20,-30));
-    assertLineCoords("M-4.29427,-6.44141 L-15.7057,-23.5586");
+    assertLineCoords("M-4.83333,-7.25 L-15.1667,-22.75");
   }
 
   void testDrawingUpRightFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(20,-30));
-    assertLineCoords("M4.29427,-6.44141 L15.7057,-23.5586");
+    assertLineCoords("M4.83333,-7.25 L15.1667,-22.75");
   }
 
   void testDrawingDownLeftFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(-20,30));
-    assertLineCoords("M-4.29427,6.44141 L-15.7057,23.5586");
+    assertLineCoords("M-4.83333,7.25 L-15.1667,22.75");
   }
 
   void testDrawingDownRightFromAtom() {
     a2->setCoordinates(QPolygonF() << QPointF(20,30));
-    assertLineCoords("M4.29427,6.44141 L15.7057,23.5586");
+    assertLineCoords("M4.83333,7.25 L15.1667,22.75");
   }
 
   void testDrawingFromUndrawnAtoms() {
@@ -111,7 +121,7 @@ public:
   void testDrawingFromNewmanAtom() {
     a1->setNewmanDiameter(6);
     a2->setCoordinates(QPolygonF() << QPointF(50,50));
-    assertLineCoords("M2.82843,2.82843 L45.7057,45.7057");
+    assertLineCoords("M2.82843,2.82843 L45.1667,45.1667");
   }
 
   void testDrawingFromNewmanAtomIfCarbon() {
@@ -121,19 +131,19 @@ public:
     a1->setElement("C");
     m->addAtom(a3);
     m->addBond(a1, a3);
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)
-        ->inAnyOrderWithValues({"M2.82843,2.82843 L45.7057,45.7057", "M-2.32495,-3.25493 L-46.1432,-64.6005"});
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")
+        ->exactlyInAnyOrder({"M2.82843,2.82843 L45.1667,45.1667", "M-2.32495,-3.25493 L-45.1667,-63.2333"});
   }
 
   void testDrawingSecondAtomInOriginBond() {
     a1->setCoordinates(QPolygonF() << QPointF(20,30));
-    assertLineCoords("M15.7057,23.5586 L4.29427,6.44141");
+    assertLineCoords("M15.1667,22.75 L4.83333,7.25");
   }
 
   void testDrawingNonOriginBasedBond() {
     a1->setCoordinates(QPolygonF() << QPointF(20,30));
     a2->setCoordinates(QPolygonF() << QPointF(-5,17));
-    assertLineCoords("M15.7057,27.767 L-0.705729,19.233");
+    assertLineCoords("M15.1667,27.4867 L-0.166667,19.5133");
   }
 
   void testBondNotDrawnIfOverlapsWithNewmanAtom() {
@@ -143,7 +153,7 @@ public:
     m->addAtom(a3);
     m->addBond(a2, a3, Bond::Invalid);
     a2->setCoordinates(QPolygonF() << QPointF(1,1));
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)->exactlyOnceWithContent(""); // TODO ->never();
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")->exactly({""});
   }
 
   void testBondNotDrawnIfOverlapsWithNewmanAtomReverse() {
@@ -153,6 +163,6 @@ public:
     m->addAtom(a3);
     m->addBond(a1, a3, Bond::Invalid);
     a1->setCoordinates(QPolygonF() << QPointF(1,1));
-    XmlAssertion::assertThat(scene->toSvg())->contains(QUERY_LINE_COORDS)->exactlyOnceWithContent(""); // TODO->never();
+    XmlAssertion::assertThat(scene->toSvg())->hasNodes(QUERY_LINE_COORDS)->haveAttribute("d")->exactly({""});
   }
 };

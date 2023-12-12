@@ -31,9 +31,10 @@ namespace Molsketch {
     SettingsFacade *facade;
     QString key;
     bool locked;
+    QVariant defaultValue;
   };
 
-  SettingsItem::SettingsItem(const QString& key, SettingsFacade *facade, QObject *parent)
+  SettingsItem::SettingsItem(const QString& key, SettingsFacade *facade, QObject *parent, const QVariant &defaultValue)
     : QObject(parent),
       d_ptr(new SettingsItemPrivate)
   {
@@ -41,6 +42,7 @@ namespace Molsketch {
     d->facade = facade;
     d->key = key;
     d->locked = false;
+    d->defaultValue = defaultValue;
   }
 
   SettingsItem::~SettingsItem() {}
@@ -243,6 +245,34 @@ namespace Molsketch {
 
   QUndoStack *SettingsItemUndoCommand::getStack() {
     return stack;
+  }
+
+  StringSettingsItem::StringSettingsItem(const QString &key, SettingsFacade *facade, QObject *parent, const QVariant &defaultValue)
+    : SettingsItem(key, facade, parent, defaultValue) {}
+
+  QString StringSettingsItem::serialize() const {
+    return get();
+  }
+
+  QVariant StringSettingsItem::getVariant() const {
+    return d_ptr->facade->value(d_ptr->key, d_ptr->defaultValue); // TODO extend others with default value as well
+  }
+
+  QString StringSettingsItem::get() const {
+    return getVariant().toString();
+  }
+
+  void StringSettingsItem::set(const QVariant &value) {
+    if (d_ptr->locked) return;
+    d_ptr->locked = true;
+    qInfo() << "Setting" << d_ptr->key << "to new value" << value;
+    d_ptr->facade->setValue(d_ptr->key, value);
+    emit updated(get());
+    d_ptr->locked = false;
+  }
+
+  void StringSettingsItem::set(const QString &value) {
+    set(QVariant(value));
   }
 
 #ifdef QT_DEBUG

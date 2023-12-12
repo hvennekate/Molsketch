@@ -37,9 +37,9 @@ public:
   ~OBabelIfaceLoader();
   QStringList inputFormats();
   QStringList outputFormats();
-  Molsketch::Molecule* loadFile(const QString& filename);
-  Molsketch::Molecule* callOsra(const QString filename);
-  bool saveFile(const QString& fileName, QGraphicsScene* scene, bool use3d);
+  Molsketch::Molecule* loadFile(std::istream *input, const std::string &filename, qreal scaling = 1);
+  Molsketch::Molecule* callOsra(const QString& filename, qreal scaling = 1);
+  bool saveFile(std::ostream *output, const std::string &filename, const QList<Molsketch::Molecule *> &molecules, bool use3d, bool addHydrogens, qreal scaling);
   Molsketch::Molecule* convertInChI(const QString& InChI);
   QVector<QPointF> optimizeCoordinates(const Molsketch::Molecule* molecule);
 

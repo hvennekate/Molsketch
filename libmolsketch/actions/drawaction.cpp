@@ -26,11 +26,7 @@
 #include <QDockWidget>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsItemGroup>
-#if QT_VERSION >= 0x050000
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include <QMainWindow>
 #include "periodictablewidget.h"
 #include "bondtypewidget.h"
@@ -42,7 +38,6 @@
 #include "scenesettings.h"
 #include "settingsitem.h"
 
-// TODO snap to help points
 namespace Molsketch {
 
   class drawAction::privateData
@@ -118,9 +113,12 @@ namespace Molsketch {
       Atom* atom = parent->scene()->atomAt(position);
       if (atom)
         parent->attemptUndoPush(new Commands::ChangeElement(atom, periodicTable->currentElement(), tr("change element")));
-      else
-        Commands::ItemAction::addItemToScene(new Molecule(QSet<Atom*>() << new Atom(position, periodicTable->currentElement(), parent->scene()->settings()->autoAddHydrogen()->get()), QSet<Bond*>()),
+      else {
+        auto newAtom = new Atom(position, periodicTable->currentElement(), parent->scene()->settings()->autoAddHydrogen()->get());
+        newAtom->setColor(parent->scene()->settings()->defaultColor()->get());
+        Commands::ItemAction::addItemToScene(new Molecule(QSet<Atom*>{ newAtom }, {}),
                                   parent->scene(), tr("add atom"));
+      }
     }
 
     void performDiatomicAction(const QPointF& posA, const QPointF& posB)
@@ -134,7 +132,9 @@ namespace Molsketch {
     {
       Atom* atom = parent->scene()->atomAt(pos);
       if (atom) return atom;
-      return new Atom(pos, periodicTable->currentElement(), parent->scene()->settings()->autoAddHydrogen()->get());
+      atom = new Atom(pos, periodicTable->currentElement(), parent->scene()->settings()->autoAddHydrogen()->get());
+      atom->setColor(parent->scene()->settings()->defaultColor()->get());
+      return atom;
     }
 
     void setOrReplaceBond(Atom* atomA, Atom* atomB)
@@ -193,7 +193,9 @@ namespace Molsketch {
     void addBond(Atom* atomA, Atom* atomB)
     {
       if (bondType->backward()) qSwap(atomA, atomB);
-      Commands::addItemToMolecule(new Bond(atomA, atomB, bondType->bondType()), atomA->molecule(), parent->scene());
+      auto newBond = new Bond(atomA, atomB, bondType->bondType());
+      newBond->setColor(parent->scene()->settings()->defaultColor()->get());
+      Commands::addItemToMolecule(newBond, atomA->molecule(), parent->scene());
       // TODO test
     }
   };
@@ -202,9 +204,7 @@ namespace Molsketch {
     : genericAction(scene),
       d(new privateData(this))
   {
-    d->dock = new QWidget(parentWidget()) ; // TODO turn this into a dock widget again
-//    d->dock->setWidget(new QWidget(d->dock));
-//    d->dock->widget()->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    d->dock = new QWidget(qobject_cast<QWidget*>(parent())) ;
     QVBoxLayout *layout = new QVBoxLayout(d->dock) ;
     layout->setAlignment(Qt::AlignLeft | Qt::AlignTop) ;
     d->periodicTable = new periodicTableWidget(d->dock) ;
@@ -219,9 +219,7 @@ namespace Molsketch {
             this, SLOT(toggleVisibility(bool)));
     connect(d->bondType, SIGNAL(currentTypeChanged(int)),
             this, SLOT(refreshIcon()));
-    refreshIcon(); // TODO
-//    if (parentWidget())
-//      qobject_cast<QMainWindow*>(parentWidget())->addDockWidget(Qt::LeftDockWidgetArea, d->dock);
+    refreshIcon();
     d->dock->setWindowFlags(Qt::Tool);
     d->dock->setWindowTitle(tr("Draw mode"));
     d->dock->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed); // TODO minimize size
@@ -362,9 +360,11 @@ namespace Molsketch {
       if (new_atom_pos != downPos) {
         stack->beginMacro("Add Bond");
         Atom* atom = new Atom(new_atom_pos,d->periodicTable->currentElement(), scene()->settings()->autoAddHydrogen()->get());
+        atom->setColor(scene()->settings()->defaultColor()->get());
         Commands::addItemToMolecule(atom, at1->molecule(), scene());
         if (d->bondType->backward()) qSwap(at1, atom);
         Bond* bond = new Bond(at1, atom, d->bondType->bondType());
+        bond->setColor(scene()->settings()->defaultColor()->get());
         Commands::addItemToMolecule(bond, at1->molecule(), scene());
         stack->endMacro();
       }

@@ -24,15 +24,16 @@
 
 #include <QList>
 
-#include "atomlabelrenderer.h"
 #include "graphicsitem.h"
 #include "sumformula.h"
 #include "alignment.h"
+#include "neighboralignment.h"
 
 namespace Molsketch {
 
   class Bond;
   class Molecule;
+  class TextField;
 
   /// Atom class
   class Atom : public graphicsItem
@@ -43,6 +44,8 @@ namespace Molsketch {
     enum { Type = AtomType };
     int type() const override { return Type; }
 
+    enum ShapeType { Rectangle = 0, Circle = 1 };
+
     /**
        * Creates a new atom.
        *
@@ -51,12 +54,11 @@ namespace Molsketch {
        * @param invisible makes the atom invisible if @c true
        */
     Atom(const QPointF & position = QPointF(), const QString & element = QString(),
-         bool implicitHydrogens = true, QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER ) ;
-    Atom(const Atom& other GRAPHICSSCENEHEADER);
+         bool implicitHydrogens = true, QGraphicsItem* parent = 0) ;
+    Atom(const Atom& other);
     ~Atom() ;
     virtual QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    qreal annotationDirection() const ;
 
     bool isDrawn() const;
     void setCoordinates(const QVector<QPointF> &c) override;
@@ -65,8 +67,12 @@ namespace Molsketch {
     void setMolecule(Molecule *molecule);
     QString element() const;
     void setElement(const QString & element);
+    ShapeType shapeType() const;
+    void setShapeType(const ShapeType& shapeType);
     void setNewmanDiameter(const qreal& diameter);
     qreal getNewmanDiameter() const;
+    void setHAlignment(const Molsketch::NeighborAlignment &);
+    Molsketch::NeighborAlignment hAlignment() const;
     void disableNewman();
     SumFormula sumFormula() const;
     /** Returns the charge of the atom.
@@ -77,31 +83,16 @@ namespace Molsketch {
       * FC = # valency electrons - 0.5 * # shared electrons - # unpaired electrons + user specified contribution
       */
     void setCharge(const int &charge);
-    /**
-       * @return The number of unpaired electrons (radicals).
-       */
-    int numUnpairedElectrons() const
-    {
-      return m_userElectrons;
-    }
     void setNumUnpairedElectrons(int n) // TODO this seems unused
     {
       m_userElectrons = n;
     }
 
-    /// Returns the string for the superscript charge (e.g. "3-", "2-", "-", "", "+", "2+", ...).
-    QString chargeString() const;
-
-
-    bool hasLabel() const;
-    QString string ()const;
-
-
     int numBonds() const;
     int bondOrderSum() const;
     /// Get the number of non-bonding electrons (e.g. 4 for O=, 2 for NH3, 1 for radicals).
     int numNonBondingElectrons() const;
-    int numImplicitHydrogens() const;
+    quint8 numImplicitHydrogens() const;
 
     QList<Bond*> bonds() const;
     QList<Atom*> neighbours() const;
@@ -109,20 +100,19 @@ namespace Molsketch {
       * Changing the number of implicit hydrogens will also effect the number
       * of free valency electrons and hence the charge of the atom.
       */
-    void setNumImplicitHydrogens(const int &number);
+    void setNumImplicitHydrogens(const quint8 &number);
 
     QString xmlName() const override;
     static QString xmlClassName();
     Molsketch::Alignment labelAlignment() const;
     Bond *bondTo(Atom *other) const;
     QWidget* getPropertiesWidget() override;
-    void propertiesWidgetDestroyed();
     QPointF bondDrawingStart(const Atom *other, qreal bondLineWidth) const;
     bool contains(const QPointF &point) const override;
     QPolygonF moveablePoints() const override;
 
-    void updateShape();
-    void setIndex(const QString& index);
+    void updateLabel();
+    void setIndex(const QString& index); // TODO this should be the responsibility of the molecule
     QString index() const;
     qreal getBondExtent(const QLineF &outer1, const QLineF &outer2, qreal lineWidth) const;
     virtual void afterMoleculeReadFinalization() {}
@@ -139,7 +129,8 @@ namespace Molsketch {
     XmlObjectInterface* produceChild(const QString &name, const QXmlStreamAttributes &attributes) override;
 
   private:
-    AtomLabelRenderer renderer;
+    QScopedPointer<TextField> label;
+    Alignment autoLabelAlignment() const;
 
     void initialize(const QPointF & position,
                     const QString & element,
@@ -150,22 +141,19 @@ namespace Molsketch {
     int m_userElectrons;
     qreal m_newmanDiameter;
     QString m_index;
+    ShapeType m_shapeType;
+    NeighborAlignment hydrogenAlignment;
 
     int m_userImplicitHydrogens;
     bool m_implicitHydrogens;
-    QRectF m_shape;
     QRectF computeBoundingRect();
     QFont getSymbolFont() const;
-    QFont getSubscriptFont(const QFont &symbolFont) const;
-    QPair<QFont, QFont> getFonts() const;
-    QString composeLabel(bool leftAligned) const;
     void drawElectrons(QPainter* painter);
-    void drawCharge(QPainter* painter);
     void renderColoredSquare(QPainter* painter);
     void renderColoredCircle(QPainter* painter);
     void renderColoredShape(QPainter *painter, void (QPainter::*drawMethod)(int, int, int, int));
     void drawSelectionHighlight(QPainter* painter);
-    QString getLabelWithHydrogens();
+    qreal radiusForCircularShape() const;
     void drawNewman(QPainter *painter);
     QPointF getBondDrawingStartFromBoundingBox(const QLineF &connection, qreal bondLineWidth) const;
     bool showHoverPoint() const override { return false; }

@@ -33,9 +33,8 @@ namespace Molsketch {
     bool hovering;
   };
 
-  TextItem::TextItem(GRAPHICSSCENESOURCE)
-    : QGraphicsTextItem(GRAPHICSSCENEINIT),
-      d(new privateData)
+  TextItem::TextItem()
+    : d(new privateData)
   {
     d->initialFill = true;
     d->hovering = false;

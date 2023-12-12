@@ -27,17 +27,15 @@ namespace Molsketch {
   class ElementSymbol : public QString {
   public:
     ElementSymbol(const QString& other) : QString(other) {}
+    bool operator<(const ElementSymbol &other) const {
+      if (*this == other) return false;
+      if (*this == "C") return true;
+      if (other == "C") return false;
+      if (*this == "H") return true;
+      if (other == "H") return false;
+      return (QString) *this < (QString) other; // TODO test
+    }
   };
-}
-
-template<>
-bool qMapLessThanKey<Molsketch::ElementSymbol>(const Molsketch::ElementSymbol &a, const Molsketch::ElementSymbol &b) {
-  if (a == b) return false;
-  if (a == "C") return true;
-  if (b == "C") return false;
-  if (a == "H") return true;
-  if (b == "H") return false;
-  return a < b;
 }
 
 namespace Molsketch {

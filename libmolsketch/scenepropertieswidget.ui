@@ -10,6 +10,9 @@
     <height>315</height>
    </rect>
   </property>
+  <property name="windowTitle">
+   <string>Drawing Properties</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>0</number>
@@ -36,8 +39,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>265</width>
-        <height>128</height>
+        <width>259</width>
+        <height>158</height>
        </rect>
       </property>
       <attribute name="label">
@@ -95,8 +98,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>279</width>
-        <height>126</height>
+        <width>311</width>
+        <height>71</height>
        </rect>
       </property>
       <attribute name="label">
@@ -130,8 +133,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>265</width>
-        <height>128</height>
+        <width>259</width>
+        <height>158</height>
        </rect>
       </property>
       <attribute name="label">
@@ -200,7 +203,7 @@
         <x>0</x>
         <y>0</y>
         <width>279</width>
-        <height>126</height>
+        <height>91</height>
        </rect>
       </property>
       <attribute name="label">
@@ -238,8 +241,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>279</width>
-        <height>126</height>
+        <width>347</width>
+        <height>96</height>
        </rect>
       </property>
       <attribute name="label">
@@ -301,8 +304,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>279</width>
-        <height>126</height>
+        <width>259</width>
+        <height>160</height>
        </rect>
       </property>
       <attribute name="label">
@@ -374,8 +377,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>279</width>
-        <height>126</height>
+        <width>259</width>
+        <height>120</height>
        </rect>
       </property>
       <attribute name="label">

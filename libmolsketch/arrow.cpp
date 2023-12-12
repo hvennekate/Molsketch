@@ -442,11 +442,4 @@ namespace Molsketch {
     d->spline = value;
   }
 
-
-  // TODO (maybe) highlight points if covered by other bounding rect (probably in scene class)
-  // TODO shift responsibility for move to item level, remove move tool
-  // TODO move as whole
-  // TODO funny when moved while other tool active
-  // TODO funny when first or last point moved
-  // TODO change arrow tip, coords -> undo
 } // namespace

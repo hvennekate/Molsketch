@@ -50,9 +50,7 @@ namespace Molsketch {
     setStyleSheet("");
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
-#if QT_VERSION >= 0x040300
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#endif
   }
 
   MolView::~MolView() {}
@@ -73,7 +71,7 @@ namespace Molsketch {
   }
 
   void MolView::zoomReset() {
-    resetMatrix();
+    resetTransform();
   }
 
   void MolView::zoomFit() {
@@ -82,7 +80,7 @@ namespace Molsketch {
   }
 
   void MolView::scaleView(qreal scaleFactor) {
-    qreal factor = matrix().scale(scaleFactor, scaleFactor).mapRect(QRect(0,0,1,1)).width();
+    qreal factor = transform().scale(scaleFactor, scaleFactor).mapRect(QRect(0,0,1,1)).width();
     if (factor < 0.07 || factor > 100) return;
     scale(scaleFactor, scaleFactor);
   }

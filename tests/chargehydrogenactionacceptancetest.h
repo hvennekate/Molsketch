@@ -52,21 +52,21 @@ class ChargeHydrogenActionAcceptanceTest : public CxxTest::TestSuite {
     delete scene;
   }
 
-  template<class T, int (Atom::*getter)() const>
-  void performIncrementActionTest(int initialCount) {
+  template<class T, class VALUE, VALUE (Atom::*getter)() const>
+  void performIncrementActionTest(VALUE initialCount) {
     Atom *atom = new Atom;
     Molecule *molecule = new Molecule(QSet<Atom*>() << atom, QSet<Bond*>());
 
-    performIncrementActionTest<T, Atom, int, getter>(molecule, atom, atom->pos(), initialCount);
+    performIncrementActionTest<T, Atom, VALUE, getter>(molecule, atom, atom->pos(), initialCount);
   }
 
 public:
   void testChargeIncreasedWithAction() {
-    performIncrementActionTest<hydrogenAction, &Atom::numImplicitHydrogens>(0);
+    performIncrementActionTest<hydrogenAction, quint8, &Atom::numImplicitHydrogens>(0);
   }
 
   void testHydrogenCountIncreasedWithAction() {
-    performIncrementActionTest<chargeAction, &Atom::charge>(0);
+    performIncrementActionTest<chargeAction, int, &Atom::charge>(0);
   }
 
   void testZLevelIncreasedWithAction() {

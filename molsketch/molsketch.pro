@@ -5,9 +5,12 @@ HEADERS += $$files(*.h, true)
 SOURCES += $$files(*.cpp, true)
 FORMS += $$files(*.ui, true)
 RESOURCES += $$files(*.qrc, true)
+TRANSLATIONS += $$files(*.ts, true)
+RC_ICONS = images/molsketch.ico
 
-LIBS += -L../lib -lmolsketch$$qtVersionSuffix
-TARGET = molsketch$$qtVersionSuffix
+CONFIG += lrelease embed_translations
+LIBS += -L../lib -lmolsketch
+TARGET = molsketch
 DESTDIR = ../bin
 QMAKE_RPATHDIR = $${MSK_INSTALL_LIBS}
 target.path=$${MSK_INSTALL_BINS}

@@ -25,6 +25,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <molecule.h>
+#include <QRegularExpression>
 #include "scenesettings.h"
 #include "settingsitem.h"
 
@@ -63,13 +64,16 @@ public:
   void reset() { setCurrentCoordinate(QPointF()); }
   QPointF getCurrentCoordinate() const { return currentCoordinate; }
   void setCurrentCoordinate(const QPointF &value) { currentCoordinate = value; }
-  void parse(const QStringList& l)
+  void parse(QStringList l)
   {
-    if (l.size() != 9)
+    if (l.size() > 9)
     {
       qDebug() << "coordinateParser: invalid number of strings to parse: " + QString::number(l.size());
       return;
     }
+
+    while (l.size() < 9) l << "";
+
     QPointF coord(l[1].toDouble() + relativeX * l[2].toDouble() + fontX * l[3].toDouble() + lineWidth * l[4].toDouble(),
         l[5].toDouble() + relativeY * l[6].toDouble() + fontY * l[7].toDouble() + lineWidth * l[8].toDouble());
     if ("+" == l[0]) currentCoordinate += coord;
@@ -80,10 +84,10 @@ public:
 class PathSegmentParser
 {
 private:
-  QRegExp re;
+  QRegularExpression re;
 protected:
-  virtual void process(QPainterPath& path, CoordinateParser& parser) = 0;
-  const QRegExp& regExp() const { return re; }
+  virtual void process(QPainterPath& path, CoordinateParser& parser, const QRegularExpressionMatch &match) = 0;
+  const QRegularExpression& regExp() const { return re; }
 public:
   PathSegmentParser(const QString& re)
     : re(re)
@@ -91,14 +95,11 @@ public:
   virtual ~PathSegmentParser() {}
   bool processed(QPainterPath& path, const QString& segment, int& index, CoordinateParser& parser)
   {
-    if (!match(segment, index)) return false;
-    index += re.matchedLength();
-    process(path, parser);
+    auto match = re.match(segment, index);
+    if (match.capturedStart() != index) return false;
+    index = match.capturedEnd();
+    process(path, parser, match);
     return true;
-  }
-  bool match(const QString& segment, const int& index) const
-  {
-    return re.indexIn(segment, index) == index;
   }
   static QString coordinateRegExp()
   {
@@ -111,9 +112,9 @@ public:
 template <void (QPainterPath::*fp)(const QPointF&)>
 class SinglePointSegment : public PathSegmentParser
 {
-  void process(QPainterPath &path, CoordinateParser &parser) override
+  void process(QPainterPath &path, CoordinateParser &parser, const QRegularExpressionMatch &match) override
   {
-    parser.parse(regExp().capturedTexts().mid(1));
+    parser.parse(match.capturedTexts().mid(1));
     (path.*fp)(parser.getCurrentCoordinate());
   }
 public:
@@ -122,10 +123,10 @@ public:
 
 class SilentMoveSegment : public PathSegmentParser
 {
-  void process(QPainterPath &path, CoordinateParser &parser) override
+  void process(QPainterPath &path, CoordinateParser &parser, const QRegularExpressionMatch &match) override
   {
     Q_UNUSED(path)
-    parser.parse(regExp().capturedTexts().mid(1));
+    parser.parse(match.capturedTexts().mid(1));
   }
 public:
   SilentMoveSegment() : PathSegmentParser("\\$" + coordinateRegExp()) {}
@@ -133,11 +134,11 @@ public:
 
 class QuadToSegment : public PathSegmentParser
 {
-  void process(QPainterPath &path, CoordinateParser &parser) override
+  void process(QPainterPath &path, CoordinateParser &parser, const QRegularExpressionMatch &match) override
   {
-    parser.parse(regExp().capturedTexts().mid(1,9));
+    parser.parse(match.capturedTexts().mid(1,9));
     QPointF point1(parser.getCurrentCoordinate());
-    parser.parse(regExp().capturedTexts().mid(10));
+    parser.parse(match.capturedTexts().mid(10));
     path.quadTo(point1, parser.getCurrentCoordinate());
   }
 public:
@@ -185,7 +186,7 @@ namespace Molsketch {
             lineWidth);
 
       auto purePath = framePathCode;
-      purePath.remove(QRegExp("\\s+"));
+      purePath.remove(QRegularExpression("\\s+"));
 
       QPainterPath painterPath;
       int currentIndex = 0;
@@ -208,11 +209,7 @@ namespace Molsketch {
       d(new privateData(this))
   {
     // TODO is this even necessary?
-#if QT_VERSION < 0x050000
-    setAcceptsHoverEvents(true);
-#else
     setAcceptHoverEvents(true) ;
-#endif
     setZValue(10);
   }
 
@@ -377,7 +374,7 @@ namespace Molsketch {
     QList<const XmlObjectInterface*> list;
     for (auto child : childItems())
       list << dynamic_cast<graphicsItem*>(child);
-    list.removeAll(0);
+    list.removeAll(nullptr);
     return list;
   }
 

@@ -1,0 +1,114 @@
+def obabeldir = '/opt/openbabel-3.1.1-static';
+def mingwdir = '/usr/i686-w64-mingw32/sys-root/mingw/bin'
+
+pipeline {
+  agent any
+  // TODO determine version and check it does not yet exist
+  // TODO push tag to github
+
+  stages {
+    stage('Clean') {
+      steps {
+        cleanWs()
+        dir('sources') {
+          git branch: 'main', credentialsId: 'github', url: 'git@github.com:hvennekate/Molsketch.git'
+        }
+      }
+    }
+    stage('version') {
+      steps {
+        dir('sources') {
+          script {
+            env.msk_version = readFile 'version'
+            env.msk_version -= '\n'
+            env.msk_version_nick = readFile 'versionnick'
+            env.msk_version_nick -= '\n'
+          }
+          echo "Build version:  ${env.msk_version_nick} ${env.msk_version}"
+        }
+      }
+    }
+    stage('build') {
+      steps {
+        dir('winbuild') { // TODO make Qt version configurable
+          sh '''
+            /opt/Qt6/6.4.3/windows-static/bin/qmake \
+            CONFIG-=debug CONFIG+=release \
+            DEFINES+=THIRD_PARTY_LICENSES \
+            OB_LIBRARY_DIRS+=/opt/openbabel-3.1.1-static/lib/ \
+            OB_INCLUDE_DIRS+=/opt/openbabel-3.1.1-static/include/openbabel3 \
+            QMAKE_LFLAGS+=-static \
+            ../sources/Molsketch.pro
+          '''
+          sh 'make -j 8'
+        }
+      }
+      post {
+        success {
+          archiveArtifacts artifacts: 'winbuild/bin/molsketch.exe, winbuild/lib/obabeliface.dll', followSymlinks: false
+        }
+      }
+    }
+    stage('dependencies') {
+      steps {
+        dir('sources/wininstaller/packages/org.molsketch/data') {
+          unarchive mapping: ['winbuild/bin/molsketch.exe': 'molsketch.exe']
+        }
+        dir('sources/wininstaller/packages/org.molsketch.openbabel.adapter/data') {
+          unarchive mapping: ['winbuild/lib/obabeliface.dll': 'obabeliface.dll']
+        }
+        dir(obabeldir) {
+          fileOperations([
+            folderCreateOperation("${WORKSPACE}/sources/wininstaller/packages/org.openbabel.formats/data"),
+            fileCopyOperation(flattenFiles: true, includes: "**/*.obf", targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.formats/data"),
+            folderCreateOperation("${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data"),
+            fileCopyOperation(flattenFiles: true, includes: "**/*.dll", targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data"),
+          ])
+        }
+        dir(mingwdir) {
+          fileOperations([
+            fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_sjlj-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libz.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+          ])
+        }
+        sh 'find . "(" -iname "*.dll" -or -iname "*.exe" -or -iname "*.obf" ")" -exec strip -v {} \\;'
+      }
+    }
+    stage('repo') {
+      steps {
+        dir("sources/wininstaller") {
+          // TODO introduce variable for packages to exclude -e org.openbabel,org.openbabel.formats,org.openbabel.mainlib,org.openssl.lib
+          sh "/opt/qt-installer-fw-win/bin/repogen.exe -p packages --update ${env.msk_version}"
+          sh "xsltproc -o Updates-new.xml --stringparam mskversion \"${env.msk_version}\" updatexml.xsl \"${env.msk_version}\"/Updates.xml && mv Updates-new.xml \"${env.msk_version}\"/Updates.xml"
+        }
+      }
+    }
+    stage('update') {
+      steps {
+        dir("winrepo") {
+          git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'git@github.com:hvennekate/molsketch-repository.git'
+          sh "xsltproc -o Updates-old.xml --stringparam mskversion \"${env.msk_version}\" ../sources/wininstaller/update_old_repo.xsl windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml && mv Updates-old.xml windows/\$(cd windows && ls | sort --version-sort | tail -n 1)/Updates.xml"
+        }
+        // fileOperations may be undesirable: does not fail if source does not exist!
+        fileOperations([folderCopyOperation(destinationFolderPath: "winrepo/windows/${env.msk_version}", sourceFolderPath: "sources/wininstaller/${env.msk_version}")])
+        dir("winrepo") {
+          sh "git add . && git commit -m \"add repo for version ${env.msk_version}\" && git checkout -b windows-${env.msk_version}"
+          sshagent(['github']) {
+            sh "git push origin windows-${env.msk_version}"
+          }
+        }
+      }
+    }
+// TODO update README.md on sourceforge!
+// TODO add toggle to choose update of installer
+//     stage('WinInstaller') {
+//       steps {
+//         dir("sources/wininstaller") {
+//           sh '/opt/qt-installer-fw-win/bin/binarycreator.exe -c config/config.xml -p packages -f MolsketchInstaller.exe'
+//         }
+//       }
+//     }
+  }
+}
