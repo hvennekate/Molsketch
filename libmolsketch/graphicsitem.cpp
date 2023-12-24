@@ -452,9 +452,9 @@ namespace Molsketch {
   }
 
   QXmlStreamAttributes &graphicsItem::addColor(QXmlStreamAttributes &attributes, const QColor &color) {
-    attributes.append("colorR", QString::number(color.red())) ; // TODO convert this into actual child
-    attributes.append("colorG", QString::number(color.green())) ;
-    attributes.append("colorB", QString::number(color.blue())) ;
+    attributes.append("colorR", QString::number(color.red())); // TODO convert this into actual child
+    attributes.append("colorG", QString::number(color.green()));
+    attributes.append("colorB", QString::number(color.blue()));
     return attributes;
   }
 
