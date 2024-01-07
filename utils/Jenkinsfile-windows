@@ -32,10 +32,11 @@ pipeline {
       steps {
         dir('winbuild') { // TODO make Qt version configurable
           sh '''
+            # TODO test THIRD_PARTY_LICENSES
             mingw32-cmake ../sources/Molsketch.pro \
               -DMSK_QT6=true \
               -DMSK_STATIC_LIB=true \
-              -DTHIRD_PARTY_LICENSES=true \ ## TODO TEST!
+              -DTHIRD_PARTY_LICENSES=true \
               -DCMAKE_PREFIX_PATH=/opt/Qt6/6.4.3/windows-static/lib/cmake/ \
               -DOB_INCLUDE_DIRS=/opt/openbabel-3.1.1-static/include/openbabel3/ \
               -DOB_LIBRARY_DIRS=/opt/openbabel-3.1.1-static/lib
