@@ -29,34 +29,35 @@ pipeline {
       }
     }
     stage('build') {
-      steps {
-        dir('winbuild') { // TODO make Qt version configurable
-          sh '''
-            # TODO test THIRD_PARTY_LICENSES
-            mingw32-cmake ../sources/Molsketch.pro \
-              -DMSK_QT6=true \
-              -DMSK_STATIC_LIB=true \
-              -DTHIRD_PARTY_LICENSES=true \
-              -DCMAKE_PREFIX_PATH=/opt/Qt6/6.4.3/windows-static/lib/cmake/ \
-              -DOB_INCLUDE_DIRS=/opt/openbabel-3.1.1-static/include/openbabel3/ \
-              -DOB_LIBRARY_DIRS=/opt/openbabel-3.1.1-static/lib
-          '''
-          sh 'cd build; mingw32-make -j 8'
+      steps { // TODO make Qt version configurable
+        sh '''
+          # TODO test THIRD_PARTY_LICENSES
+          mingw32-cmake \
+            -DMSK_QT6=true \
+            -DMSK_STATIC_LIB=true \
+            -DTHIRD_PARTY_LICENSES=true \
+            -DCMAKE_PREFIX_PATH=/opt/Qt6/6.6.1/windows-static/lib/cmake/ \
+            -DOB_INCLUDE_DIRS=/opt/openbabel-3.1.1-static/include/openbabel3/ \
+            -DOB_LIBRARY_DIRS=/opt/openbabel-3.1.1-static/lib \
+            -S ${WORKSPACE}/sources
+        '''
+        dir('build') {
+          sh 'mingw32-make -j 8'
         }
       }
       post {
         success {
-          archiveArtifacts artifacts: 'winbuild/bin/molsketch.exe, winbuild/lib/obabeliface.dll', followSymlinks: false
+          archiveArtifacts artifacts: 'build/bin/molsketch.exe, build/lib/obabeliface.dll', followSymlinks: false
         }
       }
     }
     stage('dependencies') {
       steps {
         dir('sources/wininstaller/packages/org.molsketch/data') {
-          unarchive mapping: ['winbuild/bin/molsketch.exe': 'molsketch.exe']
+          unarchive mapping: ['build/bin/molsketch.exe': 'molsketch.exe']
         }
         dir('sources/wininstaller/packages/org.molsketch.openbabel.adapter/data') {
-          unarchive mapping: ['winbuild/lib/obabeliface.dll': 'obabeliface.dll']
+          unarchive mapping: ['build/lib/obabeliface.dll': 'obabeliface.dll']
         }
         dir(obabeldir) {
           fileOperations([
