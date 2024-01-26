@@ -1,5 +1,5 @@
-def obabeldir = '/opt/openbabel-3.1.1-static';
-def mingwdir = '/usr/i686-w64-mingw32/sys-root/mingw/bin'
+def obabeldir = '/opt/openbabel-3.1.1-static-mingw64';
+def mingwdir = '/usr/x86_64-w64-mingw32/sys-root/mingw/bin'
 
 pipeline {
   agent any
@@ -32,32 +32,32 @@ pipeline {
       steps { // TODO make Qt version configurable
         sh '''
           # TODO test THIRD_PARTY_LICENSES
-          mingw32-cmake \
+          mingw64-cmake \
             -DMSK_QT6=true \
             -DMSK_STATIC_LIB=true \
             -DTHIRD_PARTY_LICENSES=true \
             -DCMAKE_PREFIX_PATH=/opt/Qt6/6.6.1/windows-static/lib/cmake/ \
-            -DOB_INCLUDE_DIRS=/opt/openbabel-3.1.1-static/include/openbabel3/ \
-            -DOB_LIBRARY_DIRS=/opt/openbabel-3.1.1-static/lib \
+            -DOB_INCLUDE_DIRS=/opt/openbabel-3.1.1-static-mingw64/include/openbabel3/ \
+            -DOB_LIBRARY_DIRS=/opt/openbabel-3.1.1-static-mingw64/lib \
             -S ${WORKSPACE}/sources
         '''
         dir('build') {
-          sh 'mingw32-make -j 8'
+          sh 'mingw64-make -j 8'
         }
       }
       post {
         success {
-          archiveArtifacts artifacts: 'build/bin/molsketch.exe, build/lib/obabeliface.dll', followSymlinks: false
+          archiveArtifacts artifacts: 'build/molsketch.exe, build/obabeliface.dll', followSymlinks: false
         }
       }
     }
     stage('dependencies') {
       steps {
         dir('sources/wininstaller/packages/org.molsketch/data') {
-          unarchive mapping: ['build/bin/molsketch.exe': 'molsketch.exe']
+          unarchive mapping: ['build/molsketch.exe': 'molsketch.exe']
         }
         dir('sources/wininstaller/packages/org.molsketch.openbabel.adapter/data') {
-          unarchive mapping: ['build/lib/obabeliface.dll': 'obabeliface.dll']
+          unarchive mapping: ['build/obabeliface.dll': 'obabeliface.dll']
         }
         dir(obabeldir) {
           fileOperations([
@@ -70,7 +70,7 @@ pipeline {
         dir(mingwdir) {
           fileOperations([
             fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_sjlj-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_seh-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
             fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
             fileCopyOperation(flattenFiles: true, includes: '**/libz.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
           ])
