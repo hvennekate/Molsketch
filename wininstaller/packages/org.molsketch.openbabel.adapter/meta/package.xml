@@ -2,7 +2,7 @@
 <Package>
   <DisplayName>OpenBabel Adapter</DisplayName>
   <Description>Small adapter library required for Molsketch to utilize OpenBabel.</Description>
-  <Version>0.8.0</Version>
+  <Version>0.8.1</Version>
   <ReleaseDate>2022-11-07</ReleaseDate>
   <AutoDependOn>org.molsketch,org.openbabel</AutoDependOn>
   <Virtual>true</Virtual>

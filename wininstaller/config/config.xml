@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>Molsketch</Name>
-    <Version>0.8.0</Version>
+    <Version>0.8.1</Version>
     <Title>Molsketch Installer</Title>
     <Publisher>Hendrik Vennekate</Publisher>
     <ProductUrl>https://molsketch.sourceforge.io/</ProductUrl>
@@ -13,8 +13,8 @@
     <TargetDir>@ApplicationsDir@/Molsketch</TargetDir>
     <RemoteRepositories>
         <Repository>
-            <DisplayName>Molsketch 0.7.1</DisplayName>
-            <Url>https://raw.githubusercontent.com/hvennekate/molsketch-repository/main/windows/0.7.1</Url>
+            <DisplayName>Molsketch 0.8.1</DisplayName>
+            <Url>https://raw.githubusercontent.com/hvennekate/molsketch-repository/main/windows/0.8.1</Url>
         </Repository>
     </RemoteRepositories>
     <ControlScript>controllerscript.qs</ControlScript>

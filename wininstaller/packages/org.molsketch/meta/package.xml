@@ -2,7 +2,7 @@
 <Package>
   <DisplayName>Molsketch</DisplayName>
   <Description>Molsketch main component</Description>
-  <Version>0.8.0</Version>
+  <Version>0.8.1</Version>
   <ReleaseDate>2022-11-07</ReleaseDate>
   <Licenses>
     <License name="GNU Public License Version 2" file="gpl-2-0.txt"/>
