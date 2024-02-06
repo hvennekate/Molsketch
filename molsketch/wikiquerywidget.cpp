@@ -152,7 +152,7 @@ void WikiQueryWidget::startMoleculeQuery(const QString& queryString) {
                                 " (SAMPLE(?smiles) AS ?smiles)"
                                 " (SAMPLE(?inchi) AS ?inchi)"
                                 " (SAMPLE(?isomer) AS ?isomer) WHERE"
-                                " { ?qnumber wdt:P31 wd:Q11173"
+                                " { ?qnumber wdt:P31 wd:Q113145171"
                                 " . ?qnumber rdfs:label ?label"
                                 " . ?qnumber wdt:P233 ?smiles"
                                 " . ?qnumber wdt:P234 ?inchi"
