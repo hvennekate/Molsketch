@@ -43,6 +43,8 @@ pipeline {
         '''
         dir('build') {
           sh 'mingw64-make -j 8'
+          sh 'strip molsketch.exe'
+          sh 'strip obabeliface.dll'
         }
       }
       post {
