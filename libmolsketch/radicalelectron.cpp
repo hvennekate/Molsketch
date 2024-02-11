@@ -30,6 +30,13 @@ namespace Molsketch {
     bool inheritColor;
     BoundingBoxLinker linker;
     bool operator==(const RadicalElectronPrivate& other) {
+#ifdef QT_DEBUG
+        qDebug() << "Radical electron equality"
+                 << (diameter == other.diameter)
+                 << (color == other.color)
+                 << (linker == other.linker)
+                 << (inheritColor == other.inheritColor);
+#endif
       return diameter == other.diameter
           && color == other.color
           && linker == other.linker
@@ -116,6 +123,7 @@ namespace Molsketch {
     return debug.nospace() << "RadicalElectron(diameter: " << radicalElectron.d_func()->diameter
                            << ", color: " << radicalElectron.d_func()->color
                            << ", linker: " << radicalElectron.d_func()->linker
+                           << ", inheritColor: " << radicalElectron.d_func()->inheritColor
                            << ")";
   }
 #endif
