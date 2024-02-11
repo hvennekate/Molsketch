@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Wi&amp;kidata search</string>
+   <string>Wikidata search</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <property name="enabled">
