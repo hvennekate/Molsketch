@@ -1,5 +1,6 @@
 # CMakeLists.txt for the main sourcecode of molsKetch
 cmake_policy(SET CMP0003 NEW)
+include(../include_qt.cmake)
 
 set(QT_USE_QTSVG TRUE)
 
@@ -31,13 +32,13 @@ link_directories(${CMAKE_BINARY_DIR}/lib)
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/images/molsketch.ico")
 if(MSK_QT6)
   qt_add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
-  target_link_libraries(molsketch PRIVATE mskcore)
+  target_link_libraries(molsketch PRIVATE libmolsketch)
   foreach(package ${QtRequiredPackages})
     target_link_libraries(molsketch PRIVATE Qt6::${package})
   endforeach(package)
 else(MSK_QT6)
   add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
-  target_link_libraries(molsketch mskcore)
+  target_link_libraries(molsketch libmolsketch)
   foreach(package ${QtRequiredPackages})
     target_link_libraries(molsketch $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::${package})
   endforeach(package)

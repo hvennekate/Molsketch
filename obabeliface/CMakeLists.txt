@@ -1,5 +1,6 @@
 # CMakeLists.txt for the sourcecode of auxiliary interface to OpenBabel
 cmake_policy(SET CMP0003 NEW)
+include(../include_qt.cmake)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/libmolsketch)
 set(obabeliface_HDRS obabeliface.h)
@@ -21,7 +22,7 @@ if(WIN32 OR WIN64)
         set_target_properties(obabeliface_LIB PROPERTIES PREFIX "")
 endif(WIN32 OR WIN64)
 
-target_link_libraries(obabeliface_LIB mskcore ${QT_LIBRARIES} ${OPENBABEL_LINK_LIBRARIES})
+target_link_libraries(obabeliface_LIB libmolsketch ${QT_LIBRARIES} ${OPENBABEL_LINK_LIBRARIES})
 
 # Install the executable and the library
 install(TARGETS obabeliface_LIB
