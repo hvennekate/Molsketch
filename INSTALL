@@ -9,6 +9,8 @@ Short instructions for building the source with CMake:
 (occasionally, you may have to use
 cmake -G "MinGW Makefiles" ..
 instead)
+Use option `-DMSK_QT6=true` for Qt 6.
+
 - make
 1.1 Install the binary (if desired)
 - make install
