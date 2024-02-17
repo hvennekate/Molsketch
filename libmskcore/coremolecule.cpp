@@ -17,33 +17,59 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#ifndef MOLSKETCH_CORE_ATOM_H
-#define MOLSKETCH_CORE_ATOM_H
+#include "coremolecule.h"
 
-#include <QString>
-#include <QPointF>
-#include <QScopedPointer>
+#include "coreatom.h"
+#include "corebond.h"
 
 namespace Molsketch {
 namespace Core {
 
-class Atom
-{
-  QString el;
-  QPointF pos;
-  unsigned hAtomCount;
-  int ch;
-public:
-  Atom(const QString &element, const QPointF &position = QPointF(), unsigned hAtoms = 0, int charge = 0);
-  Atom(const QString &element, unsigned hAtoms, int charge = 0, const QPointF &position = QPointF());
-  Atom(const Atom &other, const QPointF &newPosition);
-  QPointF position() const;
-  QString element() const;
-  unsigned hAtoms() const;
-  int charge() const;
-};
+Molecule::Molecule(std::vector<Atom> atoms, std::vector<Bond> bonds, const std::string &name)
+  : m_atoms(atoms), m_bonds(bonds), m_name(name) {}
+
+std::string Molecule::name() const {
+  return m_name;
+}
+
+std::vector<Atom> Molecule::atoms() const {
+  return m_atoms;
+}
+
+std::vector<Bond> Molecule::bonds() const {
+  return m_bonds;
+}
+
+Position Molecule::center() const {
+  return coordinates().boundingRect().center();
+}
+
+std::vector<Position> Molecule::coordinates() const {
+  QPolygonF positions;
+  for (auto atom : atoms()) positions << atom.position();
+  return positions;
+}
+
+Molecule Molecule::shiftedBy(const Position &shift) const {
+  QVector<Atom> shiftedAtoms;
+  for (auto atom : atoms()) shiftedAtoms << Atom(atom, atom.position() + shift);
+  return Molecule(shiftedAtoms, bonds(), name());
+}
+
+bool Molecule::isValid() const {
+  return !atoms().empty();
+}
 
 } // namespace Core
 } // namespace Molsketch
 
-#endif // MOLSKETCH_CORE_ATOM_H
+QDebug operator<<(QDebug debug, const Molsketch::Core::Molecule &molecule) {
+  auto out = debug.nospace() << "Molecule[name=\"" << molecule.name() << "\", atoms=(";
+  for (auto atom : molecule.atoms())
+    out << "<" << atom.element() << ": " << atom.position() << ", " << atom.hAtoms() << ">";
+  out <<"), bonds=(";
+  for (auto bond: molecule.bonds())
+    out << "<type=" << bond.type() << ", start=" << bond.start() << ", end=" << bond.end() << ">";
+  out << ")]";
+  return debug;
+}

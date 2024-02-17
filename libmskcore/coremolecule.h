@@ -17,61 +17,40 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "coremolecule.h"
+#ifndef MOLSKETCH_CORE_MOLECULE_H
+#define MOLSKETCH_CORE_MOLECULE_H
+
+#include <vector>
+#include <string>
 
 #include "coreatom.h"
 #include "corebond.h"
 
-#include <QPolygonF>
-
 namespace Molsketch {
 namespace Core {
 
-Molecule::Molecule(QVector<Atom> atoms, QVector<Bond> bonds, const QString &name)
-  : m_atoms(atoms), m_bonds(bonds), m_name(name) {}
-
-QString Molecule::name() const {
-  return m_name;
-}
-
-QVector<Atom> Molecule::atoms() const {
-  return m_atoms;
-}
-
-QVector<Bond> Molecule::bonds() const {
-  return m_bonds;
-}
-
-QPointF Molecule::center() const {
-  return coordinates().boundingRect().center();
-}
-
-QPolygonF Molecule::coordinates() const {
-  QPolygonF positions;
-  for (auto atom : atoms()) positions << atom.position();
-  return positions;
-}
-
-Molecule Molecule::shiftedBy(const QPointF &shift) const {
-  QVector<Atom> shiftedAtoms;
-  for (auto atom : atoms()) shiftedAtoms << Atom(atom, atom.position() + shift);
-  return Molecule(shiftedAtoms, bonds(), name());
-}
-
-bool Molecule::isValid() const {
-  return !atoms().empty();
-}
+class Molecule
+{
+    std::vector<Atom> m_atoms;
+    std::vector<Bond> m_bonds;
+    std::string m_name;
+public:
+    Molecule(std::vector<Atom> atoms,
+             std::vector<Bond> bonds,
+             const std::string &name = "");
+    std::string name() const;
+    std::vector<Atom> atoms() const;
+    std::vector<Bond> bonds() const;
+    // TODO unit tests
+    Position center() const;
+    std::vector<Position> coordinates() const;
+    Molecule shiftedBy(const Position &shift) const;
+    bool isValid() const;
+};
 
 } // namespace Core
 } // namespace Molsketch
 
-QDebug operator<<(QDebug debug, const Molsketch::Core::Molecule &molecule) {
-  auto out = debug.nospace() << "Molecule[name=\"" << molecule.name() << "\", atoms=(";
-  for (auto atom : molecule.atoms())
-    out << "<" << atom.element() << ": " << atom.position() << ", " << atom.hAtoms() << ">";
-  out <<"), bonds=(";
-  for (auto bond: molecule.bonds())
-    out << "<type=" << bond.type() << ", start=" << bond.start() << ", end=" << bond.end() << ">";
-  out << ")]";
-  return debug;
-}
+QDebug operator<<(QDebug debug, const Molsketch::Core::Molecule &attributes);
+
+#endif // MOLSKETCH_CORE_MOLECULE_H

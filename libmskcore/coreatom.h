@@ -17,38 +17,39 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "coreatom.h"
+#ifndef MOLSKETCH_CORE_ATOM_H
+#define MOLSKETCH_CORE_ATOM_H
+
+#include <string>
+#include "position.h"
 
 namespace Molsketch {
 namespace Core {
 
-Atom::Atom(const QString &element, const QPointF &position, unsigned hAtoms, int charge)
-  : el(element), pos(position), hAtomCount(hAtoms), ch(charge)
-{}
-
-Atom::Atom(const QString &element, unsigned hAtoms, int charge, const QPointF &position)
-  : Atom(element, position, hAtoms, charge)
-{}
-
-Atom::Atom(const Atom &other, const QPointF &newPosition)
-  : Atom(other.element(), newPosition, other.hAtoms(), other.charge())
-{}
-
-QPointF Atom::position() const {
-  return pos;
-}
-
-QString Atom::element() const {
-  return el;
-}
-
-unsigned Atom::hAtoms() const {
-  return hAtomCount;
-}
-
-int Atom::charge() const {
-  return ch;
-}
+class Atom
+{
+  std::string el;
+  Position pos;
+  unsigned hAtomCount;
+  int ch;
+public:
+  Atom(const std::string &element,
+       const Position &position = QPointF(),
+       unsigned hAtoms = 0,
+       int charge = 0);
+  Atom(const std::string &element,
+       unsigned hAtoms,
+       int charge = 0,
+       const Position &position = QPointF());
+  Atom(const Atom &other,
+       const Position &newPosition);
+  Position position() const;
+  std::string element() const;
+  unsigned hAtoms() const;
+  int charge() const;
+};
 
 } // namespace Core
 } // namespace Molsketch
+
+#endif // MOLSKETCH_CORE_ATOM_H
