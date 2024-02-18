@@ -20,6 +20,9 @@
 #include "optimizestructureaction.h"
 #include <commands.h>
 #include <QDebug>
+#include "scenesettings.h"
+#include "settingsitem.h"
+#include <algorithm>
 
 OptimizeStructureAction::OptimizeStructureAction(OBabelIfaceLoader *obabelLoader, Molsketch::MolScene *scene)
   : FilteredItemAction<Molsketch::Molecule>(scene),
@@ -40,6 +43,11 @@ void OptimizeStructureAction::execute() {
     if (Molecule *molecule = dynamic_cast<Molecule*>(item))
     {
       QPolygonF newCoords = obabelLoader->optimizeCoordinates(molecule);
+      auto bondLength = scene()->settings()->bondLength()->get();
+      auto center = newCoords.boundingRect().center();
+      newCoords.translate(-center);
+      std::for_each(newCoords.begin(), newCoords.end(), [&](QPointF& point) { point *= bondLength; });
+      newCoords.translate(center);
       qDebug() << "old molecule coords:" << molecule->coordinates()
                << "new molecule coords:" << newCoords;
       attemptUndoPush(new Molsketch::Commands::SetCoordinateCommand(item, newCoords));
