@@ -71,10 +71,10 @@ pipeline {
         }
         dir(mingwdir) {
           fileOperations([
-            fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_seh-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
-            fileCopyOperation(flattenFiles: true, includes: '**/libz.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.openbabel.mainlib/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libstdc++-6.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.molsketch/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libgcc_s_seh-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.molsketch/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libwinpthread-1.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.molsketch/data/"),
+            fileCopyOperation(flattenFiles: true, includes: '**/libz.dll', targetLocation: "${WORKSPACE}/sources/wininstaller/packages/org.molsketch/data/"),
           ])
         }
         sh 'find . "(" -iname "*.dll" -or -iname "*.exe" -or -iname "*.obf" ")" -exec strip -v {} \\;'
