@@ -25,22 +25,12 @@ pipeline {
         }
       }
     }
-    stage('QMake') {
-      steps {
-        dir('qmake-build') {
-          sh '''
-            qmake-qt5 ../sources/Molsketch.pro \
-            CONFIG+=release
-          '''
-          sh 'make -j 8'
-        }
-      }
-    }
     stage('CMake') {
       steps {
        dir('cmake-build') {
          sh 'cmake ../sources/'
          sh 'make -j 8'
+        }
       }
     }
     stage('Test') {
