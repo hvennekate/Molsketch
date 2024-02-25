@@ -20,5 +20,3 @@ Use option `-DMSK_QT6=true` for Qt 6.
 2. Notes on OpenBabel (esp. Windows)
 If you have difficulties making qmake or cmake find openbabel, you might want to set the variables OB_LIBRARY_DIRS and OB_INCLUDE_DIRS:
 cmake -DOB_LIBRARY_DIRS=<path of openbabel.dll/libopenbabel.so> -DOB_INCLUDE_DIRS=<directory containing babelconfig.h> <path to Molsketch sources>
-or
-qmake OB_LIBRARY_DIRS=<openbabel.dll/libopenbabel.so directory> OB_INCLUDE_DIRS=<directory containing babelconfig.h> <path to Molsketch sources>
