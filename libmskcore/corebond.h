@@ -20,43 +20,41 @@
 #ifndef MOLSKETCH_CORE_BOND_H
 #define MOLSKETCH_CORE_BOND_H
 
-#include <QDebug>
-
 namespace Molsketch {
 namespace Core {
 
 class Bond
 {
 public:
-  enum Type
-  {
-    Invalid = 0,
-    DativeDot = 1,
-    DativeDash = 2,
-    Single = 10,
-    Wedge = 11,
-    Hash = 12,
-    WedgeOrHash = 13,
-    Thick = 14,
-    Striped = 15,
-    DoubleLegacy = 20,
-    CisOrTrans = 21,
-    DoubleAsymmetric = 22,
-    DoubleSymmetric = 23,
-    Triple = 30,
-    TripleAsymmetric = 31, // TODO more?
-  };
-  static Type fromOrder(const unsigned &order);
+    enum Type
+    {
+        Invalid = 0,
+        DativeDot = 1,
+        DativeDash = 2,
+        Single = 10,
+        Wedge = 11,
+        Hash = 12,
+        WedgeOrHash = 13,
+        Thick = 14,
+        Striped = 15,
+        DoubleLegacy = 20,
+        CisOrTrans = 21,
+        DoubleAsymmetric = 22,
+        DoubleSymmetric = 23,
+        Triple = 30,
+        TripleAsymmetric = 31, // TODO more?
+    };
+    static Type fromOrder(const unsigned &order);
 private:
-  unsigned m_start, m_end;
-  Type m_type;
+    unsigned m_start, m_end;
+    Type m_type;
 public:
 
-  Bond(unsigned start, unsigned end, Type type = Single);
-  unsigned start() const;
-  unsigned end() const;
-  Type type() const;
-  unsigned order() const;
+    Bond(unsigned start, unsigned end, Type type = Single);
+    unsigned start() const;
+    unsigned end() const;
+    Type type() const;
+    unsigned order() const;
 };
 
 } // namespace Core

@@ -40,8 +40,8 @@
 #include "electronsystem.h"
 #include "scenesettings.h"
 #include "settingsitem.h"
-#include "core/coreatom.h"
-#include "core/corebond.h"
+#include "coreatom.h"
+#include "corebond.h"
 
 namespace Molsketch {
 
@@ -163,12 +163,12 @@ namespace Molsketch {
     : graphicsItem(parent),
       DEFAULTINITIALIZER
   {
-    setName(coreMolecule.name());
+    setName(QString::fromStdString(coreMolecule.name()));
 
     QList<Atom*> newAtoms;
     QMap<Atom*, QPair<unsigned, int>> hAtomsAndCharges;
     for (auto atom : coreMolecule.atoms()) {
-      auto newAtom = new Atom(atom.position() * scaling, atom.element());
+      auto newAtom = new Atom(atom.position() * scaling, QString::fromStdString(atom.element()));
       hAtomsAndCharges[newAtom] = qMakePair(atom.hAtoms(), atom.charge());
       newAtoms << newAtom;
       addAtom(newAtom);
@@ -844,13 +844,18 @@ void Molecule::updateElectronSystems()
   }
 
   Core::Molecule Molecule::toCoreMolecule(qreal scaling) const {
-    QVector<Core::Atom> catoms;
-    QVector<Core::Bond> cbonds;
+    std::vector<Core::Atom> catoms;
+    std::vector<Core::Bond> cbonds;
     for (auto atom : atoms())
-      catoms << Core::Atom(atom->element(), atom->pos() / scaling, atom->numImplicitHydrogens(), atom->charge());
+      catoms.push_back(
+            Core::Atom{ atom->element().toStdString(),
+                        Core::Position{ atom->pos().x() / scaling, atom->pos().y()/scaling },
+                        atom->numImplicitHydrogens(),
+                        atom->charge() });
     for (auto bond : bonds())
-      cbonds << Core::Bond(atoms().indexOf(bond->beginAtom()), atoms().indexOf(bond->endAtom()),
-                           toCoreBondType(bond->bondType()));
-    return Core::Molecule(catoms, cbonds, getName());
+      cbonds.push_back(Core::Bond{ atoms().indexOf(bond->beginAtom()),
+                                   atoms().indexOf(bond->endAtom()),
+                                   toCoreBondType(bond->bondType())});
+    return Core::Molecule(catoms, cbonds, getName().toStdString());
   }
 } // namespace

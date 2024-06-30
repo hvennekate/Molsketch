@@ -19,38 +19,36 @@
 
 #include "corebond.h"
 
-#include <QDebug>
-
 namespace Molsketch {
 namespace Core {
 
-  Bond::Type Bond::fromOrder(const unsigned &order) {
+Bond::Type Bond::fromOrder(const unsigned &order) {
     switch (order)
     {
-      case 1: return Single;
-      case 2: return DoubleLegacy;
-      case 3: return Triple;
-      default: return Invalid;
+    case 1: return Single;
+    case 2: return DoubleLegacy;
+    case 3: return Triple;
+    default: return Invalid;
     }
-  }
+}
 
-  Bond::Bond(unsigned start, unsigned end, Type type)
-  : m_start(start), m_end(end), m_type(type) {}
+Bond::Bond(unsigned start, unsigned end, Type type)
+    : m_start(start), m_end(end), m_type(type) {}
 
 unsigned Bond::start() const {
-  return m_start;
+    return m_start;
 }
 
 unsigned Bond::end() const {
-  return m_end;
+    return m_end;
 }
 
 Bond::Type Bond::type() const {
-  return m_type;
+    return m_type;
 }
 
 unsigned Bond::order() const {
-  return m_type / 10;
+    return m_type / 10;
 }
 
 } // namespace Core

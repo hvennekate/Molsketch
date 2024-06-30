@@ -1,18 +1,18 @@
 # CMakeLists.txt for the sourcecode of auxiliary interface to OpenBabel
 cmake_policy(SET CMP0003 NEW)
-include(../include_qt.cmake)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/libmolsketch)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/libmskcore)
 set(obabeliface_HDRS obabeliface.h)
 set(obabeliface_SRCS obabeliface.cpp)
 
 include(findOpenBabel.cmake)
+include_directories(${CMAKE_SOURCE_DIR}/libmskcore)
 
 # Ensure the Molsketch include directory is always first
 get_directory_property(tmp_include_dirs INCLUDE_DIRECTORIES)
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
         "${CMAKE_CURRENT_BINARY_DIR}/include;${tmp_include_dirs}")
-include_directories(${OPENBABEL_INCLUDE_DIRS}
+include_directories(SYSTEM ${OPENBABEL_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_BINARY_DIR})
 
 # Create the obabeliface library
@@ -22,7 +22,7 @@ if(WIN32 OR WIN64)
         set_target_properties(obabeliface_LIB PROPERTIES PREFIX "")
 endif(WIN32 OR WIN64)
 
-target_link_libraries(obabeliface_LIB libmolsketch ${QT_LIBRARIES} ${OPENBABEL_LINK_LIBRARIES})
+target_link_libraries(obabeliface_LIB mskcore ${OPENBABEL_LINK_LIBRARIES})
 
 # Install the executable and the library
 install(TARGETS obabeliface_LIB

@@ -25,31 +25,31 @@ namespace Core {
 using std::string;
 
 Atom::Atom(const std::string &element, const Position &position, unsigned hAtoms, int charge)
-  : el(element), pos(position), hAtomCount(hAtoms), ch(charge)
+    : el(element), pos(position), hAtomCount(hAtoms), ch(charge)
 {}
 
 Atom::Atom(const std::string &element, unsigned hAtoms, int charge, const Position &position)
-  : Atom(element, position, hAtoms, charge)
+    : Atom(element, position, hAtoms, charge)
 {}
 
 Atom::Atom(const Atom &other, const Position &newPosition)
-  : Atom(other.element(), newPosition, other.hAtoms(), other.charge())
+    : Atom(other.element(), newPosition, other.hAtoms(), other.charge())
 {}
 
 Position Atom::position() const {
-  return pos;
+    return pos;
 }
 
 std::string Atom::element() const {
-  return el;
+    return el;
 }
 
 unsigned Atom::hAtoms() const {
-  return hAtomCount;
+    return hAtomCount;
 }
 
 int Atom::charge() const {
-  return ch;
+    return ch;
 }
 
 } // namespace Core

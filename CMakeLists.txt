@@ -3,7 +3,7 @@ if (MSK_QT6)
   cmake_minimum_required(VERSION 3.21.1)
 endif (MSK_QT6)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 cmake_policy(SET CMP0005 NEW)
@@ -87,9 +87,9 @@ add_definitions(-DOBABEL_IFACE_LOCATION="${MSK_INSTALL_LIBS}/${OBABEL_IFACE_NAME
 set(CMAKE_INSTALL_PREFIX ${MSK_PREFIX})
 
 ################ Adding subdirs
-add_subdirectory(libmolsketch)
 add_subdirectory(libmskcore)
-add_subdirectory(molsketch)
 if (MSK_OBABELIFACE)
     add_subdirectory(obabeliface)
 endif (MSK_OBABELIFACE)
+add_subdirectory(libmolsketch)
+add_subdirectory(molsketch)

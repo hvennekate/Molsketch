@@ -28,25 +28,25 @@ namespace Core {
 
 class Atom
 {
-  std::string el;
-  Position pos;
-  unsigned hAtomCount;
-  int ch;
+    std::string el;
+    Position pos;
+    unsigned hAtomCount;
+    int ch;
 public:
-  Atom(const std::string &element,
-       const Position &position = QPointF(),
-       unsigned hAtoms = 0,
-       int charge = 0);
-  Atom(const std::string &element,
-       unsigned hAtoms,
-       int charge = 0,
-       const Position &position = QPointF());
-  Atom(const Atom &other,
-       const Position &newPosition);
-  Position position() const;
-  std::string element() const;
-  unsigned hAtoms() const;
-  int charge() const;
+    Atom(const std::string &element,
+         const Position &position = Position(),
+         unsigned hAtoms = 0,
+         int charge = 0);
+    Atom(const std::string &element,
+         unsigned hAtoms,
+         int charge = 0,
+         const Position &position = Position());
+    Atom(const Atom &other,
+         const Position &newPosition);
+    Position position() const;
+    std::string element() const;
+    unsigned hAtoms() const;
+    int charge() const;
 };
 
 } // namespace Core

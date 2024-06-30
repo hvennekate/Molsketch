@@ -9,6 +9,7 @@ get_directory_property(tmp_include_dirs INCLUDE_DIRECTORIES)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/libmolsketch
                     ${CMAKE_SOURCE_DIR}/obabeliface
+                    ${CMAKE_SOURCE_DIR}/libmskcore
 )
 
 file(GLOB_RECURSE molsketch_SRCS *.cpp)
@@ -32,17 +33,18 @@ link_directories(${CMAKE_BINARY_DIR}/lib)
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/images/molsketch.ico")
 if(MSK_QT6)
   qt_add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
-  target_link_libraries(molsketch PRIVATE libmolsketch)
   foreach(package ${QtRequiredPackages})
     target_link_libraries(molsketch PRIVATE Qt6::${package})
   endforeach(package)
 else(MSK_QT6)
   add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
-  target_link_libraries(molsketch libmolsketch)
   foreach(package ${QtRequiredPackages})
-    target_link_libraries(molsketch $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::${package})
+    target_link_libraries(molsketch PRIVATE $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::${package})
   endforeach(package)
 endif(MSK_QT6)
+target_link_libraries(molsketch PRIVATE libmolsketch)
+target_link_libraries(molsketch PRIVATE mskcore)
+
 install(TARGETS molsketch DESTINATION ${MSK_INSTALL_BINS})
 set_property(TARGET molsketch PROPERTY INSTALL_RPATH ${MSK_INSTALL_LIBS})
 set_target_properties(molsketch PROPERTIES OUTPUT_NAME "molsketch")

@@ -43,14 +43,12 @@ public:
     std::vector<Bond> bonds() const;
     // TODO unit tests
     Position center() const;
-    std::vector<Position> coordinates() const;
+    Coordinates coordinates() const;
     Molecule shiftedBy(const Position &shift) const;
     bool isValid() const;
 };
 
 } // namespace Core
 } // namespace Molsketch
-
-QDebug operator<<(QDebug debug, const Molsketch::Core::Molecule &attributes);
 
 #endif // MOLSKETCH_CORE_MOLECULE_H

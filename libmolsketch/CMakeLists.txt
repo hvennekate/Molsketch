@@ -7,6 +7,7 @@ set(QT_USE_QTSVG TRUE) # TODO check if really required (also in other files)
 
 # Ensure the Molsketch include directory is always first
 get_directory_property(tmp_include_dirs INCLUDE_DIRECTORIES)
+include_directories(${CMAKE_SOURCE_DIR}/libmskcore)
 
 file(GLOB_RECURSE libmolsketch_HDRS *.h)
 file(GLOB_RECURSE libmolsketch_SRCS *.cpp)
@@ -19,6 +20,7 @@ qt_add_resources(libmolsketch_SRCS ${libmolsketch_RCS} ${libmolsketch_TS_resourc
 qt_wrap_ui(libmolsketch_UIS_H ${libmolsketch_UIS})
 
 # Create the molsKetch libraries
+link_directories(${CMAKE_BINARY_DIR}/lib)
 if(MSK_QT6)
   if(MSK_STATIC_LIB)
     qt_add_library(libmolsketch STATIC ${libmolsketch_SRCS} ${libmolsketch_UIS_H} ${libmolsketch_QM})
