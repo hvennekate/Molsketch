@@ -26,6 +26,7 @@
 #include <QDebug>
 #include <molecule.h>
 #include <QRegularExpression>
+#include <QString>
 #include "scenesettings.h"
 #include "settingsitem.h"
 
@@ -118,7 +119,7 @@ class SinglePointSegment : public PathSegmentParser
     (path.*fp)(parser.getCurrentCoordinate());
   }
 public:
-  SinglePointSegment<fp>(const QString& prefix) : PathSegmentParser(prefix + coordinateRegExp()) {}
+  SinglePointSegment(const QString& prefix) : PathSegmentParser(prefix + coordinateRegExp()) {}
 };
 
 class SilentMoveSegment : public PathSegmentParser

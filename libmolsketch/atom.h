@@ -28,6 +28,7 @@
 #include "sumformula.h"
 #include "alignment.h"
 #include "neighboralignment.h"
+#include "position.h"
 
 namespace Molsketch {
 
@@ -55,6 +56,7 @@ namespace Molsketch {
        */
     Atom(const QPointF & position = QPointF(), const QString & element = QString(),
          bool implicitHydrogens = true, QGraphicsItem* parent = 0) ;
+    Atom(const Core::Position &position, const QString &element);
     Atom(const Atom& other);
     ~Atom() ;
     virtual QRectF boundingRect() const override;
@@ -172,7 +174,6 @@ namespace Molsketch {
   public:
     void afterMoleculeReadFinalization() override;
   };
-
 } // namespace
 
 #endif

@@ -82,8 +82,6 @@ private slots:
   bool saveAs();
   /** Saves a backup of the current document. */
   bool autoSave();
-  /** Import a file in the current document. */
-  bool importDoc();
   /** Export the current document as a picture. */
   bool exportDoc();
   /** Prints the current document. */

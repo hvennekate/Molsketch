@@ -62,7 +62,6 @@
 #define MSK_FORMAT "Molsketch (*.msk)"
 #define GRAPHIC_FILE_FORMATS "Scalable Vector Graphics (*.svg);;Portable Network Graphics (*.png);;Windows Bitmap (*.bmp);;Joint Photo Expert Group (*.jpeg)"
 #define GRAPHIC_DEFAULT_FORMAT "Portable Network Graphics (*.png)"
-#define OSRA_GRAPHIC_FILE_FORMATS "All supported types (*.*);;Images (*.png *.bmp *.jpg *.jpeg *.gif *.tif *.tiff);;Documents (*.pdf *.ps)"
 
 #ifdef Q_OS_WINDOWS
 #define OBABELOSSUFFIX ".dll"
@@ -317,42 +316,6 @@ bool MainWindow::saveAs() {
   return saveFile(fileName);
 }
 
-
-
-  bool MainWindow::importDoc()
-  {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Import"), settings->lastPath(), tr(OSRA_GRAPHIC_FILE_FORMATS));
-
-    if (!fileName.isEmpty()) {
-      // Save accessed path
-      settings->setLastPath(QFileInfo(fileName).path());
-
-      m_molView->scene()->clear(); // TODO this should actually end up in a new window!
-      QProgressBar *pb = new QProgressBar(this);
-      pb->setMinimum(0);
-      pb->setMaximum(0);
-      Molecule* mol = obabelLoader->callOsra(fileName, m_molView->scene()->settings()->bondLength()->get());
-      if (mol) {
-        if (mol->canSplit()) {
-          QList<Molecule*> molList = mol->split();
-          foreach(Molecule* mol,molList)
-            m_molView->scene()->addItem(mol);
-        } else {
-          m_molView->scene()->addItem(mol);
-        }
-
-        setCurrentFile(fileName);
-        return true;
-      } else {
-        QMessageBox::critical(this, tr(PROGRAM_NAME), tr("Error importing file"), QMessageBox::Ok, QMessageBox::Ok);
-        return false;
-      }
-
-    }
-
-    return false;
-  }
-
 bool MainWindow::exportDoc()
 {
   // Getting the filename
@@ -467,7 +430,6 @@ void MainWindow::createFileMenuAndToolBar() {
   auto newAction = ActionContainer::generateAction("document-new", ":icons/document-new.svg", tr("&New"), tr("Ctrl+N"), tr("Create a new file"), this, &MainWindow::newFile);
   auto openAction = ActionContainer::generateAction("document-open", ":icons/document-open.svg", tr("&Open..."), tr("Ctrl+O"), tr("Open an existing file"), this, &MainWindow::open);
   auto saveAction = ActionContainer::generateAction("document-save", ":icons/document-save.svg", tr("&Save"), tr("Ctrl+S"), tr("Save the document to disk"), this, &MainWindow::save);
-  auto importAction = ActionContainer::generateAction("document-import", ":icons/document-import.svg", tr("&Import..."), tr("Ctrl+I"), tr("Insert an existing molecule into the document"), this, &MainWindow::importDoc);
   auto exportAction = ActionContainer::generateAction("document-export", ":icons/document-export.svg", tr("&Export..."), tr("Ctrl+E"), tr("Export the current document as a picture"), this, &MainWindow::exportDoc);
   auto printAction = ActionContainer::generateAction("document-print", ":icons/document-print.svg", tr("&Print..."), tr("Ctrl+P"), tr("Print the current document"), this, &MainWindow::print);
 
@@ -475,7 +437,7 @@ void MainWindow::createFileMenuAndToolBar() {
   fileMenu->addActions(QList<QAction*>{ newAction, openAction, saveAction,
                         ActionContainer::generateAction("document-save-as", ":icons/document-save-as.svg", tr("Save &As..."), tr("Ctrl+Shift+S"), tr("Save the document under a new name"), this, &MainWindow::saveAs)});
   fileMenu->addSeparator();
-  fileMenu->addActions({ importAction, exportAction, printAction });
+  fileMenu->addActions({ exportAction, printAction });
   fileMenu->addSeparator();
   fileMenu->addAction(ActionContainer::generateAction("preferences-system", ":icons/preferences-system.svg", tr("Pre&ferences..."), tr("Ctrl+F"), tr("Edit your preferences"), this, &MainWindow::editPreferences)
         );
@@ -487,7 +449,6 @@ void MainWindow::createFileMenuAndToolBar() {
   fileToolBar->addAction(newAction);
   fileToolBar->addAction(openAction);
   fileToolBar->addAction(saveAction);
-  fileToolBar->addAction(importAction);
   fileToolBar->addAction(exportAction);
   fileToolBar->addAction(printAction);
 }

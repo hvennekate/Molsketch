@@ -17,33 +17,38 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#ifndef MOLSKETCH_CORE_ATOM_H
-#define MOLSKETCH_CORE_ATOM_H
+#ifndef MOLSKETCH_CORE_MOLECULE_H
+#define MOLSKETCH_CORE_MOLECULE_H
 
-#include <QString>
-#include <QPointF>
-#include <QScopedPointer>
+#include <vector>
+#include <string>
+
+#include "coreatom.h"
+#include "corebond.h"
 
 namespace Molsketch {
 namespace Core {
 
-class Atom
+class Molecule
 {
-  QString el;
-  QPointF pos;
-  unsigned hAtomCount;
-  int ch;
+    std::vector<Atom> m_atoms;
+    std::vector<Bond> m_bonds;
+    std::string m_name;
 public:
-  Atom(const QString &element, const QPointF &position = QPointF(), unsigned hAtoms = 0, int charge = 0);
-  Atom(const QString &element, unsigned hAtoms, int charge = 0, const QPointF &position = QPointF());
-  Atom(const Atom &other, const QPointF &newPosition);
-  QPointF position() const;
-  QString element() const;
-  unsigned hAtoms() const;
-  int charge() const;
+    Molecule(std::vector<Atom> atoms,
+             std::vector<Bond> bonds,
+             const std::string &name = "");
+    std::string name() const;
+    std::vector<Atom> atoms() const;
+    std::vector<Bond> bonds() const;
+    // TODO unit tests
+    Position center() const;
+    Coordinates coordinates() const;
+    Molecule shiftedBy(const Position &shift) const;
+    bool isValid() const;
 };
 
 } // namespace Core
 } // namespace Molsketch
 
-#endif // MOLSKETCH_CORE_ATOM_H
+#endif // MOLSKETCH_CORE_MOLECULE_H

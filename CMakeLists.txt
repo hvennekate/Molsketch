@@ -3,7 +3,7 @@ if (MSK_QT6)
   cmake_minimum_required(VERSION 3.21.1)
 endif (MSK_QT6)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 cmake_policy(SET CMP0005 NEW)
@@ -49,39 +49,6 @@ set(BUILD_SHARED_LIBS ON)
 set(_obIncDir ${CMAKE_SOURCE_DIR}/include)
 set(_obLinkDir ${CMAKE_SOURCE_DIR}/lib)
 
-# Find and setup Qt
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(QtRequiredPackages
-        Core
-        Widgets
-        Gui
-        PrintSupport
-        Svg
-        Network
-)
-
-if(MSK_QT6)
-  set(QT_MIN_VERSION "6.0.0")
-  find_package(Qt6 REQUIRED COMPONENTS ${QtRequiredPackages})
-  find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
-  qt_standard_project_setup()
-else(MSK_QT6)
-  set(QT_MIN_VERSION "5.0.0")
-  foreach(package ${QtRequiredPackages})
-          find_package(Qt5${package})
-          INCLUDE_DIRECTORIES(${Qt5${package}_INCLUDE_DIRS})
-          add_definitions(${Qt5${package}_DEFINITIONS})
-          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5${package}_EXECUTABLE_COMPILE_FLAGS}")
-          set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::${package})
-  endforeach(package)
-  find_package(Qt5LinguistTools)
-
-  if(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
-          message(FATAL_ERROR "Could not find Qt5. Required parts include: Widgets, Gui, PrintSupport, Svg.")
-  endif(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
-  set(CMAKE_AUTOMOC ON)
-endif(MSK_QT6)
-
 ################ Reading installation settings
 
 message(STATUS "======= Welcome to Molsketch build =======")
@@ -122,8 +89,9 @@ add_definitions(-DOBABEL_IFACE_LOCATION="${MSK_INSTALL_LIBS}/${OBABEL_IFACE_NAME
 set(CMAKE_INSTALL_PREFIX ${MSK_PREFIX})
 
 ################ Adding subdirs
-add_subdirectory(libmolsketch)
-add_subdirectory(molsketch)
+add_subdirectory(libmskcore)
 if (MSK_OBABELIFACE)
     add_subdirectory(obabeliface)
 endif (MSK_OBABELIFACE)
+add_subdirectory(libmolsketch)
+add_subdirectory(molsketch)

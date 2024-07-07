@@ -36,7 +36,7 @@
 #include <QList>
 #include <QGraphicsItemGroup>
 #include "moleculepopup.h"
-#include "core/coremolecule.h"
+#include "coremolecule.h"
 
 class QString;
 class QPoint;

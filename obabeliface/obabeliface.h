@@ -20,9 +20,9 @@
 #ifndef OBABELIFACE_H
 #define OBABELIFACE_H
 
-#include <QPointF>
+#include <string>
 #include <vector>
-#include <QString>
+#include "position.h"
 
 #ifdef Q_OS_WIN
 #define EXPORT_PREFIX __declspec(dllexport)
@@ -42,16 +42,16 @@ extern "C"
 
   namespace Molsketch
   {
-    EXPORT_PREFIX QStringList outputFormats();
-    typedef QStringList (*formatsFunctionPointer)() ;
+    EXPORT_PREFIX std::vector<std::string> outputFormats();
+    typedef std::vector<std::string> (*formatsFunctionPointer)() ;
     const char OUTPUT_FORMATS[] = "outputFormats";
 
-    EXPORT_PREFIX QStringList inputFormats();
+    EXPORT_PREFIX std::vector<std::string> inputFormats();
     const char INPUT_FORMATS[] = "inputFormats";
 
-    EXPORT_PREFIX Core::Molecule fromInChI(const QString&); // TODO add name
+    EXPORT_PREFIX Core::Molecule fromInChI(const std::string&); // TODO add name
     const char FROM_INCHI[] = "fromInChI";
-    typedef Core::Molecule (*fromInChIFunctionPointer)(const QString&);
+    typedef Core::Molecule (*fromInChIFunctionPointer)(const std::string&);
 
     EXPORT_PREFIX bool inChIAvailable();
     const char INCHI_AVAILABLE[] = "inChIAvailable";
@@ -60,21 +60,25 @@ extern "C"
     EXPORT_PREFIX bool gen2dAvailable();
     const char GEN2D_AVAILABLE[] = "gen2dAvailable";
 
-    EXPORT_PREFIX QVector<QPointF> optimizeCoordinates(const Core::Molecule &molecule);
+    EXPORT_PREFIX std::vector<Core::Position> optimizeCoordinates(const Core::Molecule &molecule);
     const char OPTIMIZE_COORDS[] = "optimizeCoordinates";
-    typedef QVector<QPointF> (*optimizeCoordsPointer)(const Core::Molecule &);
+    typedef std::vector<Core::Position> (*optimizeCoordsPointer)(const Core::Molecule &);
 
     EXPORT_PREFIX Core::Molecule loadFile(std::istream *input, const std::string &filename);
     const char LOAD_FILE[] = "loadFile";
     typedef Core::Molecule (*loadFileFunctionPointer)(std::istream *, const std::string &) ;
 
-    EXPORT_PREFIX bool saveFile(std::ostream *output, const std::string &filename, const QList<Core::Molecule> &molecules, unsigned short int dim = 2, bool addHydrogens = false);
+    EXPORT_PREFIX bool saveFile(std::ostream *output,
+                                const std::string &filename,
+                                const std::vector<Core::Molecule> &molecules,
+                                unsigned short int dim = 2,
+                                bool addHydrogens = false);
     const char SAVE_FILE[] = "saveFile";
-    typedef bool (*saveFileFunctionPointer)(std::ostream *, const std::string &, const QList<Core::Molecule> &, unsigned short int, bool) ;
-
-    EXPORT_PREFIX Core::Molecule call_osra(QString fileName);
-    const char CALL_OSRA[] = "call_osra";
-    typedef Core::Molecule (*callOsraFunctionPointer)(QString) ;
+    typedef bool (*saveFileFunctionPointer)(std::ostream *,
+                                            const std::string &,
+                                            const std::vector<Core::Molecule> &,
+                                            unsigned short int,
+                                            bool) ;
   } // namespace
 } // extern "C"
 

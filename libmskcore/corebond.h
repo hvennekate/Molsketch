@@ -17,38 +17,47 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "coreatom.h"
+#ifndef MOLSKETCH_CORE_BOND_H
+#define MOLSKETCH_CORE_BOND_H
 
 namespace Molsketch {
 namespace Core {
 
-Atom::Atom(const QString &element, const QPointF &position, unsigned hAtoms, int charge)
-  : el(element), pos(position), hAtomCount(hAtoms), ch(charge)
-{}
+class Bond
+{
+public:
+    enum Type
+    {
+        Invalid = 0,
+        DativeDot = 1,
+        DativeDash = 2,
+        Single = 10,
+        Wedge = 11,
+        Hash = 12,
+        WedgeOrHash = 13,
+        Thick = 14,
+        Striped = 15,
+        DoubleLegacy = 20,
+        CisOrTrans = 21,
+        DoubleAsymmetric = 22,
+        DoubleSymmetric = 23,
+        Triple = 30,
+        TripleAsymmetric = 31, // TODO more?
+    };
+    static Type fromOrder(const unsigned &order);
+private:
+    unsigned m_start, m_end;
+    Type m_type;
+public:
 
-Atom::Atom(const QString &element, unsigned hAtoms, int charge, const QPointF &position)
-  : Atom(element, position, hAtoms, charge)
-{}
-
-Atom::Atom(const Atom &other, const QPointF &newPosition)
-  : Atom(other.element(), newPosition, other.hAtoms(), other.charge())
-{}
-
-QPointF Atom::position() const {
-  return pos;
-}
-
-QString Atom::element() const {
-  return el;
-}
-
-unsigned Atom::hAtoms() const {
-  return hAtomCount;
-}
-
-int Atom::charge() const {
-  return ch;
-}
+    Bond(unsigned start, unsigned end, Type type = Single);
+    unsigned start() const;
+    unsigned end() const;
+    Type type() const;
+    unsigned order() const;
+};
 
 } // namespace Core
 } // namespace Molsketch
+
+#endif // MOLSKETCH_CORE_BOND_H

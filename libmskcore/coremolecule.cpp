@@ -17,49 +17,49 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#ifndef MOLSKETCH_CORE_BOND_H
-#define MOLSKETCH_CORE_BOND_H
+#include "coremolecule.h"
 
-#include <QDebug>
+#include "coreatom.h"
+#include "corebond.h"
 
 namespace Molsketch {
 namespace Core {
 
-class Bond
-{
-public:
-  enum Type
-  {
-    Invalid = 0,
-    DativeDot = 1,
-    DativeDash = 2,
-    Single = 10,
-    Wedge = 11,
-    Hash = 12,
-    WedgeOrHash = 13,
-    Thick = 14,
-    Striped = 15,
-    DoubleLegacy = 20,
-    CisOrTrans = 21,
-    DoubleAsymmetric = 22,
-    DoubleSymmetric = 23,
-    Triple = 30,
-    TripleAsymmetric = 31, // TODO more?
-  };
-  static Type fromOrder(const unsigned &order);
-private:
-  unsigned m_start, m_end;
-  Type m_type;
-public:
+Molecule::Molecule(std::vector<Atom> atoms, std::vector<Bond> bonds, const std::string &name)
+    : m_atoms(atoms), m_bonds(bonds), m_name(name) {}
 
-  Bond(unsigned start, unsigned end, Type type = Single);
-  unsigned start() const;
-  unsigned end() const;
-  Type type() const;
-  unsigned order() const;
-};
+std::string Molecule::name() const {
+    return m_name;
+}
+
+std::vector<Atom> Molecule::atoms() const {
+    return m_atoms;
+}
+
+std::vector<Bond> Molecule::bonds() const {
+    return m_bonds;
+}
+
+Position Molecule::center() const {
+    return Position::center(coordinates());
+}
+
+Coordinates Molecule::coordinates() const {
+    Coordinates coords;
+    for (auto atom : atoms()) coords.push_back(atom.position());
+    return coords;
+}
+
+Molecule Molecule::shiftedBy(const Position &shift) const {
+    std::vector<Atom> shiftedAtoms;
+    for (auto atom : atoms()) shiftedAtoms.push_back(Atom(atom, atom.position() + shift));
+    return Molecule(shiftedAtoms, bonds(), name());
+}
+
+bool Molecule::isValid() const {
+    return !atoms().empty();
+}
 
 } // namespace Core
 } // namespace Molsketch
 
-#endif // MOLSKETCH_CORE_BOND_H

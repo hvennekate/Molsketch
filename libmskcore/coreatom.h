@@ -17,41 +17,39 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include "corebond.h"
+#ifndef MOLSKETCH_CORE_ATOM_H
+#define MOLSKETCH_CORE_ATOM_H
 
-#include <QDebug>
+#include <string>
+#include "position.h"
 
 namespace Molsketch {
 namespace Core {
 
-  Bond::Type Bond::fromOrder(const unsigned &order) {
-    switch (order)
-    {
-      case 1: return Single;
-      case 2: return DoubleLegacy;
-      case 3: return Triple;
-      default: return Invalid;
-    }
-  }
-
-  Bond::Bond(unsigned start, unsigned end, Type type)
-  : m_start(start), m_end(end), m_type(type) {}
-
-unsigned Bond::start() const {
-  return m_start;
-}
-
-unsigned Bond::end() const {
-  return m_end;
-}
-
-Bond::Type Bond::type() const {
-  return m_type;
-}
-
-unsigned Bond::order() const {
-  return m_type / 10;
-}
+class Atom
+{
+    std::string el;
+    Position pos;
+    unsigned hAtomCount;
+    int ch;
+public:
+    Atom(const std::string &element,
+         const Position &position = Position(),
+         unsigned hAtoms = 0,
+         int charge = 0);
+    Atom(const std::string &element,
+         unsigned hAtoms,
+         int charge = 0,
+         const Position &position = Position());
+    Atom(const Atom &other,
+         const Position &newPosition);
+    Position position() const;
+    std::string element() const;
+    unsigned hAtoms() const;
+    int charge() const;
+};
 
 } // namespace Core
 } // namespace Molsketch
+
+#endif // MOLSKETCH_CORE_ATOM_H

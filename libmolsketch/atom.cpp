@@ -86,6 +86,10 @@ namespace Molsketch {
     initialize(position, element, implicitHydrogens);
   }
 
+  Atom::Atom(const Core::Position &position, const QString &element)
+  : Atom(QPointF(position.getX(), position.getY()), element)
+  {}
+
   Atom::Atom(const Atom &other)
     : graphicsItem (other)
   { // TODO unit test copy constructor
