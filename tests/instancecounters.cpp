@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2018 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2018 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,12 +19,14 @@
 
 #include "utilities.h"
 #include <QGraphicsItem>
-#include <radicalelectron.h>
+#include "radicalelectron.h"
+#include "painting/textline.h"
 namespace Molsketch {
   class Molecule;
   class MoleculeModelItem;
   class LibraryModel;
   class PiElectrons;
+  class TextBox;
 }
 template<> int ForTesting<Molsketch::Molecule>::instanceCounter = 0;
 template<> int ForTesting<Molsketch::MoleculeModelItem>::instanceCounter = 0;
@@ -32,3 +34,5 @@ template<> int ForTesting<Molsketch::LibraryModel>::instanceCounter = 0;
 template<> int ForTesting<QGraphicsItem>::instanceCounter = 0;
 template<> int ForTesting<Molsketch::RadicalElectron>::instanceCounter = 0;
 template<> int ForTesting<Molsketch::PiElectrons>::instanceCounter = 0;
+template<> int ForTesting<Molsketch::TextBox>::instanceCounter = 0;
+template<> int ForTesting<Molsketch::TextLine>::instanceCounter = 0;

@@ -33,6 +33,14 @@ namespace Molsketch {
           && color == other.color
           && linker == other.linker;
     }
+
+    QColor getColor(const QGraphicsItem *parentItem) const {
+      // TODO have flag to decide if color should be inherited or not
+//      if (color.isValid() || !parentItem) return color;
+      auto graphicsItemParent = dynamic_cast<const graphicsItem *>(parentItem);
+      if (!graphicsItemParent) return color;
+      return graphicsItemParent->getColor();
+    }
   };
 
 
@@ -71,7 +79,9 @@ namespace Molsketch {
     Q_D(const RadicalElectron);
     if (!parentItem()) return;
     painter->save();
-    painter->setBrush(d->color);
+    auto color = d->getColor(parentItem());
+    painter->setBrush(color);
+    painter->setPen(color);
     painter->drawEllipse(boundingRect());
     painter->restore();
   }

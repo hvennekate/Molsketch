@@ -28,6 +28,7 @@ class QByteArray;
 
 namespace Molsketch {
   class StringListSettingsItem;
+  class StringSettingsItem;
 }
 
 class ApplicationSettingsPrivate;
@@ -62,6 +63,7 @@ public:
   QString obabelFormatsPath() const;
   void setPixelScalingFactor(const qreal&);
   qreal pixelScalingFactor() const;
+  PROPERTY_DECL(Molsketch::StringSettingsItem, wikiQueryUrl)
 signals:
   void changedObabelIfacePath(const QString&);
   void changeObabelFormatsPath(const QString&);

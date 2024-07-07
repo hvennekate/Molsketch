@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2018 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2018 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,6 +21,7 @@
 
 #include <bond.h>
 #include <commands.h>
+#include "iconutils.h"
 
 namespace Molsketch {
 
@@ -28,7 +29,7 @@ namespace Molsketch {
     : abstractRecursiveItemAction(scene)
   {
     setMinimumItemCount(1);
-    setIcon(QIcon(":images/flip-stereo.svg"));
+    setIcon(getInternalIcon("flip-stereo"));
     setText(tr("Flip stereo bond(s)"));
     setCheckable(false);
   }

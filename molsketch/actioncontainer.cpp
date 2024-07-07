@@ -27,7 +27,6 @@
 #include <QClipboard>
 #include <molscene.h>
 #include <molview.h>
-#include <QMimeData>
 
 #include <actions/coloraction.h>
 #include <actions/deleteaction.h>
@@ -139,9 +138,8 @@ ActionContainer::ActionContainer(Molsketch::MolView *view, QObject *parent)
   : QObject(parent),
     d_ptr(new ActionContainerPrivate(view))
 {
-  Q_D(ActionContainer);
-
 #ifdef QT_DEBUG
+  Q_D(ActionContainer);
   d->debugAction = new QAction("debug scene", this);
   connect(d->debugAction, &QAction::triggered, view->scene(), &Molsketch::MolScene::debugScene);
 #endif

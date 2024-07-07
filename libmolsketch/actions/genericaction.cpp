@@ -119,13 +119,14 @@ namespace Molsketch{
     if (!scene()) return;
     if (b) {
       int exclusivity = property("exclusiveAction").toInt();
-      if (exclusivity)
+      if (exclusivity) {
         foreach(QAction* other, scene()->findChildren<QAction*>())
           if (other != this
               && other->isCheckable()
               && other->isChecked()
               && other->property("exclusiveAction").toInt())
             other->setChecked(false);
+      }
       scene()->installEventFilter(this);
     }
     else scene()->removeEventFilter(this);

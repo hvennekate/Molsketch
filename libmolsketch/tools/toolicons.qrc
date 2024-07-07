@@ -72,5 +72,9 @@
         <file>images/layerup.svg</file>
         <file>images/layerdown.svg</file>
         <file>images/layerset.svg</file>
+        <file>images/dotted.svg</file>
+        <file>images/dashed.svg</file>
+        <file>images/striped.svg</file>
+        <file>images/thick.svg</file>
     </qresource>
 </RCC>

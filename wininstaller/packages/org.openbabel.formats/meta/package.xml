@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<Package>
+  <DisplayName>OpenBabel formats</DisplayName>
+  <Description>Chemical format library files (required for importing/exporting from/to various chemical file formats).</Description>
+  <Version>3.1.1-1</Version>
+  <ReleaseDate>2020-05-08</ReleaseDate>
+  <Dependencies>org.openbabel.mainlib</Dependencies>
+  <Default>true</Default>
+  <Script>openbabel-format-registry-entry.qs</Script>
+</Package>

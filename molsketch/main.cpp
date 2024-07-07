@@ -56,6 +56,9 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 int main(int argc, char *argv[])
 {
   qInstallMessageHandler(messageOutput);
+  Q_INIT_RESOURCE(toolicons);
+  Q_INIT_RESOURCE(toolicons_inverted);
+
   QApplication app(argc, argv);
 
   QCoreApplication::setOrganizationName("SourceForge");
@@ -63,8 +66,8 @@ int main(int argc, char *argv[])
   QCoreApplication::setApplicationName("Molsketch");
 
   QTranslator molsketchTranslator, libraryTranslator;
-  auto molsketchTranslationsLoaded = molsketchTranslator.load(QLocale::system(), ":/i18n/molsketch_"); // TODO also load Qt module translations
-  auto libraryTranslationsLoaded = libraryTranslator.load(QLocale::system(), ":/i18n/libmolsketch_");
+  auto molsketchTranslationsLoaded = molsketchTranslator.load(QLocale::system(), "molsketch", "_", ":/i18n"); // TODO also load Qt module translations
+  auto libraryTranslationsLoaded = libraryTranslator.load(QLocale::system(), "libmolsketch", "_", ":/i18n");
   app.installTranslator(&molsketchTranslator);
   app.installTranslator(&libraryTranslator);
   qDebug() << "System locale:" << QLocale::system() << "Translation loaded:" << molsketchTranslationsLoaded << "for library:" << libraryTranslationsLoaded;
@@ -79,7 +82,7 @@ int main(int argc, char *argv[])
   ApplicationSettings appSettings(Molsketch::SettingsFacade::persistedSettings(new QSettings));
 
   if (appSettings.latestReleaseNotesVersionShown() < appSettings.currentVersion()) {
-    ReleaseNotesDialog().exec(); // TODO check that this still works
+    ReleaseNotesDialog().exec();
     appSettings.updateReleaseNotesShownVersion();
   }
 

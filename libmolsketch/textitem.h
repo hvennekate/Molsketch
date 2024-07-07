@@ -21,7 +21,6 @@
 #define MOLSKETCH_TEXTITEM_H
 
 #include "xmlobjectinterface.h"
-#include "qtversionmacros.h"
 #include <QGraphicsTextItem>
 
 namespace Molsketch {
@@ -29,7 +28,7 @@ namespace Molsketch {
   class TextItem : public QGraphicsTextItem, public XmlObjectInterface {
     Q_OBJECT
   public:
-    explicit TextItem(GRAPHICSSCENEHEADER);
+    TextItem();
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
   protected:

@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2014 by Hendrik Vennekate                               *
- *   HVennekate@gmx.de                                                     *
+ *   Copyright (C) 2014 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,13 +20,17 @@
 #ifndef OBABELIFACE_H
 #define OBABELIFACE_H
 
-#include <QString>
-#include <QPointF>
+#include <string>
 #include <vector>
+#include "position.h"
 
-class QGraphicsScene ;
+#ifdef Q_OS_WIN
+#define EXPORT_PREFIX __declspec(dllexport)
+#else
+#define EXPORT_PREFIX
+#endif
 
-namespace Molsketch
+namespace Molsketch::Core
 {
   class Molecule ;
   class Atom ;
@@ -36,78 +39,46 @@ namespace Molsketch
 
 extern "C"
 {
+
   namespace Molsketch
   {
-/**
- * Get supported output file formats
- */
-    QStringList outputFormats();
-    typedef QStringList (*formatsFunctionPointer)() ;
+    EXPORT_PREFIX std::vector<std::string> outputFormats();
+    typedef std::vector<std::string> (*formatsFunctionPointer)() ;
+    const char OUTPUT_FORMATS[] = "outputFormats";
 
-/**
- * Get supported input file formats
- */
-    QStringList inputFormats();
-/**
- * Generate SMILES string from molecule
- */
-    QString smiles(const Molecule*) ;
-    typedef QString (*smilesFunctionPointer)(const Molecule*) ;
-/**
- * Generate molecule from SMILES string
- */
-    Molecule* fromSmiles(const QString&);
-    typedef Molecule* (*fromSmilesFunctionPointer)(const QString&);
-/**
- * Generate molecule from InChI string
- */
-    Molecule* fromInChI(const QString&);
-    typedef Molecule* (*fromInChIFunctionPointer)(const QString&);
-/**
- * Check if InChI format is available
- */
-    bool inChIAvailable();
-    bool gen2dAvailable();
+    EXPORT_PREFIX std::vector<std::string> inputFormats();
+    const char INPUT_FORMATS[] = "inputFormats";
+
+    EXPORT_PREFIX Core::Molecule fromInChI(const std::string&); // TODO add name
+    const char FROM_INCHI[] = "fromInChI";
+    typedef Core::Molecule (*fromInChIFunctionPointer)(const std::string&);
+
+    EXPORT_PREFIX bool inChIAvailable();
+    const char INCHI_AVAILABLE[] = "inChIAvailable";
     typedef bool (*formatAvailablePointer)();
-/**
- * Optimize coordinates
- */
-    QVector<QPointF> optimizeCoordinates(const Molecule* molecule);
-    typedef QVector<QPointF> (*optimizeCoordsPointer)(const Molecule*);
 
-/**
- * Load and save routines
- *
- * @author Harm van Eersel (modified by H. Vennekate)
- */
+    EXPORT_PREFIX bool gen2dAvailable();
+    const char GEN2D_AVAILABLE[] = "gen2dAvailable";
 
-/**
- * Loads file with @p fileName and returns it as pointer to a new Molecule
- * object.
- */
-    Molecule* loadFile(const QString &fileName);
-    typedef Molecule* (*loadFileFunctionPointer)(const QString&) ;
-/**
- * Saves the current document under @p fileName and returns @c false if the
- * save failed.
- */
-    bool saveFile(const QString &fileName, QGraphicsScene * scene, unsigned short int dim = 2);
-    typedef bool (*saveFileFunctionPointer)(const QString&, QGraphicsScene*, unsigned short int) ;
-/**
- * Get symmetry numbers for atoms
- */
-    void getSymmetryClasses(const Molecule* molecule, std::vector<unsigned int>& symmetry_classes) ;
-    typedef void (*getSymmetryClassesFunctionPointer)(const Molecule*, std::vector<unsigned int>&) ;
-/**
- * Get chiral atoms for molecule @p molecule
- */
-    QList<Atom*> chiralAtoms(const Molecule* molecule) ;
-    typedef QList<Atom*> (*chiralAtomsFunctionPointer)(const Molecule*) ;
-/**
- * Load Molecule from image (OSRA)
- */
-    Molecule*  call_osra(QString fileName);
-    typedef Molecule* (*callOsraFunctionPointer)(QString) ;
+    EXPORT_PREFIX std::vector<Core::Position> optimizeCoordinates(const Core::Molecule &molecule);
+    const char OPTIMIZE_COORDS[] = "optimizeCoordinates";
+    typedef std::vector<Core::Position> (*optimizeCoordsPointer)(const Core::Molecule &);
+
+    EXPORT_PREFIX Core::Molecule loadFile(std::istream *input, const std::string &filename);
+    const char LOAD_FILE[] = "loadFile";
+    typedef Core::Molecule (*loadFileFunctionPointer)(std::istream *, const std::string &) ;
+
+    EXPORT_PREFIX bool saveFile(std::ostream *output,
+                                const std::string &filename,
+                                const std::vector<Core::Molecule> &molecules,
+                                unsigned short int dim = 2,
+                                bool addHydrogens = false);
+    const char SAVE_FILE[] = "saveFile";
+    typedef bool (*saveFileFunctionPointer)(std::ostream *,
+                                            const std::string &,
+                                            const std::vector<Core::Molecule> &,
+                                            unsigned short int,
+                                            bool) ;
   } // namespace
 } // extern "C"
 

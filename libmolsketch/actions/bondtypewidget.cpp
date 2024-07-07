@@ -20,10 +20,11 @@
 #include <QButtonGroup>
 #include <QToolButton>
 #include <QHBoxLayout>
+#include "iconutils.h"
 
 namespace Molsketch {
 
-#define ADDBONDBUTTON(TYPE, ICON, INVERTED) addButton(TYPE, QPixmap::fromImage(QImage(":images/" ICON ".svg").mirrored(INVERTED, INVERTED)));
+#define ADDBONDBUTTON(TYPE, ICON, INVERTED) addButton(TYPE, QPixmap::fromImage(getInternalImage(ICON).mirrored(INVERTED, INVERTED)));
 
   bondTypeWidget::bondTypeWidget(bool withInversion, QWidget *parent)
     : ItemTypeWidget(parent)
@@ -34,6 +35,10 @@ namespace Molsketch {
     ADDBONDBUTTON(Bond::Wedge, "wedge", false)
     if (withInversion) ADDBONDBUTTON(- (int) Bond::Wedge, "wedge", true)
     ADDBONDBUTTON(Bond::WedgeOrHash, "hashOrWedge", false)
+    ADDBONDBUTTON(Bond::Thick, "thick", false)
+    ADDBONDBUTTON(Bond::Striped, "striped", false)
+    ADDBONDBUTTON(Bond::DativeDot, "dotted", false)
+    ADDBONDBUTTON(Bond::DativeDash, "dashed", false)
     ADDBONDBUTTON(Bond::DoubleSymmetric, "double", false)
     ADDBONDBUTTON(Bond::DoubleAsymmetric, "double-asymmetric", false)
     if (withInversion) ADDBONDBUTTON(- (int) Bond::DoubleAsymmetric, "double-asymmetric", true)

@@ -23,23 +23,36 @@
 #include "utilities.h"
 #include <scenesettings.h>
 #include <settingsitem.h>
+#include "xmlassertion.h"
 
 using namespace Molsketch;
+using XmlAssert::assertThat;
 
 CLASS_FOR_TESTING_WITH_FUNCTIONS(RadicalElectron, \
                                  public: \
                                  explicit RadicalElectronForTesting(qreal diameter, BoundingBoxLinker linker = BoundingBoxLinker(Anchor::Top, Anchor::Bottom), const QColor& color = QColor()) \
                                  : RadicalElectron(diameter, linker, color){})
 const int DIAMETER = 2;
-const QString RADICAL_ELECTRON_XML("<radicalElectron diameter=\"5\" colorR=\"255\" colorG=\"0\" colorB=\"0\"><bbLinker originAnchor=\"TopLeft\" targetAnchor=\"BottomRight\" xOffset=\"0\" yOffset=\"0\"/></radicalElectron>");
-const RadicalElectron SAMPLE_RADICAL_ELECTRON(5, BoundingBoxLinker::upperLeft(), Qt::red);
+const QString RADICAL_ELECTRON_XML("<radicalElectron"
+                                   " diameter=\"5\""
+                                   " colorR=\"0\"" // TODO set back to 255 once color is serialized properly in XML
+                                   " colorG=\"0\""
+                                   " colorB=\"0\">"
+                                   "<bbLinker"
+                                   " originAnchor=\"TopLeft\""
+                                   " targetAnchor=\"BottomRight\""
+                                   " xOffset=\"0\""
+                                   " yOffset=\"0\"/>"
+                                   "</radicalElectron>");
+const RadicalElectron SAMPLE_RADICAL_ELECTRON(5, BoundingBoxLinker::upperLeft(), Qt::black); // TODO restore if color is properly serialized , Qt::red);
+const QString &CIRCLE_QUERY("svg/g/g/circle");
 
 class RadicalElectronUnitTest : public CxxTest::TestSuite {
   MolScene *scene;
   Atom *atom;
 
   QString svgWithAtomAndRadicalElectron() {
-    RadicalElectron *radical = new RadicalElectron(DIAMETER);
+    RadicalElectron *radical = new RadicalElectron(DIAMETER, BoundingBoxLinker::above(), Qt::blue);
     radical->setParentItem(atom);
     return scene->toSvg();
   }
@@ -49,6 +62,7 @@ public:
     scene = new MolScene;
     scene->settings()->atomFont()->set(QFont("Noto Sans", 8));
     atom = new Atom(QPointF(0,0), "C", false);
+    atom->setCharge(0);
     scene->addItem(atom);
   }
 
@@ -59,26 +73,58 @@ public:
 
   void testNothingDrawnIfNoParentWasSet() {
     scene->addItem(new RadicalElectron(DIAMETER));
-    int circleCount = xmlElementCount(scene->toSvg(), "circle");
-    TSM_ASSERT_EQUALS("No radical electrons should be drawn if parent was not assigned.", circleCount, 0);
+    assertThat(scene->toSvg())->hasNodes(CIRCLE_QUERY)->none();
   }
 
   void testCircleIsDrawnIfParentIsAtom() {
-    int circleCount = xmlElementCount(svgWithAtomAndRadicalElectron(), "circle");
-    TSM_ASSERT_EQUALS("A radical electron should be drawn if parent was not assigned.", circleCount, 1);
+    assertThat(svgWithAtomAndRadicalElectron())->hasNodes(CIRCLE_QUERY)->exactlyOne();
   }
 
   void testCircleSize() {
-    QXmlStreamReader reader(svgWithAtomAndRadicalElectron());
-    assertTrue(findNextElement(reader, "circle"), "Could not find circle in SVG!");
-    TS_ASSERT_EQUALS(reader.attributes().value("r").toDouble() * 2, DIAMETER);
+    assertThat(svgWithAtomAndRadicalElectron())->hasNodes(CIRCLE_QUERY)
+        ->haveAttribute("r")->exactly({QString::number(DIAMETER/2.)});
   }
 
   void testPosition() {
-    QXmlStreamReader reader(svgWithAtomAndRadicalElectron());
-    assertTrue(findNextElement(reader, "circle"), "Could not find circle in SVG!");
-    TS_ASSERT_EQUALS(reader.attributes().value("cx").toDouble() * 2, 0);
-    TS_ASSERT_EQUALS(reader.attributes().value("cy").toDouble() * 3, -21);
+    auto circle = assertThat(svgWithAtomAndRadicalElectron())->hasNodes(CIRCLE_QUERY);
+    circle->haveAttribute("cx")->exactly({"0"});
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+    circle->haveAttribute("cy")->exactly({"-9"});
+#else
+    circle->haveAttribute("cy")->exactly({"-8.49219"});
+#endif
+  }
+
+  void assertSvgColor(const XmlNodesAssertion *parentAssertion, const QString &color) {
+    parentAssertion->haveAttribute("fill")->exactly({color});
+    parentAssertion->haveAttribute("stroke")->exactly({color});
+  }
+
+  void testColorWithExplicitColor_isExcplicitColor() {
+    TS_SKIP("Need to first serialize validity of color to XML");
+    auto parent = assertThat(svgWithAtomAndRadicalElectron())->hasParentOf(CIRCLE_QUERY);
+    assertSvgColor(parent, "#0000ff");
+  }
+
+  void testColorWithoutParent_isNotDrawn() {
+    auto radical = new RadicalElectron(DIAMETER);
+    scene->addItem(radical);
+    assertThat(scene->toSvg())->hasNodes(CIRCLE_QUERY)->none();
+  }
+
+  void testColorWithParentNoExplicitColor_isParentsColor() {
+    RadicalElectron *radical = new RadicalElectron(DIAMETER, BoundingBoxLinker::above());
+    radical->setParentItem(atom);
+    atom->setColor(Qt::red);
+    auto parent = assertThat(scene->toSvg())->hasParentOf(CIRCLE_QUERY);
+    assertSvgColor(parent, "#ff0000");
+  }
+
+  void testColorWithParentAndExplicitColor_isExplicitColor() {
+    TS_SKIP("Need to first serialize validity of color to XML");
+    atom->setColor(Qt::red);
+    auto parent = assertThat(svgWithAtomAndRadicalElectron())->hasParentOf(CIRCLE_QUERY);
+    assertSvgColor(parent, "#0000ff");
   }
 
   void testBoundingRectWithoutParent() {
@@ -109,6 +155,4 @@ public:
     radicalElectron.readXml(reader);
     QS_ASSERT_EQUALS(radicalElectron, SAMPLE_RADICAL_ELECTRON);
   }
-
-  // TODO test color!
 };

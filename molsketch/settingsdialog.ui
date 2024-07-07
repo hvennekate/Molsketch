@@ -404,7 +404,7 @@
               <item row="1" column="0">
                <widget class="QLabel" name="obabelifaceWarningLabel">
                 <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Warning!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Setting an &amp;quot;obabeliface&amp;quot; library here that was not built&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;for this version of Molsketch may lead to crashes!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Warning!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Setting an &amp;quot;obabeliface&amp;quot; library here that was not built&lt;br/&gt;for this version of Molsketch may lead to crashes!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -466,12 +466,32 @@
               <item row="1" column="0">
                <widget class="QLabel" name="obabelFormatsWarningLabel">
                 <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Warning!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Selecting a folder of OpenBabel formats here that was not built&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;for the version of OpenBabel for which the &amp;quot;obabeliface&amp;quot; above was built&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;may lead to crashes or prevent formats from working!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Warning!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Selecting a folder of OpenBabel formats here that was not built&lt;br/&gt;for the version of OpenBabel for which the &amp;quot;obabeliface&amp;quot; above was built&lt;br/&gt;may lead to crashes or prevent formats from working!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
              </layout>
             </widget>
+           </item>
+           <item row="4" column="0" rowspan="2">
+            <layout class="QFormLayout" name="formLayout">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="wikidataQueryUrl"/>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="wikidataQueryUrlLabel">
+               <property name="text">
+                <string>Wikidata Query URL</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>

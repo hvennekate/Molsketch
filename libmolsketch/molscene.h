@@ -102,7 +102,8 @@ namespace Molsketch {
 
       TextInputItem *inputItem() ;
 
-      QList<Atom*> atoms() const;
+      QList<Atom *> atoms() const;
+      QList<Molecule *> molecules() const;
 
     signals:
       void copyAvailable(bool);
@@ -171,6 +172,7 @@ namespace Molsketch {
       QList<const XmlObjectInterface *> children() const override;
       void readAttributes(const QXmlStreamAttributes &attributes) override;
       QXmlStreamAttributes xmlAttributes() const override;
+      void afterReadFinalization() override;
 
   private:
 

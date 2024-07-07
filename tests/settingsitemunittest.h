@@ -72,6 +72,12 @@ const QMap<std::pair<QString, int>, qreal> ALTERNATE_STRING_INT_DOUBLE_MAP_VALUE
 const QVariantMap ALTERNATE_STRING_INT_DOUBLE_MAP_VARIANT{{"two", QVariantMap{{"0", 2.}}}, {"threehalf", QVariantMap{{"1", 3.5}}}};
 const QString ALTERNATE_STRING_INT_DOUBLE_MAP_AS_STRING("[{\"keyInt\":1,\"keyString\":\"threehalf\",\"value\":3.5},{\"keyInt\":0,\"keyString\":\"two\",\"value\":2}]");
 
+const QString STRING_KEY("TestStringKey");
+const QString STRING_VALUE{"testString"};
+const QString STRING_AS_STRING("testString");
+const QString ALTERNATE_STRING{"alternate"};
+const QString ALTERNATE_STRING_AS_STRING("alternate");
+
 template<typename T, typename SETTINGS_ITEM_TYPE, typename SIGNAL_COUNTER_TYPE>
 class SettingsItemTestCase : public CxxTest::TestSuite {
 protected:
@@ -238,6 +244,17 @@ public:
 class StringIntDoubleMapSettingsItemUnitTest : public SettingsItemTestCase<QMap<std::pair<QString, int>, qreal>, StringIntDoubleMapSettingsItem, StringIntDoubleMapSignalCounter> {
 public:
   StringIntDoubleMapSettingsItemUnitTest() : SettingsItemTestCase(STRING_INT_DOUBLE_MAP_KEY, STRING_INT_DOUBLE_MAP_VALUE, ALTERNATE_STRING_INT_DOUBLE_MAP_VALUE, STRING_INT_DOUBLE_MAP_AS_STRING, ALTERNATE_STRING_INT_DOUBLE_MAP_AS_STRING, STRING_INT_DOUBLE_MAP_VARIANT, ALTERNATE_STRING_INT_DOUBLE_MAP_VARIANT) {}
+  void testReading() { readValue(); }
+  void testWritingXml() { assertWritingXml(); }
+  void testReadingXml() { assertWritingXml(); }
+  void testSettingValue() { performSettingCycle(alternate); }
+  void testSettingVariant() { performSettingCycle(alternateVariant); }
+  void testSettingString() { performSettingCycle(alternateAsString); }
+};
+
+class StringSettingsItemUnitTest : public SettingsItemTestCase<QString, StringSettingsItem, StringSignalCounter> {
+public:
+  StringSettingsItemUnitTest() : SettingsItemTestCase(STRING_KEY, STRING_VALUE, ALTERNATE_STRING, STRING_AS_STRING, ALTERNATE_STRING_AS_STRING) {}
   void testReading() { readValue(); }
   void testWritingXml() { assertWritingXml(); }
   void testReadingXml() { assertWritingXml(); }

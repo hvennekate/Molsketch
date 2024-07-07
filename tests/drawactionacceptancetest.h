@@ -43,10 +43,6 @@ class DrawActionAcceptanceTest : public CxxTest::TestSuite {
     return result;
   }
 
-  template<typename T>
-  QSet<T> toSet(const QPair<T, T>& pair) {
-    return QSet<T>{pair.first, pair.second};
-  }
 public:
   void setUp() {
     scene = new MolScene;
@@ -94,7 +90,7 @@ public:
 
     QS_ASSERT_EQUALS(sceneItems<Bond*>().size(), 1);
     QS_ASSERT_EQUALS(sceneItems<Atom*>().size(), 2);
-    QS_ASSERT_EQUALS(toSet(sceneItems<Bond*>().first()->atoms()), sceneItems<Atom*>().toSet());
+    QS_ASSERT_EQUALS(toSet(sceneItems<Bond*>().first()->atoms()), toSet(sceneItems<Atom*>()));
 
     scene->stack()->undo();
     QS_ASSERT_EQUALS(sceneItems<graphicsItem*>().size(), 0);
@@ -102,6 +98,6 @@ public:
     scene->stack()->redo();
     QS_ASSERT_EQUALS(sceneItems<Bond*>().size(), 1);
     QS_ASSERT_EQUALS(sceneItems<Atom*>().size(), 2);
-    QS_ASSERT_EQUALS(toSet(sceneItems<Bond*>().first()->atoms()), sceneItems<Atom*>().toSet());
+    QS_ASSERT_EQUALS(toSet(sceneItems<Bond*>().first()->atoms()), toSet(sceneItems<Atom*>()));
   }
 };

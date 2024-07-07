@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2014 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2014 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,29 +17,18 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
  ***************************************************************************/
 
-#include <QFileInfo>
-#include <QDebug>
-#include <QGraphicsScene>
-#include <QGraphicsItem>
-#include <QProcess>
-#include <QDir>
-#if QT_VERSION < 0x050000
-#include <QDesktopServices>
-#else
-#include <QStandardPaths>
-#endif
-
 #include "obabeliface.h"
-#include "molecule.h"
-#include "bond.h"
-#include "atom.h"
-#include "molscene.h"
+#include "coremolecule.h"
+#include "corebond.h"
+#include "coreatom.h"
 
-#include "scenesettings.h"
-#include "settingsitem.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wsuggest-override"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wdeprecated-copy" // OpenBabel 2 only
 
 #include <openbabel/graphsym.h>
-#include <openbabel/stereo/stereo.h>
 
 #include <openbabel/mol.h>
 #include <openbabel/data.h>
@@ -47,6 +36,7 @@
 #include <openbabel/babelconfig.h>
 #include <openbabel/op.h>
 #include <openbabel/stereo/stereo.h>
+#include <openbabel/stereo/tetrahedral.h>
 
 #if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
 #include <openbabel/obiter.h>
@@ -54,15 +44,23 @@
 #include <openbabel/elements.h>
 #endif
 
+#include <iostream>
+#include <numeric>
+
+#pragma GCC diagnostic pop
+
 #if (OB_VERSION < OB_VERSION_CHECK(3, 0, 0))
 OpenBabel::OBElementTable elementTable;
 #endif
 
 namespace Molsketch
 {
+  using Core::Molecule;
+  using Core::Atom;
+  using Core::Bond;
   static const char INCHI_FORMAT[] = "inchi";
 
-  QString number2symbol( int number )
+  std::string number2symbol( int number )
   {
 #if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
     return OpenBabel::OBElements::GetSymbol(number);
@@ -71,267 +69,142 @@ namespace Molsketch
 #endif
   }
 
-  int symbol2number( const QString &symbol )
+  int symbol2number( const std::string &symbol )
   {
 #if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
-    return OpenBabel::OBElements::GetAtomicNum(symbol.STRINGCONVERSION) ;
+    return OpenBabel::OBElements::GetAtomicNum(symbol.data()) ;
 #else
-    return elementTable.GetAtomicNum(symbol.STRINGCONVERSION) ;
+    return elementTable.GetAtomicNum(symbol.data()) ;
 #endif
   }
 
-  OpenBabel::OBMol toOBMolecule(const Molsketch::Molecule* originalMolecule, unsigned short int dim = 2)
+  OpenBabel::OBMol toOBMolecule(const Molecule &originalMolecule, unsigned short int dim = 2)
   {
     // Create the output molecule
     OpenBabel::OBMol obmol ;
     obmol.SetDimension(dim) ;
-    if (!originalMolecule) return obmol ;
 
-    QHash<Atom*,OpenBabel::OBAtom*> hash;
+    std::vector<OpenBabel::OBAtom*> newAtoms;
 
     obmol.BeginModify();
-    foreach (Atom* atom, originalMolecule->atoms()) {
-      OpenBabel::OBAtom* obatom = obmol.NewAtom();
-      obatom->SetVector(atom->scenePos().x()/40,atom->scenePos().y()/40,0);
-      std::string element = atom->element().toStdString();
-      obatom->SetAtomicNum(Molsketch::symbol2number(atom->element()));
-      hash.insert(atom,obatom);
+    for (auto atom : originalMolecule.atoms()) {
+      newAtoms.push_back(obmol.NewAtom());
+      auto newAtom = newAtoms.back();
+      newAtom->SetVector(atom.position().getX(), atom.position().getY(), 0);
+      newAtom->SetAtomicNum(Molsketch::symbol2number(atom.element()));
+      newAtom->SetFormalCharge(atom.charge()); // TODO does this have to be done after the bonds?
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+      newAtom->SetImplicitHCount(atom.hAtoms());
+#endif
     }
-    foreach (Bond* bond, originalMolecule->bonds()) {
-      Atom* a1 = bond->beginAtom();
-      Atom* a2 = bond->endAtom();
 
-      int flags = 0 ;
-      // Setting bondtype
-      switch (bond->bondType()) {
-      case Bond::Wedge:
-        flags |= OB_WEDGE_BOND;
-        break;
-      case Bond::Hash:
-        flags |= OB_HASH_BOND;
-        break;
-      default: break;
-      }
-      obmol.AddBond(hash[a1]->GetIdx(),
-                      hash[a2]->GetIdx(),
-                      bond->bondOrder(),
-                      flags);
+    for (auto bond : originalMolecule.bonds()) {
+      if (bond.order() < 1) continue;
+
+      OpenBabel::OBBond newBond;
+      newBond.SetBondOrder(bond.order());
+      newBond.SetBegin(newAtoms.at(bond.start()));
+      newBond.SetEnd(newAtoms.at(bond.end()));
+
+      if (Bond::Wedge == bond.type()) newBond.SetWedge();
+      if (Bond::Hash == bond.type()) newBond.SetHash();
+      if (Bond::WedgeOrHash == bond.type()) newBond.SetWedgeOrHash();
+      obmol.AddBond(newBond);
     }
     obmol.EndModify();
+
+#if (OB_VERSION < OB_VERSION_CHECK(3, 0, 0))
+    for (int i = 0 ; i < newAtoms.size() ; ++i) {
+      auto newAtom = newAtoms.at(i);
+      auto atom = originalMolecule.atoms().at(i);
+      std::cerr << "H atoms" << atom.hAtoms()
+                << " implicit count: " << newAtom->ImplicitHydrogenCount()
+                << " exlicit count: " << newAtom->ExplicitHydrogenCount()
+                << " valence: " << newAtom->GetImplicitValence()
+                << endl;
+      newAtom->SetSpinMultiplicity(qAbs(2*(newAtom->ImplicitHydrogenCount() - atom.hAtoms())));
+      std::cerr << "after set H atoms " << atom.hAtoms()
+                << " implicit count: " << newAtom->ImplicitHydrogenCount()
+                << " exlicit count: " << newAtom->ExplicitHydrogenCount()
+                << " valence: " << newAtom->GetImplicitValence()
+                << " multiplicity: " << newAtom->GetSpinMultiplicity()
+                << endl;
+    }
+#endif
+
     return obmol;
   }
 
-  QString smiles(const Molecule* mol)
-  {
-    OpenBabel::OBConversion conv ;
-    if (!conv.SetOutFormat("can"))
-      return "Output format 'can' not available." ;
-
-    OpenBabel::OBMol obmol(toOBMolecule(mol)) ;
-    return conv.WriteString(&obmol).c_str() ;
-  }
-
-  bool saveFile(const QString &fileName, QGraphicsScene* scene, unsigned short int dim) // TODO this should really take all the molecules instead of the entire scene!
+  bool saveFile(std::ostream *output, const std::string &filename, const std::vector<Molecule> &molecules, unsigned short int dim, bool addHydrogens)
   {
     using namespace OpenBabel;
     OBConversion conversion;
 
-    if (!conversion.SetOutFormat(QFileInfo(fileName).suffix(). STRINGCONVERSION))
-    {
-      qDebug() << "Error while saving #1";
+    if (!conversion.SetOutFormat(conversion.FormatFromExt(filename))) {
+      std::cerr << "Error while saving: " << filename << std::endl;
       return false;
     }
 
-    // Create the output molecule
     OBMol obmol;
     obmol.SetDimension(dim);
-
-    // Add all molecules on the scene
-    foreach(QGraphicsItem* item, scene->items()) // TODO remove this dependency on molscene
-      if (auto molecule = dynamic_cast<Molecule*>(item))
-        obmol += toOBMolecule(molecule, dim) ;
-    // TODO this should really be done on a per-atom basis
-    if (3 == dim // TODO also for 2D?
-      && dynamic_cast<MolScene*>(scene)
-      && dynamic_cast<MolScene*>(scene)->settings()->autoAddHydrogen()->get())
-        obmol.AddHydrogens(); // TODO check if this works without begin/end modify
-
-    // Checking if the file exists and making a backup
-    if (QFile::exists(fileName))
-    {
-      QFile::remove(fileName + "~");
-      QFile::copy(fileName,fileName + "~");
-    }
-
-    // Writing the final result to the file
-    conversion.WriteFile(&obmol,fileName.toStdString());
-
+    for (auto molecule : molecules)
+      obmol += toOBMolecule(molecule, dim);
+    if (addHydrogens) obmol.AddHydrogens(); // TODO check if this works without begin/end modify
+    conversion.Write(&obmol, output);
     return true;
   }
 
-  Molecule* fromOBMolecule(OpenBabel::OBMol& obmol) { // TODO convert title
+  Molecule fromOBMolecule(OpenBabel::OBMol& obmol) {
     using namespace OpenBabel;
-    // Create a new molecule
-    Molecule* mol = new Molecule();
-    mol->setPos(QPointF(0,0));
 
-    qDebug() << "Number of atoms" <<obmol.NumAtoms();
-    QHash<OBAtom*, Atom*> atomHash ;
-    QHash<Atom*, int> charges;
-    // Add atoms one-by-ons
+    std::vector<Atom> atoms;
+    std::map<OBAtom*, unsigned> atomNumbers;
+    int i = 0;
     FOR_ATOMS_OF_MOL(obatom, obmol) {
-      auto atom = new Atom(QPointF(obatom->x(), obatom->y()) * 40, Molsketch::number2symbol(obatom->GetAtomicNum()), true); // TODO this had to be done by MSK setting!
-//      atom->setNumImplicitHydrogens(obatom->ImplicitHydrogenCount()); // TODO check if hydrogens can be transfered (reference: wiki search for diazomethane -- diazo-group appears to be wrong)
-      charges[atom] = obatom->GetFormalCharge();
-      atomHash[&(*obatom)] = atom;
-      mol->addAtom(atom);
+      atoms.push_back(Atom(Molsketch::number2symbol(obatom->GetAtomicNum()),
+                    Core::Position(obatom->x(), obatom->y()),
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+                    obatom->GetImplicitHCount(),
+#else
+                    obatom->ImplicitHydrogenCount(),
+#endif
+                    obatom->GetFormalCharge()));
+      atomNumbers[&(*obatom)] = i++;
     }
 
-    // Add bonds one-by-one
-    /// Mind the numbering!
+    std::vector<Bond> bonds;
     FOR_BONDS_OF_MOL(obbond, obmol)
     {
-      Bond* bond  = mol->addBond(atomHash[obbond->GetBeginAtom()],
-                                 atomHash[obbond->GetEndAtom()],
-                                 Bond::simpleTypeFromOrder(obbond->GetBondOrder()));
-      // Set special bond types
-      // TODO sometimes, when importing wikidata InChI molecules, this seems to lead to inverse bonds
-      if (obbond->IsWedge())
-        bond->setType( Bond::Wedge );
-      if (obbond->IsHash())
-        bond->setType( Bond::Hash );
+      Bond::Type type;
+      if (obbond->IsWedge()) type = Bond::Wedge;
+      else if (obbond->IsHash()) type = Bond::Hash;
+      else type = Bond::fromOrder(obbond->GetBondOrder());
+
+      bonds.push_back(Bond(atomNumbers[obbond->GetBeginAtom()],
+          atomNumbers[obbond->GetEndAtom()],
+          type));
     }
 
-    // Set charges (has to be done _after_ setting up the bond network
-    for (auto atom : charges.keys()) atom->setCharge(charges[atom]);
-
-    return mol;
+    return Molecule(atoms, bonds, obmol.GetTitle());
   }
 
-  Molecule* loadFile(const QString &fileName)
-  {
-    // Creating and setting conversion classes
-    using namespace OpenBabel;
-    OBConversion conversion ;
-    conversion.SetInFormat(conversion.FormatFromExt(fileName.toStdString())) ;
-    conversion.AddOption("h", OBConversion::GENOPTIONS);
-    OBMol obmol;
-
-    if (!conversion.ReadFile(&obmol, fileName.toStdString()))
-      return 0;
-
-    return fromOBMolecule(obmol);
-  }
-
-  void getSymmetryClasses(const Molecule* molecule, std::vector<unsigned int>& symmetry_classes)
-  {
-    symmetry_classes.clear() ;
-    if (!molecule) return ;
-    OpenBabel::OBMol obmol(toOBMolecule(molecule)) ;
-    OpenBabel::OBGraphSym graphsym(&obmol);
-    graphsym.GetSymmetry(symmetry_classes);
-  }
-
-  QList<Atom*> chiralAtoms(const Molecule* molecule)
-  {
-    QList<Atom*> result ;
-    if (!molecule) return result ;
-
-    QList<Atom*> atoms(molecule->atoms()) ;
-    OpenBabel::OBMol obmol(toOBMolecule(molecule)) ;
-    // need to calculate symmetry first
-    std::vector<unsigned int> symmetry_classes;
-    OpenBabel::OBGraphSym graphsym(&obmol);
-    graphsym.GetSymmetry(symmetry_classes);
-
-    //std::vector<unsigned long> atomIds = FindTetrahedralAtoms(obmol, symmetry_classes);
-    OpenBabel::OBStereoUnitSet units = FindStereogenicUnits(&obmol, symmetry_classes);
-
-    for (unsigned int i = 0; i < units.size(); ++i) {
-      if (units.at(i).type == OpenBabel::OBStereo::Tetrahedral) {
-        OpenBabel::OBAtom *obatom = obmol.GetAtomById(units.at(i).id);
-        result << atoms[obatom->GetIndex()] ;
-      } else
-      if (units.at(i).type == OpenBabel::OBStereo::CisTrans) {
-        OpenBabel::OBBond *obbond = obmol.GetBondById(units.at(i).id);
-        OpenBabel::OBAtom *obatom1 = obbond->GetBeginAtom();
-        OpenBabel::OBAtom *obatom2 = obbond->GetEndAtom();
-        result << atoms[obatom1->GetIndex()]
-               << atoms[obatom2->GetIndex()] ;
-      }
+  // TODO should be const, but OpenBabel iterator methods do not support const
+  bool hasCoordinates(OpenBabel::OBMol &molecule) {
+    FOR_ATOMS_OF_MOL(obatom, molecule) {
+      if (obatom->GetVector() != OpenBabel::VZero)
+        return true;
     }
-    return result ;
+    return false;
   }
 
-  Molecule* call_osra(QString fileName)
+  void generate2dCoords(OpenBabel::OBMol& obmol)
   {
-    int n=0;
-#if QT_VERSION < 0x050000
-    QString tmpresult = QDesktopServices::storageLocation(QDesktopServices::TempLocation) + QDir::separator() + "osra";
-#else
-    QString tmpresult = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + QDir::separator() + "osra";
-#endif
-    tmpresult += ".sdf";
-    QString command;
-    char *env = getenv("OSRA");
-    if (env != NULL)
-      command = env;
-    else
-      command = "osra";
-
-    command += " -f sdf " + fileName + ">" + tmpresult;
-
-    QStringList arguments;
-    arguments << "-f";
-    arguments << "sdf";
-    arguments << fileName;
-    arguments << ">";
-    arguments << tmpresult;
-
-    if (QProcess::execute(command, arguments))
-      return 0;
-
-    Molecule* mol = loadFile(tmpresult);
-    if (mol) {
-      qreal x_avg = 0, y_avg = 0;
-
-      foreach(Atom* atom, mol->atoms()) {
-        x_avg += atom->x();
-        y_avg += atom->y();
-        n++;
-      }
-      if (n > 0) {
-        x_avg /= n;
-        y_avg /= n;
-        foreach(Atom* atom, mol->atoms())
-          atom->setPos(atom->x() - x_avg, y_avg - atom->y());
-      }
-    }
-    QFile::remove(tmpresult);
-    return mol;
+    OpenBabel::OBOp* gen2D = OpenBabel::OBOp::FindType("gen2D");
+    if (!gen2D || !gen2D->Do(&obmol))
+      std::cerr << "Could not find gen2D for coordinate generation." << std::endl;
   }
 
-  QStringList getFormats(const std::vector<std::string>& originalFormats) {
-    QStringList formats;
-    for (std::string pluginDescription : originalFormats) {
-        QString fromOpenBabel(QString::fromStdString(pluginDescription));
-        formats << fromOpenBabel.section(" -- ", 1) // This split is based on OBFormat::Display
-                        + " (*." + fromOpenBabel.section(" -- ", 0, 0) + ")";
-    }
-    return formats;
-  }
-
-  QStringList outputFormats() {
-    OpenBabel::OBConversion conversion;
-    return getFormats(conversion.GetSupportedOutputFormat());
-  }
-
-  QStringList inputFormats() {
-    OpenBabel::OBConversion conversion; // TODO find out why this needs to be instantiated
-    return getFormats(conversion.GetSupportedInputFormat());
-  }
-
-  void SetWedgeAndHash(OpenBabel::OBMol& mol) {
+  void setWedgeAndHash(OpenBabel::OBMol& mol) {
       using namespace OpenBabel;
     // Remove any existing wedge and hash bonds
     FOR_BONDS_OF_MOL(b, &mol)  {
@@ -344,12 +217,14 @@ namespace Molsketch
 #endif
     }
 
+    // TODO reverse bonds where their direction is not "from stereo center"
+
     std::map<OBBond*, enum OBStereo::BondDirection> updown;
     std::map<OBBond*, OBStereo::Ref> from;
     std::map<OBBond*, OBStereo::Ref>::const_iterator from_cit;
     TetStereoToWedgeHash(mol, updown, from);
 
-    for(from_cit=from.begin();from_cit!=from.end();++from_cit) {
+    for(from_cit = from.begin(); from_cit != from.end(); ++from_cit) {
       OBBond* pbond = from_cit->first;
       if(updown[pbond]==OBStereo::UpBond)
         pbond->SetHash();
@@ -360,49 +235,86 @@ namespace Molsketch
     }
   }
 
+  Molecule loadFile(std::istream *input, const std::string &filename)
+  {
+    // Creating and setting conversion classes
+    using namespace OpenBabel;
+    OBConversion conversion ;
+    conversion.SetInFormat(conversion.FormatFromExt(filename)) ;
+    conversion.AddOption("h", OBConversion::GENOPTIONS); // add hydrogens
+    OBMol obmol;
+
+    if (!conversion.Read(&obmol, input)) return Molecule({}, {});
+
+    if (!hasCoordinates(obmol)) {
+      generate2dCoords(obmol);
+      setWedgeAndHash(obmol); // TODO check if this is only needed if no original coords were present or generally for all formats
+    }
+
+    return fromOBMolecule(obmol);
+  }
+
+  std::vector<std::string> getFormats(const std::vector<std::string>& originalFormats) {
+    std::vector<std::string> formats;
+    for (std::string pluginDescription : originalFormats) {
+        auto splitPos = pluginDescription.find(" -- "); // This split is based on OBFormat::Display
+        formats.push_back(pluginDescription.substr(splitPos + 4)
+                        + " (*." + pluginDescription.substr(0, splitPos) + ")");
+    }
+    return formats;
+  }
+
+  std::vector<std::string> outputFormats() {
+    OpenBabel::OBConversion conversion;
+    return getFormats(conversion.GetSupportedOutputFormat());
+  }
+
+  std::vector<std::string> inputFormats() {
+    OpenBabel::OBConversion conversion;
+    return getFormats(conversion.GetSupportedInputFormat());
+  }
+
+  void printAvailableOutputFormats() {
+    auto outputs = outputFormats();
+    std::cout << "Available formats: ";
+    for (auto it = outputs.cbegin(); it != outputs.cend(); ++it) {
+      std::cout << *it;
+      if (it + 1 < outputs.cend()) std::cout << ", ";
+    }
+  }
+
   bool isInputFormatAvailable(OpenBabel::OBConversion conv, const char* format) {
     if (conv.SetInFormat(format)) return true;
-    qCritical("Could not find format: %s", format);
-    qInfo() << ("Available formats: " + outputFormats().join(", "));
+    std::cerr << "Could not find format: " << format << std::endl;
+    printAvailableOutputFormats();
     return false;
   }
 
-  void generate2dCoords(OpenBabel::OBMol& obmol)
-  {
-    OpenBabel::OBOp* gen2D = OpenBabel::OBOp::FindType("gen2D");
-    if (!gen2D || !gen2D->Do(&obmol))
-      qCritical("Could not find gen2D for coordinate generation.");
-  }
-
-  Molecule *fromString(const QString &input, const char* format) {
+  Molecule fromString(const std::string &input, const char* format) {
     OpenBabel::OBConversion conv ;
-    qDebug() << "setting input format" << format;
+    std::cout << "setting input format " << format << std::endl;
     if (!conv.SetInFormat(format)) {
-      qCritical() << "Could not find format:" << format;
-      qInfo() << "Available formats:" << outputFormats().join(", ");
-      return 0;
+      std::cerr << "Could not find format: " << format << std::endl;
+      printAvailableOutputFormats();
+      return Molecule({}, {});
     }
     conv.AddOption("h", OpenBabel::OBConversion::GENOPTIONS);
 
     OpenBabel::OBMol obmol;
-    qDebug() << "reading molecule" << input;
-    if (!conv.ReadString(&obmol, input.toStdString())) {
-      qCritical() << "Could not convert InChI:" << input; // TODO do we need error handling if false?
-      return nullptr;
+    std::cout << "reading molecule " << input << std::endl;
+    if (!conv.ReadString(&obmol, input)) {
+      std::cerr << "Could not convert InChI:" << input << std::endl; // TODO do we need error handling if false?
+      return Molecule({}, {});
     }
-    qDebug() << "Error messages:" << QString::fromStdString(OpenBabel::OBMessageHandler().GetMessageSummary());
+    std::cout << "Error messages: " << OpenBabel::OBMessageHandler().GetMessageSummary() << std::endl;
 
     generate2dCoords(obmol);
-    SetWedgeAndHash(obmol);
+    setWedgeAndHash(obmol);
     return fromOBMolecule(obmol);
   }
 
-  Molecule *fromSmiles(const QString &input) {
-    return fromString(input, "can");
-  }
-
-  Molecule *fromInChI(const QString &input) {
-    return fromString(input.startsWith("InChI=") ? input : "InChI=" + input, INCHI_FORMAT);
+  Molsketch::Core::Molecule fromInChI(const std::string &input) {
+    return fromString(input.starts_with("InChI=") ? input : "InChI=" + input, INCHI_FORMAT);
   }
 
   bool inChIAvailable() {
@@ -413,13 +325,14 @@ namespace Molsketch
     return OpenBabel::OBOp::FindType("gen2D");
   }
 
-  QVector<QPointF> optimizeCoordinates(const Molecule *molecule) {
+  std::vector<Core::Position> optimizeCoordinates(const Molecule &molecule) {
     OpenBabel::OBMol obmol(toOBMolecule(molecule));
     generate2dCoords(obmol);
-    QPolygonF optimizedCoordinates = fromOBMolecule(obmol)->coordinates();
-    optimizedCoordinates.translate(
-          molecule->coordinates().boundingRect().center() -
-          optimizedCoordinates.boundingRect().center());
+    auto optimizedMolecule = fromOBMolecule(obmol);
+    auto shift = molecule.center() - optimizedMolecule.center();
+    auto optimizedCoordinates = optimizedMolecule.coordinates();
+    for (auto position : optimizedCoordinates)
+        position += shift;
     return optimizedCoordinates;
   }
 

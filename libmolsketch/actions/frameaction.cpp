@@ -23,10 +23,11 @@
 #include "molscene.h"
 #include "commands.h"
 #include "frame.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
-#define FRAMEMACRO(ARROWSTRING, ICON, DESCRIPTION) { auto a = new QAction(QIcon(":images/" ICON ".svg"), tr(DESCRIPTION), this); a->setData(ARROWSTRING); addSubAction(a); }
+#define FRAMEMACRO(ARROWSTRING, ICON, DESCRIPTION) { auto a = new QAction(getInternalIcon(ICON), tr(DESCRIPTION), this); a->setData(ARROWSTRING); addSubAction(a); }
 
   // TODO this leads to ugly doubling with FrameTypeWidget
   struct FrameAction::privateData

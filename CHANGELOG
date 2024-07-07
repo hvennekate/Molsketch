@@ -6,6 +6,55 @@
     </ul>
 </b>
 
+<h2>0.8.1 Fluorine-13</h2>
+<ul>
+    <li>Fix color of newly inserted atoms and bonds</li>
+    <li>Fix color of radical electrons</li>
+    <li>Fix color of lone pairs</li>
+</ul>
+
+<h1>0.8.0 Fluorine</h1>
+<ul>
+    <li>Reimplemented rendering of atom labels (should also fix bounding box issues for charges)</li>
+    <li>Enable build with Qt 6</li>
+    <li>Dark mode icons</li>
+</ul>
+
+<h2>0.7.3 Oxygen-18</h2>
+<ul>
+    <li>New bond types</li>
+    <li>This release is mainly for testing the automated release pipeline</li>
+</ul>
+
+<h2>0.7.2 Oxygen-17</h2>
+<ul>
+    <li>Update location of OpenBabel adapter when updating Molsketch</li>
+    <li>Minor fixes in translations build (cmake)</li>
+</ul>
+
+<h2>0.7.1 Oxygen-16</h2>
+<ul>
+    <li>Copy and cut actions also copy SVG image</li>
+    <li>Fixed compilation with Qt 5 versions before Qt 5.14</li>
+    <li>Fixed inclusion of translations for library part for qmake build</li>
+    <li>Fixed inclusion of all translations for cmake build</li>
+    <li>Fixed crashes/errors during copy/cut/paste and when opening files</li>
+    <li>Windows: added installer</li>
+    <li><em>Removed support for Qt 4; filenames changed!</em></li>
+</ul>
+
+<h1>0.7.0 Oxygen</h1>
+<ul>
+    <li>New localizations: Greek, German, and Chinese</li>
+    <li>Direction of attached hydrogen atoms can be set explicitly by user</li>
+    <li>Atom shape can also be a circle instead of a rectangle</li>
+    <li>Bitmap export with adjustable resolution</li>
+    <li>Support OpenBabel 3</li>
+    <li>Fixes for sum formula and molecule tooltip</li>
+    <li>Fix clipping of bonds</li>
+    <li>Fixed OpenBabel support</li>
+</ul>
+
 <h1>0.6.0 Nitrogen</h1>
 <ul>
     <li>Levels on which items are drawn are accessible; bonds are indicated to cover other bonds if on higher level</li>

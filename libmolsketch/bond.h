@@ -45,7 +45,7 @@ namespace Molsketch {
 
   public:
     enum { Type = graphicsItem::BondType };
-    int type() const override {return Type; }
+    int type() const override { return Type; }
 
     enum BondType
     {
@@ -53,9 +53,11 @@ namespace Molsketch {
       DativeDot = 1,
       DativeDash = 2,
       Single = 10,
-      Wedge  = 11,
-      Hash   = 12,
+      Wedge = 11,
+      Hash = 12,
       WedgeOrHash = 13,
+      Thick = 14,
+      Striped = 15,
       DoubleLegacy = 20,
       CisOrTrans = 21,
       DoubleAsymmetric = 22,
@@ -78,7 +80,7 @@ namespace Molsketch {
     explicit Bond(Atom* atomA = 0, // TODO check usage
                   Atom* atomB = 0,
                   Bond::BondType type = Single,
-                  QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER ) ;
+                  QGraphicsItem* parent = 0) ;
     explicit Bond(const Bond& other, Atom *atomA = 0, Atom *atomB = 0);
 
     virtual ~Bond();
@@ -136,7 +138,11 @@ namespace Molsketch {
   private:
     QPainterPath drawHashBond() const;
     QPainterPath drawWedgeBond() const;
+    QPainterPath drawWavyBond() const;
+    QPainterPath drawThickBond() const;
+    QPainterPath drawStripedBond() const;
     QPainterPath getWedgeBondShape() const;
+    QPainterPath getThickBondShape() const;
     void determineDoubleBondOrientation();
     QPainterPath bondPath() const;
     QPointF determineBondDrawingStart(Atom* start, Atom* end) const;
@@ -150,10 +156,13 @@ namespace Molsketch {
     QLineF mapOuterLineToAtom(const Atom *atom, const QLineF &line, bool reverse) const;
     qreal getExtentForStereoBond(const Atom *atom, const QPair<QLineF, QLineF> &outerLines, bool reverse) const;
     QPair<QLineF, QLineF> getOuterLimitsOfStereoBond() const;
+    QPair<QLineF, QLineF> getOuterLimitsOfThickBond() const;
     qreal bondShapeGap() const;
     void paintBrokenBondIndicators(QPainter *painter, const QPointF &begin, const QPointF &end, const QPointF &vb, const QPointF &normalVector);
     QPainterPath getBrokenBondIndicatorsPath(const QPointF &begin, const QPointF &end, const QPointF &normalVector) const;
     QPainterPath clipBrokenBondIndicator(const QPointF &point, const QPointF &otherAtom, const QPointF &normalVector) const;
+    QPainterPath getBondShapeFromOuterLines(const QPair<QLineF, QLineF> &outerLines) const;
+    QPainterPath drawBondComprisedOfStripes(const QPair<QLineF, QLineF> &outerLines) const;
   };
 
 } // namespace

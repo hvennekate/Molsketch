@@ -22,8 +22,6 @@
 #include <QGraphicsItem>
 #include "abstractxmlobject.h"
 
-#include "qtversionmacros.h"
-
 class QUndoCommand ;
 
 namespace Molsketch {
@@ -45,8 +43,8 @@ namespace Molsketch {
       RadicalType = QGraphicsItem::UserType + 11
     };
 
-    graphicsItem(QGraphicsItem* parent = 0 GRAPHICSSCENEHEADER);
-    graphicsItem(const graphicsItem& other GRAPHICSSCENEHEADER);
+    explicit graphicsItem(QGraphicsItem* parent = 0);
+    explicit graphicsItem(const graphicsItem& other);
     ~graphicsItem();
     // TODO XML i/o
     void setColor(const QColor &color) ;
@@ -64,6 +62,7 @@ namespace Molsketch {
     virtual QPolygonF coordinates() const = 0;
     virtual void setCoordinates(const QVector<QPointF>& c) = 0;
     void setCoordinates(const QPolygonF& c);
+    void scale(qreal scaling);
     virtual void setCoordinate(const int& index, const QPointF& p);
     virtual QPointF getPoint(const int& index) const;
     virtual QPointF lastPoint() const;
@@ -130,6 +129,13 @@ namespace Molsketch {
     // TODO automatically return item children from graphicsitem as xmlitem
   };
 
+#ifdef QT_DEBUG
+  QDebug operator <<(QDebug debug, const graphicsItem &item);
+#endif
+
 } // namespace
+
+QPolygonF operator *(const QPolygonF &polygon, qreal scaling);
+QPolygonF operator *(qreal scaling, const QPolygonF &polygon);
 
 #endif // GRAPHICSITEM_H

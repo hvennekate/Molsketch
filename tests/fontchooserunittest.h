@@ -83,6 +83,7 @@ public:
   }
 
   void testSettingFontProgrammatically() {
+    TS_SKIP("To be reenabled with proper fonts");
     TS_ASSERT_DIFFERS(fontName->currentText(), "Times New Roman");
     TS_ASSERT_DIFFERS(fontSize->value(), FONT_SIZE);
     TS_ASSERT(!bold->isChecked());

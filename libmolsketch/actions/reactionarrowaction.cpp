@@ -20,6 +20,7 @@
 #include "arrow.h"
 #include "molscene.h"
 #include "commands.h"
+#include "iconutils.h"
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 
@@ -29,7 +30,7 @@ namespace Molsketch {
   {
   public:
     privateData(QObject* parent)
-#define ARROWACTION(NAME,DESCRIPTION,ICON) NAME(new QAction(QIcon(":images/" ICON ".svg"), tr(DESCRIPTION), parent))
+#define ARROWACTION(NAME,DESCRIPTION,ICON) NAME(new QAction(getInternalIcon(ICON), tr(DESCRIPTION), parent))
       : ARROWACTION(normalArrow, "Single arrow", "simplearrow"),
         ARROWACTION(doubleArrow, "Double arrow", "doublearrow"),
         ARROWACTION(hookArrow, "Half arrow", "halfarrow"),

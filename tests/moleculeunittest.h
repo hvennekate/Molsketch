@@ -56,7 +56,7 @@ class MoleculeUnitTest : public CxxTest::TestSuite {
   }
 
   void performAssertionsOnPiElectronSystem(const ElectronSystem* electronSystem, QSet<Atom*> expectedAtoms, int additionalElectrons = 0) {
-    QS_ASSERT_EQUALS(electronSystem->atoms().toSet(), expectedAtoms);
+    QS_ASSERT_EQUALS(toSet(electronSystem->atoms()), expectedAtoms);
     TS_ASSERT_EQUALS(electronSystem->numAtoms(), expectedAtoms.size());
     TS_ASSERT_EQUALS(electronSystem->numElectrons(), expectedAtoms.size() + additionalElectrons);
     TS_ASSERT_EQUALS(electronSystem->type(), ElectronSystem::PiType);

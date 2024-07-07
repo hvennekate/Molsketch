@@ -4,17 +4,17 @@
 <context>
     <name>AlignRowDialog</name>
     <message>
-        <location filename="alignrowdialog.ui" line="14"/>
+        <location filename="actions/alignrowdialog.ui" line="14"/>
         <source>Align</source>
         <translation>Στοίχιση</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="20"/>
+        <location filename="actions/alignrowdialog.ui" line="20"/>
         <source>Distance</source>
         <translation>Απόσταση</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="33"/>
+        <location filename="actions/alignrowdialog.ui" line="33"/>
         <source>Inter&amp;val</source>
         <translation>Διάστ&amp;ημα</translation>
     </message>
@@ -27,56 +27,110 @@
         <translation>Ιδιότητες ατόμου</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="20"/>
+        <location filename="atompopup.ui" line="32"/>
+        <source>General</source>
+        <translation>Γενικά</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="38"/>
         <source>S&amp;ymbol</source>
         <translation>Σύμβο&amp;λο</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="33"/>
+        <location filename="atompopup.ui" line="51"/>
         <source>Charge</source>
         <translation>Φορτίο</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="50"/>
+        <location filename="atompopup.ui" line="79"/>
+        <source>Shape</source>
+        <translation>Σχήμα</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="87"/>
+        <source>Rectangle</source>
+        <translation>Παραλληλόγραμμο</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="92"/>
+        <source>Circle</source>
+        <translation>Κύκλος</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="116"/>
+        <location filename="atompopup.ui" line="122"/>
         <source>Hydrogens</source>
         <translation>Υδρογόνα</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="74"/>
+        <location filename="atompopup.ui" line="139"/>
+        <source>Alignment</source>
+        <translation>Στοίχιση</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="165"/>
+        <source>Lone Pairs</source>
+        <translation>Μονήρη Ζεύγη</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="277"/>
+        <source>Radical Electrons</source>
+        <translation>Ριζικά Ηλεκτρόνια</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="293"/>
         <source>Radicals</source>
         <translation>Ρίζες</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="139"/>
-        <location filename="atompopup.ui" line="209"/>
+        <location filename="atompopup.ui" line="256"/>
+        <location filename="atompopup.ui" line="358"/>
         <source>E</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="221"/>
+        <location filename="atompopup.ui" line="191"/>
         <source>Lone pairs</source>
         <translation>Μονήρη ζεύγη</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="228"/>
+        <location filename="atompopup.ui" line="283"/>
         <source>Diameter</source>
         <translation>Διάμετρος</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="235"/>
+        <location filename="atompopup.ui" line="171"/>
         <source>Line width</source>
         <translation>Πλάτος γραμμής</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="242"/>
+        <location filename="atompopup.ui" line="184"/>
         <source>Length</source>
         <translation>Μήκος</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="258"/>
+        <location filename="atompopup.ui" line="68"/>
         <source>Newman
 diameter</source>
         <translation>Διάμετρος Newman</translation>
+    </message>
+</context>
+<context>
+    <name>ElementAlignment</name>
+    <message>
+        <location filename="elementalignment.ui" line="20"/>
+        <source>Form</source>
+        <translation>Σχήμα</translation>
+    </message>
+    <message>
+        <location filename="elementalignment.ui" line="58"/>
+        <source>E</source>
+        <translation>Σ</translation>
+    </message>
+    <message>
+        <location filename="elementalignment.ui" line="91"/>
+        <source>Auto</source>
+        <translation>Αυτόματο</translation>
     </message>
 </context>
 <context>
@@ -108,17 +162,32 @@ diameter</source>
 <context>
     <name>Molsketch::AtomPopup</name>
     <message>
-        <location filename="atompopup.cpp" line="137"/>
+        <location filename="atompopup.cpp" line="128"/>
+        <source>Change element</source>
+        <translation>Αλλαγή στοιχείου</translation>
+    </message>
+    <message>
+        <location filename="atompopup.cpp" line="132"/>
+        <source>Change charge</source>
+        <translation>Αλλαγή φορτίου</translation>
+    </message>
+    <message>
+        <location filename="atompopup.cpp" line="136"/>
+        <source>Change number of hydrogens</source>
+        <translation>Αλλαγή αριθμού υδρογόνων</translation>
+    </message>
+    <message>
+        <location filename="atompopup.cpp" line="140"/>
         <source>Change Newman diameter</source>
         <translation>Αλλαγή διαμέτρου Newman</translation>
     </message>
     <message>
-        <location filename="atompopup.cpp" line="152"/>
+        <location filename="atompopup.cpp" line="154"/>
         <source>Change radical electrons</source>
         <translation>Αλλαγή ριζικών ηλεκτρονίων</translation>
     </message>
     <message>
-        <location filename="atompopup.cpp" line="169"/>
+        <location filename="atompopup.cpp" line="171"/>
         <source>Change lone pairs</source>
         <translation>Αλλαγή μονήρων ζευγών</translation>
     </message>
@@ -157,7 +226,7 @@ diameter</source>
         <translation>Διακόσμηση</translation>
     </message>
     <message>
-        <location filename="actions/frameaction.cpp" line="143"/>
+        <location filename="actions/frameaction.cpp" line="142"/>
         <source>Add frame or brackets</source>
         <translation>Προσθήκη πλαισίου ή αγκυλών</translation>
     </message>
@@ -214,7 +283,7 @@ diameter</source>
 <context>
     <name>Molsketch::LibraryView</name>
     <message>
-        <location filename="libraryview.cpp" line="37"/>
+        <location filename="libraryview.cpp" line="36"/>
         <source>No molecules to show</source>
         <translation>Δεν υπάρχουν μόρια προς προβολή</translation>
     </message>
@@ -222,7 +291,7 @@ diameter</source>
 <context>
     <name>Molsketch::LineUpAction</name>
     <message>
-        <location filename="lineupaction.cpp" line="99"/>
+        <location filename="actions/lineupaction.cpp" line="99"/>
         <source>Space items equally</source>
         <translation>Τοποθέτηση στοιχείων κατά ίσα διαστήματα</translation>
     </message>
@@ -230,47 +299,46 @@ diameter</source>
 <context>
     <name>Molsketch::MolScene</name>
     <message>
-        <location filename="molscene.cpp" line="239"/>
+        <location filename="molscene.cpp" line="237"/>
         <source>cutting items</source>
         <translation>αποκοπή στοιχείων</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="268"/>
+        <location filename="molscene.cpp" line="303"/>
         <source>Paste</source>
         <translation>Επικόλληση</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="320"/>
+        <location filename="molscene.cpp" line="362"/>
         <source>MolsKetch Drawing</source>
         <translation>Σχέδιο MolsKetch</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="356"/>
         <source>add molecule</source>
-        <translation>προσθήκη μορίου</translation>
+        <translation type="vanished">προσθήκη μορίου</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="402"/>
+        <location filename="molscene.cpp" line="427"/>
         <source>Mouse wheel configuration</source>
         <translation>Ρύθμιση τροχού ποντικιού</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="403"/>
+        <location filename="molscene.cpp" line="428"/>
         <source>Mouse wheel use has not been configured.Should the wheel be used to zoom, or to cycle tool settings?</source>
         <translation>Η χρήση του τροχού του ποντικιού δεν έχει ρυθμιστεί. Να χρησιμοποιείται ο τροχός για ζουμ, ή για κυκλική εναλλαγή των παραμέτρων εργαλείων;</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="406"/>
+        <location filename="molscene.cpp" line="431"/>
         <source>Use to zoom</source>
         <translation>Χρήση για ζουμ</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="407"/>
+        <location filename="molscene.cpp" line="432"/>
         <source>Use to cycle tool options</source>
         <translation>Χρήση για κυκλική εναλλαγή των παραμέτρων εργαλείων</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="646"/>
+        <location filename="molscene.cpp" line="682"/>
         <source>insert molecule</source>
         <translation>εισαγωγή μορίου</translation>
     </message>
@@ -595,12 +663,12 @@ diameter</source>
 <context>
     <name>Molsketch::TextItem</name>
     <message>
-        <location filename="textitem.cpp" line="87"/>
+        <location filename="textitem.cpp" line="86"/>
         <source>Move text item</source>
         <translation>Μετακίνηση στοιχείου κειμένου</translation>
     </message>
     <message>
-        <location filename="textitem.cpp" line="111"/>
+        <location filename="textitem.cpp" line="110"/>
         <source>Edit text</source>
         <translation>Επεξεργασία κειμένου</translation>
     </message>
@@ -608,32 +676,32 @@ diameter</source>
 <context>
     <name>Molsketch::TypeListDialog</name>
     <message>
-        <location filename="typelistdialog.ui" line="14"/>
+        <location filename="actions/typelistdialog.ui" line="14"/>
         <source>Select types</source>
         <translation>Επιλογή ειδών</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="20"/>
+        <location filename="actions/typelistdialog.ui" line="20"/>
         <source>Molecules</source>
         <translation>Μόρια</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="27"/>
+        <location filename="actions/typelistdialog.ui" line="27"/>
         <source>Atoms</source>
         <translation>Άτομα</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="34"/>
+        <location filename="actions/typelistdialog.ui" line="34"/>
         <source>Bonds</source>
         <translation>Δεσμοί</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="41"/>
+        <location filename="actions/typelistdialog.ui" line="41"/>
         <source>Arrows</source>
         <translation>Βέλη</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="48"/>
+        <location filename="actions/typelistdialog.ui" line="48"/>
         <source>Decorations (frames, brackets)</source>
         <translation>Διακοσμήσεις (πλαίσια, αγκύλες)</translation>
     </message>
@@ -667,17 +735,17 @@ diameter</source>
 <context>
     <name>Molsketch::ZLevelStepAction</name>
     <message>
-        <location filename="actions/incdecaction.cpp" line="187"/>
+        <location filename="actions/incdecaction.cpp" line="186"/>
         <source>Drawing Level</source>
         <translation>Επίπεδο σχεδίασης</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="190"/>
+        <location filename="actions/incdecaction.cpp" line="189"/>
         <source>Move up</source>
         <translation>Μετακίνηση πάνω</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="191"/>
+        <location filename="actions/incdecaction.cpp" line="190"/>
         <source>Move down</source>
         <translation>Μετακίνηση κάτω</translation>
     </message>
@@ -701,17 +769,17 @@ diameter</source>
 <context>
     <name>Molsketch::chargeAction</name>
     <message>
-        <location filename="actions/incdecaction.cpp" line="150"/>
+        <location filename="actions/incdecaction.cpp" line="149"/>
         <source>Charge</source>
         <translation>Φορτίο</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="153"/>
+        <location filename="actions/incdecaction.cpp" line="152"/>
         <source>Increase charge</source>
         <translation>Αύξηση φορτίου</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="154"/>
+        <location filename="actions/incdecaction.cpp" line="153"/>
         <source>Decrease charge</source>
         <translation>Μείωση φορτίου</translation>
     </message>
@@ -750,48 +818,48 @@ diameter</source>
 <context>
     <name>Molsketch::drawAction</name>
     <message>
-        <location filename="actions/drawaction.cpp" line="120"/>
+        <location filename="actions/drawaction.cpp" line="115"/>
         <source>change element</source>
         <translation>αλλαγή στοιχείου</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="123"/>
-        <location filename="actions/drawaction.cpp" line="175"/>
+        <location filename="actions/drawaction.cpp" line="118"/>
+        <location filename="actions/drawaction.cpp" line="170"/>
         <source>add atom</source>
         <translation>προσθήκη ατόμου</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="128"/>
+        <location filename="actions/drawaction.cpp" line="123"/>
         <source>draw bond</source>
         <translation>σχεδίαση δεσμού</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="145"/>
+        <location filename="actions/drawaction.cpp" line="140"/>
         <source>change bond type</source>
         <translation>αλλαγή είδους δεσμού</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="147"/>
+        <location filename="actions/drawaction.cpp" line="142"/>
         <source>flip bond</source>
         <translation>αναστροφή δεσμού</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="165"/>
+        <location filename="actions/drawaction.cpp" line="160"/>
         <source>add molecule</source>
         <translation>προσθήκη μορίου</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="170"/>
+        <location filename="actions/drawaction.cpp" line="165"/>
         <source>Add atom</source>
         <translation>Προσθήκη ατόμου</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="226"/>
+        <location filename="actions/drawaction.cpp" line="217"/>
         <source>Draw mode</source>
         <translation>Κατάσταση σχεδίασης</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="229"/>
+        <location filename="actions/drawaction.cpp" line="220"/>
         <source>Draw</source>
         <translation>Σχεδίαση</translation>
     </message>
@@ -825,17 +893,17 @@ diameter</source>
 <context>
     <name>Molsketch::hydrogenAction</name>
     <message>
-        <location filename="actions/incdecaction.cpp" line="162"/>
+        <location filename="actions/incdecaction.cpp" line="161"/>
         <source>Hydrogens</source>
         <translation>Υδρογόνα</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="165"/>
+        <location filename="actions/incdecaction.cpp" line="164"/>
         <source>Add implicit hydrogen</source>
         <translation>Προσθήκη εννοούμενου υδρογόνου</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="166"/>
+        <location filename="actions/incdecaction.cpp" line="165"/>
         <source>Remove implicit hydrogen</source>
         <translation>Αφαίρεση εννοούμενου υδρογόνου</translation>
     </message>
@@ -899,7 +967,7 @@ diameter</source>
         <translation>Βέλος</translation>
     </message>
     <message>
-        <location filename="actions/reactionarrowaction.cpp" line="98"/>
+        <location filename="actions/reactionarrowaction.cpp" line="97"/>
         <source>draw arrow</source>
         <translation>σχεδιασμός βέλους</translation>
     </message>
@@ -907,12 +975,12 @@ diameter</source>
 <context>
     <name>Molsketch::ringAction</name>
     <message>
-        <location filename="actions/ringaction.cpp" line="147"/>
+        <location filename="actions/ringaction.cpp" line="143"/>
         <source>Ring</source>
         <translation>Δακτύλιος</translation>
     </message>
     <message>
-        <location filename="actions/ringaction.cpp" line="278"/>
+        <location filename="actions/ringaction.cpp" line="274"/>
         <source>Add ring</source>
         <translation>Προσθήκη δακτυλίου</translation>
     </message>
@@ -920,12 +988,12 @@ diameter</source>
 <context>
     <name>Molsketch::rotateAction</name>
     <message>
-        <location filename="actions/rotateaction.cpp" line="118"/>
+        <location filename="actions/rotateaction.cpp" line="114"/>
         <source>Rotate</source>
         <translation>Περιστροφή</translation>
     </message>
     <message>
-        <location filename="actions/rotateaction.cpp" line="130"/>
+        <location filename="actions/rotateaction.cpp" line="126"/>
         <source>°
 Hold Shift to use fixed angles.</source>
         <translation>°
@@ -935,7 +1003,7 @@ Hold Shift to use fixed angles.</source>
 <context>
     <name>Molsketch::translateAction</name>
     <message>
-        <location filename="actions/rotateaction.cpp" line="142"/>
+        <location filename="actions/rotateaction.cpp" line="138"/>
         <source>Move</source>
         <translation>Μετκίνηση</translation>
     </message>
@@ -948,7 +1016,7 @@ Hold Shift to use fixed angles.</source>
         <translation>Άνοιγμα μορίου</translation>
     </message>
     <message>
-        <location filename="graphicsitem.cpp" line="58"/>
+        <location filename="graphicsitem.cpp" line="54"/>
         <source>Move</source>
         <translation>Μετακίνηση</translation>
     </message>

@@ -37,7 +37,7 @@ using namespace Molsketch;
 
 struct XmlObjectInterfaceForTesting : public XmlObjectInterface {
   QXmlStreamReader& readXml(QXmlStreamReader &in){
-    QS_ASSERT_EQUALS(in.name(), "innerTestElement");
+    QS_ASSERT_EQUALS(in.name().toString(), "innerTestElement");
     TS_ASSERT_EQUALS(in.readNext(), QXmlStreamReader::EndElement);
     return in;
   }
@@ -167,7 +167,7 @@ public:
   void tearDown() {
     if (reader) {
       TS_ASSERT(reader->isEndElement())
-      QS_ASSERT_EQUALS(reader->name(), "testElement")
+      QS_ASSERT_EQUALS(reader->name().toString(), "testElement")
     }
     delete testObject;
     delete reader;
@@ -298,7 +298,7 @@ public:
     ReadingTestSetup setup(testObject);
     prepareReader("<testElement />\n<A />\n");
     testObject->readXml(*reader);
-    QS_ASSERT_EQUALS(reader->name(), "testElement");
+    QS_ASSERT_EQUALS(reader->name().toString(), "testElement");
     QS_ASSERT_EQUALS(reader->tokenType(), QXmlStreamReader::EndElement);
   }
 

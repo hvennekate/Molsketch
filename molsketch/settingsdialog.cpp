@@ -87,6 +87,7 @@ void SettingsDialog::setInitialValues()
 
   ui.libraryPath->setText(settings->obabelIfacePath());
   ui.obfPath->setText(settings->obabelFormatsPath());
+  ui.wikidataQueryUrl->setText(settings->wikiQueryUrl()->get());
   // TODO accceptance test
 }
 
@@ -116,6 +117,7 @@ void SettingsDialog::applyChanges()
 
   settings->setObabelIfacePath(ui.libraryPath->text());
   settings->setObabelFormatsPath(ui.obfPath->text());
+  settings->wikiQueryUrl()->set(ui.wikidataQueryUrl->text());
 
   settings->transferFrom(*sceneSettingsFacade);
 
@@ -162,6 +164,14 @@ void SettingsDialog::on_obfPathButton_clicked() {
 }
 
 void SettingsDialog::on_libraryPathButton_clicked() {
-  QString filename = QFileDialog::getOpenFileName(0, tr("Path to obabelIface"), ui.libraryPath->text(), "*.dll"); // TODO replace dll with appropriate extension
+  QString filename = QFileDialog::getOpenFileName(0, tr("Path to obabelIface"), ui.libraryPath->text(),
+#ifdef Q_OS_WINDOWS
+          "*.dll (*.dll)"
+#elif defined Q_OS_UNIX
+          "*.so (*.so)"
+#else
+          ""
+#endif
+                                                  );
   if (!filename.isEmpty()) ui.libraryPath->setText(filename);
 }

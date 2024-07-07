@@ -53,26 +53,6 @@ public:
   void assertPayloads(const QList<Content>& expected) { QS_ASSERT_EQUALS(expected, payloads); }
 };
 
-template<typename ... Types>
-QDebug operator<<(QDebug debug, const std::tuple<Types...>& tuple) {
-  debug << "Tuple [";
-  printTupel(tuple, debug);
-  return debug << "]";
-}
-
-template<std::size_t I = 0, typename... TupelTypes>
-typename std::enable_if<I == sizeof...(TupelTypes)>::type
-  printTupel(const std::tuple<TupelTypes...>&, QDebug&) {}
-
-template<std::size_t I = 0, typename... TupelTypes>
-typename std::enable_if<I < sizeof...(TupelTypes)>::type
-  printTupel(const std::tuple<TupelTypes...>& tupel, QDebug& debug)
-  {
-    debug << std::get<I>(tupel);
-    if (I + 1 < sizeof...(TupelTypes)) debug << ", ";
-    printTupel<I + 1, TupelTypes...>(tupel, debug);
-  }
-
 class QRealSignalCounter : public QObject, public SignalCounter<qreal> {
   Q_OBJECT
 public:
@@ -86,7 +66,7 @@ class BoolSignalCounter : public QObject, public SignalCounter<bool> {
 public:
   explicit BoolSignalCounter(QObject *parent = 0);
 public slots:
-  void record(const bool& value);
+  void record(const bool &value);
 };
 
 class ColorSignalCounter : public QObject, public SignalCounter<QColor> {
@@ -94,7 +74,7 @@ class ColorSignalCounter : public QObject, public SignalCounter<QColor> {
 public:
   explicit ColorSignalCounter(QObject *parent = 0);
 public slots:
-  void record(const QColor&value);
+  void record(const QColor &value);
 };
 
 class FontSignalCounter : public QObject, public SignalCounter<QFont> {
@@ -102,7 +82,7 @@ class FontSignalCounter : public QObject, public SignalCounter<QFont> {
 public:
   explicit FontSignalCounter(QObject *parent = 0);
 public slots:
-  void record(const QFont&value);
+  void record(const QFont &value);
 };
 
 class StringListSignalCounter : public QObject, public SignalCounter<QStringList> {
@@ -110,7 +90,15 @@ class StringListSignalCounter : public QObject, public SignalCounter<QStringList
 public:
   explicit StringListSignalCounter(QObject *parent = 0);
 public slots:
-  void record(const QStringList&value);
+  void record(const QStringList &value);
+};
+
+class StringSignalCounter : public QObject, public SignalCounter<QString> {
+  Q_OBJECT
+public:
+  explicit StringSignalCounter(QObject *parent = 0);
+public slots:
+  void record(const QString &value);
 };
 
 class StringDoubleMapSignalCounter : public QObject, public SignalCounter<QMap<QString, qreal>> {

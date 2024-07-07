@@ -34,7 +34,7 @@ namespace Molsketch {
     Q_OBJECT
     Q_DECLARE_PRIVATE(SettingsItem)
   public:
-    explicit SettingsItem(const QString &key, SettingsFacade* facade, QObject *parent = 0);
+    explicit SettingsItem(const QString &key, SettingsFacade* facade, QObject *parent = 0, const QVariant &defaultValue = QVariant());
     ~SettingsItem();
     virtual QString serialize() const = 0; // TODO check visibility
     virtual QVariant getVariant() const = 0;
@@ -159,6 +159,20 @@ namespace Molsketch {
     void set(const QMap<std::pair<QString, int>, qreal>&);
   signals:
     void updated(const QMap<std::pair<QString, int>, qreal>&);
+  };
+
+  class StringSettingsItem : public SettingsItem {
+    Q_OBJECT
+  public:
+    StringSettingsItem(const QString& key, SettingsFacade *facade, QObject *parent = 0, const QVariant &defaultValue = QVariant());
+    QString serialize() const override;
+    QVariant getVariant() const override;
+    QString get() const;
+    void set(const QVariant&) override;
+  public slots:
+    void set(const QString&) override;
+  signals:
+    void updated(const QString&);
   };
 
   class SettingsItemUndoCommand : public Commands::Command<SettingsItem, SettingsItemUndoCommand, Commands::SettingsItemId> {

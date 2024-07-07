@@ -50,9 +50,7 @@ namespace Molsketch {
     setStyleSheet("");
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
-#if QT_VERSION >= 0x040300
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#endif
   }
 
   MolView::~MolView() {}

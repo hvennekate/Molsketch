@@ -20,6 +20,7 @@
 #include <algorithm>
 #include "alignmentaction.h"
 #include "commands.h"
+#include "iconutils.h"
 #include <QDebug>
 
 namespace Molsketch {
@@ -54,7 +55,7 @@ namespace Molsketch {
   QPointF getShift(const graphicsItem* item, const qreal& targetValue) const override {return SHIFT; } \
   qreal initialValue() const override { return START; } \
   public: AlignmentActionImpl(MolScene *scene) : AlignmentAction(DESCRIPTION, scene) \
-  { setIcon(QIcon(":images/" ICON ".svg")); } \
+  { setIcon(getInternalIcon(ICON)); } \
 }; \
   return new AlignmentActionImpl(scene);
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2018 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2018 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +23,6 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QTableView>
-#include <QXmlStreamReader>
 #include <QMenuBar>
 
 void mouseMoveEvent(QWidget *widget, Qt::MouseButton button, Qt::KeyboardModifiers stateKey, QPoint pos, int delay) {
@@ -84,47 +83,10 @@ void clickCheckBox(QCheckBox *checkBox) {
   leftMouseClick(checkBox, {minimumSize.width()/2, minimumSize.height()/2});
 }
 
-int xmlElementCount(const QString& xml, const QString& element) {
-  int count = 0;
-  QXmlStreamReader reader(xml);
-  while (findNextElement(reader, element))
-    ++count;
-  return count;
-}
-
-bool findNextElement(QXmlStreamReader& reader, const QString& element) {
-  while (!reader.atEnd())
-    if (QXmlStreamReader::StartElement == reader.readNext() && reader.name() == element)
-      return true;
-  return false;
-}
-
-QPolygonF getPointsFromXml(const QXmlStreamReader &reader, const QString &attribute) {
-  QStringRef localValue = reader.attributes().value("points");
-  QVector<QStringRef> pointsText = localValue.split(" ", QString::SkipEmptyParts);
-  QPolygonF points;
-  for (QStringRef pointText : pointsText) {
-    QVector<QStringRef> coordsText = pointText.split(",");
-    QSM_ASSERT_EQUALS(pointText.toString(), coordsText.size(),2);
-    points << QPointF(coordsText[0].toDouble(), coordsText[1].toDouble());
-  }
-  return points;
-}
-
-QXmlStreamAttributes getAttributesOfParentElement(QXmlStreamReader& reader, const QString &element) {
-  QXmlStreamAttributes parentAttributes;
-  while (!reader.atEnd()) {
-    if (reader.name() == element) return parentAttributes;
-    parentAttributes = reader.attributes();
-    while (!reader.atEnd() && QXmlStreamReader::StartElement != reader.readNext());
-  }
-  return QXmlStreamAttributes();
-}
-
 template<typename T, QString (T::*FP)() const>
 T *findItem(const QList<T*> &items, const QString& text) {
  for (auto item : items)
-   if ((item->*FP)().remove(QRegExp("&(?!&)")) == text)
+   if ((item->*FP)().remove(QRegularExpression("&(?!&)")) == text)
      return item;
  TS_FAIL("Could not find item by the name of " + text);
  return nullptr;
@@ -156,4 +118,8 @@ void doubleClick(QWidget *w, QPoint p) {
 
 void doubleClick(QWindow *w, QPoint p) {
   QTest::mouseDClick(w, Qt::LeftButton, Qt::KeyboardModifiers(), p);
+}
+
+QDebug operator <<(QDebug debug, const std::string &string) {
+  return debug << QString::fromStdString(string);
 }

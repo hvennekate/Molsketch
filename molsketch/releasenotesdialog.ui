@@ -26,6 +26,9 @@
     </widget>
    </item>
    <item>
+    <widget class="ConfigurationUpdates" name="configUpdates" native="true"/>
+   </item>
+   <item>
     <widget class="QTextBrowser" name="textBrowser">
      <property name="source">
       <url>
@@ -49,6 +52,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ConfigurationUpdates</class>
+   <extends>QWidget</extends>
+   <header>configurationupdates.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="molsketch.qrc"/>
  </resources>

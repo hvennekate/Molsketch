@@ -27,7 +27,7 @@
 #define ENCAPSULE_OB_CALL(CALL) try { CALL } catch (...) { \
   QMessageBox::critical(nullptr, "Error", "OpenBabel/obabeliface threw an exception. Please report to the author."); }
 
-static const char BABEL_LIBDIR_VARIABLE[] = "BABEL_LIBDIR";
+static const char BABEL_LIBDIR_VARIABLE[] = "BABEL_LIBDIR"; // TODO take from OpenBabel directly
 
 class OBabelIfaceLoaderPrivate {
   Q_DISABLE_COPY (OBabelIfaceLoaderPrivate)
@@ -38,41 +38,33 @@ class OBabelIfaceLoaderPrivate {
   QString openBabelFormatsPath;
   Molsketch::loadFileFunctionPointer load;
   Molsketch::saveFileFunctionPointer save;
-  Molsketch::smilesFunctionPointer toSmiles;
-  Molsketch::fromSmilesFunctionPointer fromSmiles;
   Molsketch::formatsFunctionPointer inputFormats;
   Molsketch::formatsFunctionPointer outputFormats;
   Molsketch::fromInChIFunctionPointer fromInChI;
   Molsketch::optimizeCoordsPointer optimizeCoordinates;
   Molsketch::formatAvailablePointer inChIAvailable;
   Molsketch::formatAvailablePointer gen2dAvailable;
-  Molsketch::callOsraFunctionPointer callOsra;
   void loadFunctions () {
     load = (Molsketch::loadFileFunctionPointer)openBabelInterface.resolve (
       "loadFile"); // TODO put into obabeliface.h -- question: what happens when lib is dynamically loaded (with its constants etc.)?
     save = (Molsketch::saveFileFunctionPointer)openBabelInterface.resolve ("saveFile");
-    toSmiles = (Molsketch::smilesFunctionPointer)openBabelInterface.resolve ("smiles");
-    fromSmiles = (Molsketch::fromSmilesFunctionPointer)openBabelInterface.resolve ("fromSmiles");
     inputFormats = (Molsketch::formatsFunctionPointer)openBabelInterface.resolve ("inputFormats");
     outputFormats = (Molsketch::formatsFunctionPointer)openBabelInterface.resolve ("outputFormats");
     fromInChI = (Molsketch::fromInChIFunctionPointer)openBabelInterface.resolve ("fromInChI");
     optimizeCoordinates = (Molsketch::optimizeCoordsPointer)openBabelInterface.resolve("optimizeCoordinates");
     inChIAvailable = (Molsketch::formatAvailablePointer)openBabelInterface.resolve ("inChIAvailable");
     gen2dAvailable = (Molsketch::formatAvailablePointer)openBabelInterface.resolve("gen2dAvailable");
-    callOsra = (Molsketch::callOsraFunctionPointer)openBabelInterface.resolve("call_osra");
 
     qDebug() << "Loaded OpenBabel functions. Available Functions:"
              << "load:" << load
              << "save:" << save
-             << "toSmiles:" << toSmiles
-             << "fromSmiles:" << fromSmiles
              << "inputFormats:" << inputFormats
              << "outputFormats:" << outputFormats
              << "fromInChI:" << fromInChI
              << "gen2dAvailable:" << gen2dAvailable
              << "optimizeCoordinates:" << optimizeCoordinates
              << "inChIAvailable:" << inChIAvailable
-             << "callOsra:" << callOsra;
+             << "Error:" << openBabelInterface.errorString();
   }
   void unloadFunctions () { // TODO check if this is really necessary
   }
@@ -95,50 +87,61 @@ OBabelIfaceLoader::OBabelIfaceLoader (QObject* parent) : QObject (parent), d_ptr
 
 OBabelIfaceLoader::~OBabelIfaceLoader () { delete d_ptr; }
 
+template<class Output, class Input, typename Transformation>
+Output convertContainer(Input inputContainer, Transformation transformation = [] (auto item) { return item; }) {
+  Output result;
+  std::transform(inputContainer.cbegin(), inputContainer.cend(), result.begin(), transformation);
+  return result;
+}
+
+QStringList toQStringList(const std::vector<std::string>& vectorOfStrings) {
+  return convertContainer<QStringList>(vectorOfStrings, &QString::fromStdString);
+}
+
 QStringList OBabelIfaceLoader::inputFormats () {
   Q_D (OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->inputFormats) return d->inputFormats ();)
+  ENCAPSULE_OB_CALL(if (d->inputFormats) return toQStringList(d->inputFormats());)
   qWarning ("No OpenBabel formats available for input");
   return QStringList ();
 }
 
 QStringList OBabelIfaceLoader::outputFormats () {
   Q_D (OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->outputFormats) return d->outputFormats();)
+  ENCAPSULE_OB_CALL(if (d->outputFormats) return toQStringList(d->outputFormats());)
   qWarning ("No OpenBabel formats available for output");
   return QStringList ();
 }
 
-Molsketch::Molecule* OBabelIfaceLoader::loadFile (const QString& filename) {
+Molsketch::Molecule* OBabelIfaceLoader::loadFile (std::istream *input, const std::string &filename, qreal scaling) {
   Q_D (OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->load) return d->load (filename);)
+  ENCAPSULE_OB_CALL(if (d->load) return Molsketch::Molecule::fromCoreMolecule(d->load (input, filename), scaling);)
   qWarning ("No OpenBabel support available for loading file");
   return nullptr;
 }
 
-Molsketch::Molecule *OBabelIfaceLoader::callOsra(const QString filename) {
-  Q_D(OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->callOsra) return d->callOsra(filename);)
-  return nullptr;
-}
-
-bool OBabelIfaceLoader::saveFile (const QString& fileName, QGraphicsScene* scene, bool use3d) {
+bool OBabelIfaceLoader::saveFile (std::ostream *output, const std::string &filename, const QList<Molsketch::Molecule *> &originalMolecules, bool use3d, bool addHydrogens, qreal scaling) {
+  auto nonNullMolecules = QList<Molsketch::Molecule*>();
+  std::copy_if(originalMolecules.cbegin(), originalMolecules.cend(), nonNullMolecules.begin(), [] (auto *input) { return input != nullptr; });
+  auto molecules = convertContainer<std::vector<Molsketch::Core::Molecule>>(nonNullMolecules, [&] (Molsketch::Molecule* original) { return original->toCoreMolecule(scaling); });
   Q_D (OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->save) return d->save (fileName, scene, use3d ? 3 : 2);)
+  ENCAPSULE_OB_CALL(if (d->save) return d->save (output, filename, molecules, use3d ? 3 : 2, addHydrogens);)
   qWarning ("No support for saving OpenBabel available");
   return false;
 }
 
 Molsketch::Molecule *OBabelIfaceLoader::convertInChI(const QString &InChI) {
+  // TODO this should also have a scaling parameter!
   Q_D(OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->fromInChI) return d->fromInChI(InChI);)
+  ENCAPSULE_OB_CALL(if (d->fromInChI) return Molsketch::Molecule::fromCoreMolecule(d->fromInChI(InChI.toStdString()));)
   qWarning("No support for converting InChI available");
   return nullptr;
 }
 
 QVector<QPointF> OBabelIfaceLoader::optimizeCoordinates(const Molsketch::Molecule *molecule) {
   Q_D(OBabelIfaceLoader);
-  ENCAPSULE_OB_CALL(if (d->optimizeCoordinates) return d->optimizeCoordinates(molecule);)
+  ENCAPSULE_OB_CALL(if (d->optimizeCoordinates)
+                    return convertContainer<QVector<QPointF>>
+                    (d->optimizeCoordinates(molecule->toCoreMolecule()), [] (auto item) { return QPointF(item.getX(), item.getY()); }); )
   qWarning("No support for optimizing coordinates using OpenBabel available");
   return molecule->coordinates();
 }
@@ -147,6 +150,7 @@ void OBabelIfaceLoader::reloadObabelIface (const QString& path) {
   Q_D (OBabelIfaceLoader);
   d->openBabelInterface.unload ();
   d->openBabelInterface.setFileName (path);
+  d->openBabelInterface.setLoadHints(QLibrary::ExportExternalSymbolsHint);
   d->loadFunctions ();
   d->emitSignals ();
 }

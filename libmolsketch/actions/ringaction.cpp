@@ -25,15 +25,12 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPen>
 #include <bond.h>
-#if QT_VERSION >= 0x050000
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include <commands.h>
 #include "molscene.h"
 #include "math2d.h"
 #include "molecule.h"
+#include "iconutils.h"
 
 #include "scenesettings.h"
 #include "settingsitem.h"
@@ -136,7 +133,7 @@ namespace Molsketch {
 
 #define ADDRINGSUBACTION(NAME, SIZE) \
   c = (SIZE > 0 ? "C" : "a"); \
-  newAction = new QAction(QIcon(":images/" + c + "1" + c.repeated(qAbs(SIZE) -1) + "1.svg"), tr(NAME), this); \
+  newAction = new QAction(getInternalIcon(c + "1" + c.repeated(qAbs(SIZE) -1) + "1"), tr(NAME), this); \
   newAction->setData(SIZE); \
   addSubAction(newAction);
 
@@ -233,6 +230,7 @@ namespace Molsketch {
       else
       {
         atom = new Atom(vertex, "C", scene()->settings()->autoAddHydrogen()->get());
+        atom->setColor(scene()->settings()->defaultColor()->get());
         newMolecule->addAtom(atom);
       }
       ringAtoms << atom;

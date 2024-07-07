@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2018 by Hendrik Vennekate, HVennekate@gmx.de            *
+ *   Copyright (C) 2018 by Hendrik Vennekate, Hendrik.Vennekate@posteo.de  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -29,9 +29,12 @@
 class QTableView;
 class QLineEdit;
 class QCheckBox;
-class QXmlStreamReader;
-class QXmlStreamAttributes;
 class QMainWindow;
+
+#define QS_MANUAL_TEST {\
+  if (qEnvironmentVariable("RUN_MANUAL_TESTS").toLower() != "true")\
+    TS_SKIP("Manual test");\
+  }
 
 #define QS_ASSERT_EQUALS(VAL1,VAL2) {_TS_TRY { \
   if (!(VAL1 == VAL2)) CxxTest::tracker().failedTest(__FILE__, __LINE__, \
@@ -48,6 +51,11 @@ class QMainWindow;
   makeComparisonString(#VAL1, #VAL2, VAL1, VAL2, "==", "    Expected:           ", "    not to be equal to: ").toStdString().data()); \
   } __TS_CATCH(__FILE__, __LINE__) }
 
+#define QS_ASSERT_CONTAINS(VAL, COLLECTION) {_TS_TRY { \
+  if (!COLLECTION.contains(VAL)) CxxTest::tracker().failedTest(__FILE__, __LINE__, \
+  makeComparisonString(#VAL, #COLLECTION, VAL, COLLECTION, " not in ", "    Expected: ", "    to be in: ").toStdString().data()); \
+  } __TS_CATCH(__FILE__, __LINE__) }
+
 template<typename T, typename U>
 QString makeComparisonString(const char *first, const char *second, T expected, U actual, const char *op,
                              const char *expectedIntro, const char *actualIntro) {
@@ -60,7 +68,7 @@ QString makeComparisonString(const char *first, const char *second, T expected, 
   return comparison;
 }
 
-#define QSM_ASSERT(MESSAGE, VAL){QString __comparison("\n    "); QDebug __out(&__comparison); __out << VAL; TSM_ASSERT((MESSAGE + __comparison).toStdString().data(), VAL)}
+#define QSM_ASSERT(MESSAGE, VAL){QString __comparison("\n    "); QDebug __out(&__comparison); __out << (VAL); TSM_ASSERT((MESSAGE + __comparison).toStdString().data(), VAL)}
 
 #define QSM_ASSERT_EQUALS(MESSAGE, VAL1, VAL2) {QString __comparison("\n    "); QDebug __out(&__comparison); __out << VAL1; __comparison += "\n != "; __out << VAL2; TSM_ASSERT_EQUALS((MESSAGE + __comparison).toStdString().data(), VAL1, VAL2)}
 
@@ -90,6 +98,38 @@ QString joinToString(FirstType firstInput, InputTypes... inputs) {
     CAST_TYPE *p = dynamic_cast<CAST_TYPE*>(POINTER);\
     if (p) QS_ASSERT_EQUALS(p->METHOD, VALUE)\
   }\
+  }
+
+template<class T, class U, typename binaryOperation>
+void assertListTransformed(QList<T> items, binaryOperation transformer, QList<U> expected) {
+  QList<U> actual;
+  std::transform(items.cbegin(), items.cend(), std::back_inserter(actual), transformer);
+  QS_ASSERT_EQUALS(actual, expected);
+}
+
+template<class T, class U>
+void assertListProperty(QList<T> items, U (T::*extractor)() const , QList<U> expected) {
+  assertListTransformed(items, std::mem_fn(extractor), expected);
+}
+
+template<typename ... Types>
+QDebug operator<<(QDebug debug, const std::tuple<Types...>& tuple) {
+  debug << "Tuple [";
+  printTupel(tuple, debug);
+  return debug << "]";
+}
+
+template<std::size_t I = 0, typename... TupelTypes>
+typename std::enable_if<I == sizeof...(TupelTypes)>::type
+  printTupel(const std::tuple<TupelTypes...>&, QDebug&) {}
+
+template<std::size_t I = 0, typename... TupelTypes>
+typename std::enable_if<I < sizeof...(TupelTypes)>::type
+  printTupel(const std::tuple<TupelTypes...>& tupel, QDebug& debug)
+  {
+    debug << std::get<I>(tupel);
+    if (I + 1 < sizeof...(TupelTypes)) debug << ", ";
+    printTupel<I + 1, TupelTypes...>(tupel, debug);
   }
 
 void mouseMoveEvent(QWidget *widget, Qt::MouseButton button, Qt::KeyboardModifiers stateKey, QPoint pos, int delay=-1);
@@ -122,27 +162,41 @@ T* assertNotNull(T* pointer, QString message = "Should not be null") {
 }
 void assertTrue(bool input, QString message = "Assertion not fulfilled!");
 
-bool findNextElement(QXmlStreamReader& reader, const QString& element);
-
-int xmlElementCount(const QString& xml, const QString& element);
-
-QPolygonF getPointsFromXml(const QXmlStreamReader& reader, const QString& attribute);
-
-QXmlStreamAttributes getAttributesOfParentElement(QXmlStreamReader& reader, const QString &element);
-
 void clickMenuEntry(const QStringList& names, QMainWindow* mainWindow);
 
 template<typename T, typename U>
-T* findByType(QList<U*> items) {
+T* findFirstByType(const QList<U*>& items) {
   for (auto item : items)
     if (T* result = dynamic_cast<T*>(item))
       return result;
   return nullptr;
 }
 
+template<typename T, typename U>
+QList<T*> findByType(const QList<U*>& items) {
+  QList<T*> result;
+  for (auto item : items)
+    if (T* t = dynamic_cast<T*>(item))
+      result += t;
+  return result;
+}
+
 void leftMouseClick(QWidget* w, QPoint p = QPoint());
 void leftMouseClick(QWindow* w, QPoint p = QPoint());
 void doubleClick(QWidget* w, QPoint p = QPoint());
 void doubleClick(QWindow* w, QPoint p = QPoint());
+
+QDebug operator <<(QDebug debug, const std::string &string);
+
+// Qt5 -> Qt6 replacement
+template<class T>
+QSet<T> toSet(const QList<T>& list) {
+  return QSet<T>{list.cbegin(), list.cend()};
+}
+
+template<typename T>
+QSet<T> toSet(const QPair<T, T>& pair) {
+  return QSet<T>{pair.first, pair.second};
+}
 
 #endif // UTILITIES_H

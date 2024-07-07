@@ -20,13 +20,14 @@
 
 #include <QInputDialog>
 #include "commands.h"
+#include "iconutils.h"
 
 namespace Molsketch {
 
 ZLevelAction::ZLevelAction(MolScene *parent)
   : abstractRecursiveItemAction(parent)
 {
-  setIcon(QIcon(":images/layerset.svg"));
+  setIcon(getInternalIcon("layerset"));
   setText(tr("Set relative level..."));
   setToolTip(tr("Set the level at which the item will be drawn\n(higher values above lower values)"));
   setWhatsThis(tr("Set the level at which the item will be drawn\n(higher values above lower values)"));

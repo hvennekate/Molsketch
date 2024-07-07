@@ -23,6 +23,8 @@
 #include "utilities.h"
 #include <QSet>
 
+#include <QRandomGenerator>
+
 using namespace Molsketch;
 
 const QByteArray LEGACY_MOLECULE_XML{"<molecule>"
@@ -52,14 +54,15 @@ class MoleculeTest : public CxxTest::TestSuite
     Molecule* molecule() {
       QList<Atom*> atoms = this->atoms();
       QSet<Bond*> bonds = this->bonds(atoms);
-      return new Molecule(atoms.toSet(), bonds);
+      return new Molecule(toSet(atoms), bonds);
     }
 
     QList<Atom*> atoms()
     {
+      auto rand = QRandomGenerator::system();
       QList<Atom*> atoms;
       for (int i = 0 ; i < atomCount ; ++i)
-        atoms << new Atom(QPointF((qreal) qrand()/RAND_MAX,(qreal) qrand()/RAND_MAX), "C" + QString::number(i));
+        atoms << new Atom(QPointF(rand->generateDouble(), rand->generateDouble()), "C" + QString::number(i));
       return atoms;
     }
 
@@ -78,8 +81,8 @@ class MoleculeTest : public CxxTest::TestSuite
       TSM_ASSERT_EQUALS(testName + " can split", molecule->canSplit(), this->parts > 1);
       TSM_ASSERT_EQUALS(testName + " number of parts", parts.size(), this->parts);
       for (Molecule* part : parts) {
-        TSM_ASSERT_EQUALS(testName + " new atoms distinct", molecule->atoms().toSet() & part->atoms().toSet(), QSet<Atom*>());
-        TSM_ASSERT_EQUALS(testName + " new bonds distinct", molecule->bonds().toSet() & part->bonds().toSet(), QSet<Bond*>());
+        TSM_ASSERT_EQUALS(testName + " new atoms distinct", toSet(molecule->atoms()) & toSet(part->atoms()), QSet<Atom*>());
+        TSM_ASSERT_EQUALS(testName + " new bonds distinct", toSet(molecule->bonds()) & toSet(part->bonds()), QSet<Bond*>());
       }
     }
   };

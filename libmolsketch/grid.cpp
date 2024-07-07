@@ -21,11 +21,7 @@
 #include "settingsitem.h"
 #include <QGraphicsScene>
 #include <QPainter>
-#if QT_VERSION >= 0x050000
 #include <QtMath>
-#else
-#include <QtCore/qmath.h>
-#endif
 #include <QDebug>
 
 namespace Molsketch {

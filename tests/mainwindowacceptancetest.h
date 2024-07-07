@@ -97,7 +97,7 @@ public:
 
   void testWindowModificationStatus() {
     QAction *drawAction = assertNotNull(window->findChild<QAction*>("draw-action"));
-    QToolButton *drawButton = assertNotNull(findByType<QToolButton>(drawAction->associatedWidgets()));
+    QToolButton *drawButton = assertNotNull(findFirstByType<QToolButton>(drawAction->associatedWidgets()));
     leftMouseClick(drawButton);
     leftMouseClick(window->findChild<Molsketch::MolView*>()->viewport());
 

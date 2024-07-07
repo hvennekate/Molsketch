@@ -4,17 +4,17 @@
 <context>
     <name>AlignRowDialog</name>
     <message>
-        <location filename="alignrowdialog.ui" line="14"/>
+        <location filename="actions/alignrowdialog.ui" line="14"/>
         <source>Align</source>
         <translation>Ausrichten</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="20"/>
+        <location filename="actions/alignrowdialog.ui" line="20"/>
         <source>Distance</source>
         <translation>Zwischenraum</translation>
     </message>
     <message>
-        <location filename="alignrowdialog.ui" line="33"/>
+        <location filename="actions/alignrowdialog.ui" line="33"/>
         <source>Inter&amp;val</source>
         <translation>&amp;Position</translation>
     </message>
@@ -27,56 +27,110 @@
         <translation>Atomeigenschaften</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="20"/>
+        <location filename="atompopup.ui" line="32"/>
+        <source>General</source>
+        <translation>Allgemein</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="38"/>
         <source>S&amp;ymbol</source>
         <translation>S&amp;ymbol</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="33"/>
+        <location filename="atompopup.ui" line="51"/>
         <source>Charge</source>
         <translation>Ladung</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="50"/>
+        <location filename="atompopup.ui" line="79"/>
+        <source>Shape</source>
+        <translation>Form</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="87"/>
+        <source>Rectangle</source>
+        <translation>Rechteck</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="92"/>
+        <source>Circle</source>
+        <translation>Kreis</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="116"/>
+        <location filename="atompopup.ui" line="122"/>
         <source>Hydrogens</source>
         <translation>H-Atome</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="74"/>
+        <location filename="atompopup.ui" line="139"/>
+        <source>Alignment</source>
+        <translation>Ausrichtung</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="165"/>
+        <source>Lone Pairs</source>
+        <translation>Elektronenpaare</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="277"/>
+        <source>Radical Electrons</source>
+        <translation>Radikalelektronen</translation>
+    </message>
+    <message>
+        <location filename="atompopup.ui" line="293"/>
         <source>Radicals</source>
         <translation>Elektronen</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="139"/>
-        <location filename="atompopup.ui" line="209"/>
+        <location filename="atompopup.ui" line="256"/>
+        <location filename="atompopup.ui" line="358"/>
         <source>E</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="221"/>
+        <location filename="atompopup.ui" line="191"/>
         <source>Lone pairs</source>
         <translation>Elektronenpaare</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="228"/>
+        <location filename="atompopup.ui" line="283"/>
         <source>Diameter</source>
         <translation>Größe</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="235"/>
+        <location filename="atompopup.ui" line="171"/>
         <source>Line width</source>
         <translation>Linienbreite</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="242"/>
+        <location filename="atompopup.ui" line="184"/>
         <source>Length</source>
         <translation>Länge</translation>
     </message>
     <message>
-        <location filename="atompopup.ui" line="258"/>
+        <location filename="atompopup.ui" line="68"/>
         <source>Newman
 diameter</source>
         <translation>Newman-&lt;br/&gt;Durchmesser</translation>
+    </message>
+</context>
+<context>
+    <name>ElementAlignment</name>
+    <message>
+        <location filename="elementalignment.ui" line="20"/>
+        <source>Form</source>
+        <translation>Ausrichtung</translation>
+    </message>
+    <message>
+        <location filename="elementalignment.ui" line="58"/>
+        <source>E</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="elementalignment.ui" line="91"/>
+        <source>Auto</source>
+        <translation>Auto</translation>
     </message>
 </context>
 <context>
@@ -108,17 +162,32 @@ diameter</source>
 <context>
     <name>Molsketch::AtomPopup</name>
     <message>
-        <location filename="atompopup.cpp" line="137"/>
+        <location filename="atompopup.cpp" line="128"/>
+        <source>Change element</source>
+        <translation>Element ändern</translation>
+    </message>
+    <message>
+        <location filename="atompopup.cpp" line="132"/>
+        <source>Change charge</source>
+        <translation>Ladung ändern</translation>
+    </message>
+    <message>
+        <location filename="atompopup.cpp" line="136"/>
+        <source>Change number of hydrogens</source>
+        <translation>Anzahl Wasserstoffatome ändern</translation>
+    </message>
+    <message>
+        <location filename="atompopup.cpp" line="140"/>
         <source>Change Newman diameter</source>
         <translation>Newman-Durchmesser ändern</translation>
     </message>
     <message>
-        <location filename="atompopup.cpp" line="152"/>
+        <location filename="atompopup.cpp" line="154"/>
         <source>Change radical electrons</source>
         <translation>Elektronen ändern</translation>
     </message>
     <message>
-        <location filename="atompopup.cpp" line="169"/>
+        <location filename="atompopup.cpp" line="171"/>
         <source>Change lone pairs</source>
         <translation>Elektronenpaare ändern</translation>
     </message>
@@ -158,7 +227,7 @@ diameter</source>
         <translation>Verzierung</translation>
     </message>
     <message>
-        <location filename="actions/frameaction.cpp" line="143"/>
+        <location filename="actions/frameaction.cpp" line="142"/>
         <source>Add frame or brackets</source>
         <translation>Rahmen oder Klammern hinzufügen</translation>
     </message>
@@ -216,7 +285,7 @@ diameter</source>
 <context>
     <name>Molsketch::LibraryView</name>
     <message>
-        <location filename="libraryview.cpp" line="37"/>
+        <location filename="libraryview.cpp" line="36"/>
         <source>No molecules to show</source>
         <translation>Keine Moleküle vorhanden</translation>
     </message>
@@ -224,7 +293,7 @@ diameter</source>
 <context>
     <name>Molsketch::LineUpAction</name>
     <message>
-        <location filename="lineupaction.cpp" line="99"/>
+        <location filename="actions/lineupaction.cpp" line="99"/>
         <source>Space items equally</source>
         <translation>Abstände angleichen</translation>
     </message>
@@ -232,47 +301,46 @@ diameter</source>
 <context>
     <name>Molsketch::MolScene</name>
     <message>
-        <location filename="molscene.cpp" line="239"/>
+        <location filename="molscene.cpp" line="237"/>
         <source>cutting items</source>
         <translation>Ausschneiden</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="268"/>
+        <location filename="molscene.cpp" line="303"/>
         <source>Paste</source>
         <translation>Einfügen</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="320"/>
+        <location filename="molscene.cpp" line="362"/>
         <source>MolsKetch Drawing</source>
         <translation>Molsketch-Zeichnung</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="356"/>
         <source>add molecule</source>
-        <translation>Molekül hinzufügen</translation>
+        <translation type="vanished">Molekül hinzufügen</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="402"/>
+        <location filename="molscene.cpp" line="427"/>
         <source>Mouse wheel configuration</source>
         <translation>Mausrad-Einstellung</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="403"/>
+        <location filename="molscene.cpp" line="428"/>
         <source>Mouse wheel use has not been configured.Should the wheel be used to zoom, or to cycle tool settings?</source>
         <translation>Die Funktion des Mausrads ist noch nicht festgelegt worden.&lt;br/&gt;Soll es zum Zoomen oder zum Wechseln von Werkzeugen dienen?</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="406"/>
+        <location filename="molscene.cpp" line="431"/>
         <source>Use to zoom</source>
         <translation>Zoomen</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="407"/>
+        <location filename="molscene.cpp" line="432"/>
         <source>Use to cycle tool options</source>
         <translation>Werkzeugwechsel</translation>
     </message>
     <message>
-        <location filename="molscene.cpp" line="646"/>
+        <location filename="molscene.cpp" line="682"/>
         <source>insert molecule</source>
         <translation>Molekül einfügen</translation>
     </message>
@@ -597,12 +665,12 @@ diameter</source>
 <context>
     <name>Molsketch::TextItem</name>
     <message>
-        <location filename="textitem.cpp" line="87"/>
+        <location filename="textitem.cpp" line="86"/>
         <source>Move text item</source>
         <translation>Text verschieben</translation>
     </message>
     <message>
-        <location filename="textitem.cpp" line="111"/>
+        <location filename="textitem.cpp" line="110"/>
         <source>Edit text</source>
         <translation>Text bearbeiten</translation>
     </message>
@@ -610,32 +678,32 @@ diameter</source>
 <context>
     <name>Molsketch::TypeListDialog</name>
     <message>
-        <location filename="typelistdialog.ui" line="14"/>
+        <location filename="actions/typelistdialog.ui" line="14"/>
         <source>Select types</source>
         <translation>Auswahl nach Typ</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="20"/>
+        <location filename="actions/typelistdialog.ui" line="20"/>
         <source>Molecules</source>
         <translation>Moleküle</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="27"/>
+        <location filename="actions/typelistdialog.ui" line="27"/>
         <source>Atoms</source>
         <translation>Atome</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="34"/>
+        <location filename="actions/typelistdialog.ui" line="34"/>
         <source>Bonds</source>
         <translation>Bindungen</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="41"/>
+        <location filename="actions/typelistdialog.ui" line="41"/>
         <source>Arrows</source>
         <translation>Pfeile</translation>
     </message>
     <message>
-        <location filename="typelistdialog.ui" line="48"/>
+        <location filename="actions/typelistdialog.ui" line="48"/>
         <source>Decorations (frames, brackets)</source>
         <translation>Verzierungen (Rahmen, Klammern)</translation>
     </message>
@@ -668,17 +736,17 @@ diameter</source>
 <context>
     <name>Molsketch::ZLevelStepAction</name>
     <message>
-        <location filename="actions/incdecaction.cpp" line="187"/>
+        <location filename="actions/incdecaction.cpp" line="186"/>
         <source>Drawing Level</source>
         <translation>Ebene</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="190"/>
+        <location filename="actions/incdecaction.cpp" line="189"/>
         <source>Move up</source>
         <translation>Nach oben</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="191"/>
+        <location filename="actions/incdecaction.cpp" line="190"/>
         <source>Move down</source>
         <translation>Nach unten</translation>
     </message>
@@ -702,17 +770,17 @@ diameter</source>
 <context>
     <name>Molsketch::chargeAction</name>
     <message>
-        <location filename="actions/incdecaction.cpp" line="150"/>
+        <location filename="actions/incdecaction.cpp" line="149"/>
         <source>Charge</source>
         <translation>Ladung</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="153"/>
+        <location filename="actions/incdecaction.cpp" line="152"/>
         <source>Increase charge</source>
         <translation>Negative Ladung</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="154"/>
+        <location filename="actions/incdecaction.cpp" line="153"/>
         <source>Decrease charge</source>
         <translation>Positive Ladung</translation>
     </message>
@@ -751,48 +819,48 @@ diameter</source>
 <context>
     <name>Molsketch::drawAction</name>
     <message>
-        <location filename="actions/drawaction.cpp" line="120"/>
+        <location filename="actions/drawaction.cpp" line="115"/>
         <source>change element</source>
         <translation>Chemisches Element ändern</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="123"/>
-        <location filename="actions/drawaction.cpp" line="175"/>
+        <location filename="actions/drawaction.cpp" line="118"/>
+        <location filename="actions/drawaction.cpp" line="170"/>
         <source>add atom</source>
         <translation>Atom hinzufügen</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="128"/>
+        <location filename="actions/drawaction.cpp" line="123"/>
         <source>draw bond</source>
         <translation>Bindung zeichnen</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="145"/>
+        <location filename="actions/drawaction.cpp" line="140"/>
         <source>change bond type</source>
         <translation>Bindungsart ändern</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="147"/>
+        <location filename="actions/drawaction.cpp" line="142"/>
         <source>flip bond</source>
         <translation>Bindung umdrehen</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="165"/>
+        <location filename="actions/drawaction.cpp" line="160"/>
         <source>add molecule</source>
         <translation>Molekül hinzufügen</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="170"/>
+        <location filename="actions/drawaction.cpp" line="165"/>
         <source>Add atom</source>
         <translation>Atom hinzufügen</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="226"/>
+        <location filename="actions/drawaction.cpp" line="217"/>
         <source>Draw mode</source>
         <translation>Zeichnen</translation>
     </message>
     <message>
-        <location filename="actions/drawaction.cpp" line="229"/>
+        <location filename="actions/drawaction.cpp" line="220"/>
         <source>Draw</source>
         <translation>Zeichnen</translation>
     </message>
@@ -826,17 +894,17 @@ diameter</source>
 <context>
     <name>Molsketch::hydrogenAction</name>
     <message>
-        <location filename="actions/incdecaction.cpp" line="162"/>
+        <location filename="actions/incdecaction.cpp" line="161"/>
         <source>Hydrogens</source>
         <translation>H-Atome</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="165"/>
+        <location filename="actions/incdecaction.cpp" line="164"/>
         <source>Add implicit hydrogen</source>
         <translation>H-Atom hinzufügen</translation>
     </message>
     <message>
-        <location filename="actions/incdecaction.cpp" line="166"/>
+        <location filename="actions/incdecaction.cpp" line="165"/>
         <source>Remove implicit hydrogen</source>
         <translation>H-Atom entfernen</translation>
     </message>
@@ -900,7 +968,7 @@ diameter</source>
         <translation>Pfeil</translation>
     </message>
     <message>
-        <location filename="actions/reactionarrowaction.cpp" line="98"/>
+        <location filename="actions/reactionarrowaction.cpp" line="97"/>
         <source>draw arrow</source>
         <translation>Pfeil zeichnen</translation>
     </message>
@@ -908,12 +976,12 @@ diameter</source>
 <context>
     <name>Molsketch::ringAction</name>
     <message>
-        <location filename="actions/ringaction.cpp" line="147"/>
+        <location filename="actions/ringaction.cpp" line="143"/>
         <source>Ring</source>
         <translation>Ring</translation>
     </message>
     <message>
-        <location filename="actions/ringaction.cpp" line="278"/>
+        <location filename="actions/ringaction.cpp" line="274"/>
         <source>Add ring</source>
         <translation>Ring hinzufügen</translation>
     </message>
@@ -921,12 +989,12 @@ diameter</source>
 <context>
     <name>Molsketch::rotateAction</name>
     <message>
-        <location filename="actions/rotateaction.cpp" line="118"/>
+        <location filename="actions/rotateaction.cpp" line="114"/>
         <source>Rotate</source>
         <translation>Drehen</translation>
     </message>
     <message>
-        <location filename="actions/rotateaction.cpp" line="130"/>
+        <location filename="actions/rotateaction.cpp" line="126"/>
         <source>°
 Hold Shift to use fixed angles.</source>
         <translation>°
@@ -936,7 +1004,7 @@ Shift gedrückt halten, um feste Winkel zu benutzen.</translation>
 <context>
     <name>Molsketch::translateAction</name>
     <message>
-        <location filename="actions/rotateaction.cpp" line="142"/>
+        <location filename="actions/rotateaction.cpp" line="138"/>
         <source>Move</source>
         <translation>Verschieben</translation>
     </message>
@@ -953,7 +1021,7 @@ Shift gedrückt halten, um feste Winkel zu benutzen.</translation>
         <translation type="vanished">Verschieben</translation>
     </message>
     <message>
-        <location filename="graphicsitem.cpp" line="58"/>
+        <location filename="graphicsitem.cpp" line="54"/>
         <source>Move</source>
         <translation>Verschieben</translation>
     </message>

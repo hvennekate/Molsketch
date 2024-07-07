@@ -186,7 +186,7 @@ namespace Molsketch {
     typedef setItemPropertiesCommand<Frame, QString, &Frame::setFrameString, &Frame::frameString, FrameTypeId> SetFrameTypeString;
     typedef setItemPropertiesCommand<Arrow, bool, &Arrow::setSpline, &Arrow::getSpline, ArrowSplineId> setArrowSplineCommand;
     typedef setItemPropertiesCommand<Atom, int, &Atom::setCharge, &Atom::charge, AtomChargeId> setAtomChargeCommand;
-    typedef setItemPropertiesCommand<Atom, int, &Atom::setNumImplicitHydrogens, &Atom::numImplicitHydrogens, AtomImplicitHydrogensId> setImplicitHydrogensCommand;
+    typedef setItemPropertiesCommand<Atom, quint8, &Atom::setNumImplicitHydrogens, &Atom::numImplicitHydrogens, AtomImplicitHydrogensId> setImplicitHydrogensCommand;
     typedef setItemPropertiesCommand<Atom, QString, &Atom::setElement, &Atom::element> ChangeElement;
     typedef setItemPropertiesCommand<Molecule, QString, &Molecule::setName, &Molecule::getName, MoleculeNameId> ChangeMoleculeName;
     typedef setItemPropertiesCommand<graphicsItem, qreal, &graphicsItem::setRelativeWidth, &graphicsItem::relativeWidth> changeRelativeWidth;
@@ -203,6 +203,7 @@ namespace Molsketch {
       void redo() override;
       MolScene *getScene() const override;
       QGraphicsScene *otherScene;
+      bool owning;
     public:
       ToggleScene(QGraphicsItem *item, QGraphicsScene *scene, const QString &text = "", QUndoCommand *parent = 0);
       ~ToggleScene();
@@ -224,10 +225,9 @@ namespace Molsketch {
       static void addItemToScene(QGraphicsItem* item, MolScene* scene, const QString &text = "");
       static void removeItemFromScene(QGraphicsItem* item, const QString &text = "");
     private:
-      MolScene* m_scene;
+      MolScene *m_scene;
       bool owning;
-
-      // Command interface
+      QGraphicsItem *parent;
     protected:
       MolScene *getScene() const override;
     };

@@ -30,6 +30,7 @@ typedef QMap<QString, qreal> StringDoubleMap ;
 SIGNAL_COUNTER_DEF(StringDoubleMapSignalCounter, StringDoubleMap)
 typedef QMap<std::pair<QString, int>, qreal> StringIntDoubleMap;
 SIGNAL_COUNTER_DEF(StringIntDoubleMapSignalCounter, StringIntDoubleMap)
+SIGNAL_COUNTER_DEF(StringSignalCounter, QString)
 
 ModelIndexSignalCounter::ModelIndexSignalCounter(QObject *parent) : QObject(parent) {}
 

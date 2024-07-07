@@ -98,6 +98,7 @@ public:
     MolScene otherScene;
     otherScene.addItem(item);
     addItemToScene();
+
     TS_ASSERT(!otherScene.items().contains(item));
     TS_ASSERT(scene->items().contains(item));
     TS_ASSERT(scene->stack()->canUndo());
@@ -107,5 +108,22 @@ public:
     deleteItemFromScene();
     TS_ASSERT(!scene->items().contains(item));
     TS_ASSERT(!scene->stack()->canUndo());
+  }
+
+  void testDeletingAndUndoingRestoresParent() {
+    auto parentItem = new QGraphicsItemForTesting;
+    scene->addItem(parentItem);
+    item->setParentItem(parentItem);
+
+    deleteItemFromScene();
+
+    TS_ASSERT(!scene->items().contains(item));
+    TS_ASSERT(scene->items().contains(parentItem));
+
+    undo();
+
+    TS_ASSERT(scene->items().contains(item));
+    TS_ASSERT(scene->items().contains(parentItem));
+    TS_ASSERT_EQUALS(item->parentItem(), parentItem);
   }
 };
