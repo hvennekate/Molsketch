@@ -36,30 +36,48 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>100</width>
+           <width>80</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>100</width>
+           <width>80</width>
            <height>16777215</height>
           </size>
          </property>
          <property name="baseSize">
           <size>
-           <width>100</width>
+           <width>80</width>
            <height>0</height>
           </size>
          </property>
+         <property name="lineWidth">
+          <number>1</number>
+         </property>
+         <property name="midLineWidth">
+          <number>0</number>
+         </property>
          <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
          </property>
          <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+         </property>
+         <property name="showDropIndicator" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
          </property>
          <property name="defaultDropAction">
-          <enum>Qt::TargetMoveAction</enum>
+          <enum>Qt::DropAction::CopyAction</enum>
          </property>
          <property name="alternatingRowColors">
           <bool>false</bool>
@@ -70,17 +88,32 @@
            <height>32</height>
           </size>
          </property>
+         <property name="textElideMode">
+          <enum>Qt::TextElideMode::ElideNone</enum>
+         </property>
+         <property name="verticalScrollMode">
+          <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
+         </property>
+         <property name="movement">
+          <enum>QListView::Movement::Static</enum>
+         </property>
          <property name="flow">
-          <enum>QListView::TopToBottom</enum>
+          <enum>QListView::Flow::TopToBottom</enum>
+         </property>
+         <property name="isWrapping" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="resizeMode">
+          <enum>QListView::ResizeMode::Adjust</enum>
          </property>
          <property name="gridSize">
           <size>
-           <width>100</width>
-           <height>60</height>
+           <width>80</width>
+           <height>80</height>
           </size>
          </property>
          <property name="viewMode">
-          <enum>QListView::IconMode</enum>
+          <enum>QListView::ViewMode::IconMode</enum>
          </property>
          <property name="uniformItemSizes">
           <bool>true</bool>
@@ -89,17 +122,14 @@
           <bool>false</bool>
          </property>
          <property name="itemAlignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
          <property name="currentRow">
-          <number>0</number>
+          <number>-1</number>
          </property>
          <item>
           <property name="text">
            <string>General</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
           </property>
           <property name="icon">
            <iconset theme="preferences-system" resource="oxygenicons.qrc">
@@ -113,9 +143,6 @@
           <property name="text">
            <string>Draw settings</string>
           </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
           <property name="icon">
            <iconset theme="draw-freehand" resource="oxygenicons.qrc">
             <normaloff>:/icons/draw-freehand.svg</normaloff>:/icons/draw-freehand.svg</iconset>
@@ -128,9 +155,6 @@
           <property name="text">
            <string>Libraries</string>
           </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
           <property name="icon">
            <iconset theme="document-open" resource="oxygenicons.qrc">
             <normaloff>:/icons/document-open.svg</normaloff>:/icons/document-open.svg</iconset>
@@ -142,9 +166,6 @@
          <item>
           <property name="text">
            <string>Open Babel</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
           </property>
           <property name="icon">
            <iconset resource="molsketch.qrc">
@@ -164,13 +185,13 @@
          <widget class="QWidget" name="generalPage">
           <layout class="QFormLayout" name="generalPageLayout">
            <property name="fieldGrowthPolicy">
-            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
            </property>
            <property name="labelAlignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
            </property>
            <property name="formAlignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
            </property>
            <property name="horizontalSpacing">
             <number>30</number>
@@ -257,7 +278,7 @@
               <string>Use &amp;mouse wheel to...</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
              <property name="buddy">
               <cstring>mouseWheelZoom</cstring>
@@ -337,7 +358,7 @@
                <item row="0" column="0" colspan="2">
                 <widget class="QListWidget" name="libraries">
                  <property name="selectionMode">
-                  <enum>QAbstractItemView::ExtendedSelection</enum>
+                  <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
                  </property>
                 </widget>
                </item>
@@ -391,7 +412,7 @@
               <item row="2" column="0">
                <spacer name="openbabelifaceSpacer">
                 <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+                 <enum>Qt::Orientation::Vertical</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -453,7 +474,7 @@
               <item row="2" column="0">
                <spacer name="openbabelFormatsSpacer">
                 <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+                 <enum>Qt::Orientation::Vertical</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -502,10 +523,10 @@
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="standardButtons">
-        <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
+        <set>QDialogButtonBox::StandardButton::Apply|QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Help|QDialogButtonBox::StandardButton::Ok|QDialogButtonBox::StandardButton::RestoreDefaults</set>
        </property>
       </widget>
      </item>
