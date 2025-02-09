@@ -1,6 +1,6 @@
 isEmpty(CXXTEST_PATH) : error("Pass CXXTEST_PATH on command line")
 include(findOpenBabel.pri)
-CONFIG += c++14
+CONFIG += c++20
 QT += widgets
 INCLUDEPATH += $$CXXTEST_PATH \
     /usr/include/boost/stacktrace \

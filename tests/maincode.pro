@@ -13,7 +13,7 @@ HEADERS -= $$files($$PWD/../tests/*.h, true) $$files($$PWD/../obiftest/*.h, true
 FORMS += $$files($$PWD/../*.ui, true)
 RESOURCES += $$files($$PWD/../*.qrc, true)
 
-CONFIG += c++14 debug
+CONFIG += c++20 debug
 QT += widgets printsupport svg testlib network
 
 INCLUDEPATH += \
