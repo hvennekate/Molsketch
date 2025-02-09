@@ -20,7 +20,8 @@ INCLUDEPATH += \
     /usr/include/boost/stacktrace \
     ../libmolsketch \
     ../molsketch \
-    ../obabeliface
+    ../obabeliface \
+    ../libmskcore
 
 TEMPLATE = lib
 
