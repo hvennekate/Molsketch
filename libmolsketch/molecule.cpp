@@ -853,8 +853,8 @@ void Molecule::updateElectronSystems()
                         atom->numImplicitHydrogens(),
                         atom->charge() });
     for (auto bond : bonds())
-      cbonds.push_back(Core::Bond{ atoms().indexOf(bond->beginAtom()),
-                                   atoms().indexOf(bond->endAtom()),
+      cbonds.push_back(Core::Bond{ (uint) atoms().indexOf(bond->beginAtom()),
+                                   (uint) atoms().indexOf(bond->endAtom()),
                                    toCoreBondType(bond->bondType())});
     return Core::Molecule(catoms, cbonds, getName().toStdString());
   }
