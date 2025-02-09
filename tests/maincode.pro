@@ -1,4 +1,4 @@
-include(../obabeliface/findOpenBabel.pri)
+include(findOpenBabel.pri)
 include(../settings.pri)
 TESTS = $$files(*test.h, true)
 

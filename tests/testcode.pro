@@ -1,5 +1,5 @@
 isEmpty(CXXTEST_PATH) : error("Pass CXXTEST_PATH on command line")
-include(../obabeliface/findOpenBabel.pri)
+include(findOpenBabel.pri)
 include(../settings.pri)
 TESTS = $$files(*test.h, true)
 

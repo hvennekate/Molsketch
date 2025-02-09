@@ -1,5 +1,5 @@
 isEmpty(CXXTEST_PATH) : error("Pass CXXTEST_PATH on command line")
-include(../obabeliface/findOpenBabel.pri)
+include(findOpenBabel.pri)
 CONFIG += c++14
 QT += widgets
 INCLUDEPATH += $$CXXTEST_PATH \
