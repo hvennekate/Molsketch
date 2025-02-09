@@ -114,21 +114,21 @@ namespace Molsketch
     obmol.EndModify();
 
 #if (OB_VERSION < OB_VERSION_CHECK(3, 0, 0))
-    for (int i = 0 ; i < newAtoms.size() ; ++i) {
+    for (unsigned int i = 0 ; i < newAtoms.size() ; ++i) {
       auto newAtom = newAtoms.at(i);
       auto atom = originalMolecule.atoms().at(i);
       std::cerr << "H atoms" << atom.hAtoms()
                 << " implicit count: " << newAtom->ImplicitHydrogenCount()
                 << " exlicit count: " << newAtom->ExplicitHydrogenCount()
                 << " valence: " << newAtom->GetImplicitValence()
-                << endl;
-      newAtom->SetSpinMultiplicity(qAbs(2*(newAtom->ImplicitHydrogenCount() - atom.hAtoms())));
+                << std::endl;
+      newAtom->SetSpinMultiplicity(std::abs(2*(newAtom->ImplicitHydrogenCount() - atom.hAtoms())));
       std::cerr << "after set H atoms " << atom.hAtoms()
                 << " implicit count: " << newAtom->ImplicitHydrogenCount()
                 << " exlicit count: " << newAtom->ExplicitHydrogenCount()
                 << " valence: " << newAtom->GetImplicitValence()
                 << " multiplicity: " << newAtom->GetSpinMultiplicity()
-                << endl;
+                << std::endl;
     }
 #endif
 
