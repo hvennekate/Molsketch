@@ -155,7 +155,7 @@ namespace Molsketch
   }
 
   Molecule fromOBMolecule(OpenBabel::OBMol& obmol) {
-    using namespace OpenBabel;
+    using namespace OpenBabel::impl;
 
     std::vector<Atom> atoms;
     std::map<OBAtom*, unsigned> atomNumbers;
@@ -205,7 +205,7 @@ namespace Molsketch
   }
 
   void setWedgeAndHash(OpenBabel::OBMol& mol) {
-      using namespace OpenBabel;
+      using namespace OpenBabel::impl;
     // Remove any existing wedge and hash bonds
     FOR_BONDS_OF_MOL(b, &mol)  {
 #if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
