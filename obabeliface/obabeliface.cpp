@@ -190,6 +190,9 @@ namespace Molsketch
 
   // TODO should be const, but OpenBabel iterator methods do not support const
   bool hasCoordinates(OpenBabel::OBMol &molecule) {
+#if (OB_VERSION >= OB_VERSION_CHECK(3, 0, 0))
+    using namespace OpenBabel;
+#endif
     FOR_ATOMS_OF_MOL(obatom, molecule) {
       if (obatom->GetVector() != OpenBabel::VZero)
         return true;
