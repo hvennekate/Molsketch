@@ -138,7 +138,7 @@ class AtomUnitTest : public CxxTest::TestSuite {
     QString output;
     QXmlStreamWriter writer(&output);
     atom->writeXml(writer);
-    QS_ASSERT_EQUALS(output, expected);
+    QS_ASSERT_EQUALS(output, expected)
   }
 
   void readXmlInput(const QString& input) {
@@ -216,19 +216,19 @@ public:
   }
 
   void testNormalAtomHasNoNewmanDiameter() {
-    Atom atom(QPointF(), "C");
+    Atom atom("C");
     assertThat(atom)->hasNodes("atom")->exactlyOne()->withNoAttribute("newmanDiameter");
   }
 
   void testNewmanAtomHasNewmanDiameter() {
-    Atom atom(QPointF(), "C");
+    Atom atom("C");
     atom.setNewmanDiameter(5.5);
     TS_ASSERT_EQUALS(atom.getNewmanDiameter(), 5.5);
     assertThat(atom)->hasNodes("atom")->haveAttribute("newmanDiameter")->exactly({"5.5"});
   }
 
   void testDisabledNewmanAtomHasNoNewmanDiameter() {
-    Atom atom(QPointF(), "C");
+    Atom atom("C");
     atom.setNewmanDiameter(5.5);
     TS_ASSERT_EQUALS(atom.getNewmanDiameter(), 5.5);
     atom.disableNewman();
@@ -332,16 +332,16 @@ public:
   }
 
   void testBondStartForRectangleWithHydrogenRight() {
-    Atom atom({}, "C");
-    Atom otherAtom({20,0});
+    Atom atom("C");
+    Atom otherAtom(QPointF{20,0});
     atom.setNumImplicitHydrogens(5);
     auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
     TS_ASSERT_DELTA(bondStart.x(), atom.boundingRect().right(), 1e-5);
   }
 
   void testBondStartForCircularShapeWithHydrogenRight() {
-    Atom atom({}, "C");
-    Atom otherAtom({50,0});
+    Atom atom("C");
+    Atom otherAtom(QPointF{50,0});
     atom.setNumImplicitHydrogens(5);
     atom.setShapeType(Atom::Circle);
     auto bondStart = atom.bondDrawingStart(&otherAtom, 0);
@@ -350,8 +350,8 @@ public:
   }
 
   void testBondStartForCircularShapeWithHydrogenLeft() {
-    Atom atom({}, "C");
-    Atom otherAtom({-50,0});
+    Atom atom("C");
+    Atom otherAtom(QPointF{-50,0});
     atom.setNumImplicitHydrogens(5);
     atom.setHAlignment(NeighborAlignment::west);
     atom.setShapeType(Atom::Circle);
@@ -361,8 +361,8 @@ public:
   }
 
   void testBondStartForCircularShapeWithHydrogenTop() {
-    Atom atom({}, "C");
-    Atom otherAtom({0,-50});
+    Atom atom("C");
+    Atom otherAtom(QPointF{0,-50});
     atom.setNumImplicitHydrogens(5);
     atom.setHAlignment(NeighborAlignment::north);
     atom.setShapeType(Atom::Circle);
@@ -372,8 +372,8 @@ public:
   }
 
   void testBondStartForCircularShapeWithHydrogenBottom() {
-    Atom atom({}, "C");
-    Atom otherAtom({0,50});
+    Atom atom("C");
+    Atom otherAtom(QPointF{0,50});
     atom.setNumImplicitHydrogens(5);
     atom.setHAlignment(NeighborAlignment::south);
     atom.setShapeType(Atom::Circle);
@@ -383,7 +383,7 @@ public:
   }
 
   void testBondExtentForCircularShapeWithHydrogensRight() {
-    Atom atom({}, "C");
+    Atom atom("C");
     atom.setNumImplicitHydrogens(5);
     atom.setShapeType(Atom::Circle);
     atom.setHAlignment(NeighborAlignment::east);
@@ -394,7 +394,7 @@ public:
   }
 
   void testBondExtentForCircularShapeWithHydrogensLeft() {
-    Atom atom({}, "C");
+    Atom atom("C");
     atom.setNumImplicitHydrogens(5);
     atom.setShapeType(Atom::Circle);
     atom.setHAlignment(NeighborAlignment::west);
@@ -405,7 +405,7 @@ public:
   }
 
   void testBondExtentForCircularShapeWithHydrogensTop() {
-    Atom atom({}, "C");
+    Atom atom("C");
     atom.setNumImplicitHydrogens(5);
     atom.setShapeType(Atom::Circle);
     atom.setHAlignment(NeighborAlignment::north);
@@ -416,7 +416,7 @@ public:
   }
 
   void testBondExtentForCircularShapeWithHydrogensBottom() {
-    Atom atom({}, "C");
+    Atom atom("C");
     atom.setNumImplicitHydrogens(5);
     atom.setShapeType(Atom::Circle);
     atom.setHAlignment(NeighborAlignment::south);

@@ -54,6 +54,11 @@ Molsketch::Core::Position &Molsketch::Core::Position::operator +=(const Position
   return *this;
 }
 
+bool Molsketch::Core::Position::operator ==(const Position &other) const
+{
+  return x == other.x && y == other.y;
+}
+
 Molsketch::Core::Position Molsketch::Core::operator*(const double &factor, const Position &pos)
 {
     return pos * factor;

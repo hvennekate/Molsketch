@@ -25,6 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include <QTest>
 #include <functional>
+#include <position.h>
 
 class QTableView;
 class QLineEdit;
@@ -52,8 +53,9 @@ class QMainWindow;
   } __TS_CATCH(__FILE__, __LINE__) }
 
 #define QS_ASSERT_CONTAINS(VAL, COLLECTION) {_TS_TRY { \
-  if (!COLLECTION.contains(VAL)) CxxTest::tracker().failedTest(__FILE__, __LINE__, \
-  makeComparisonString(#VAL, #COLLECTION, VAL, COLLECTION, " not in ", "    Expected: ", "    to be in: ").toStdString().data()); \
+  if (!std::any_of(COLLECTION.cbegin(), COLLECTION.cend(), [](const std::string &other) { return other == VAL; } )) \
+    CxxTest::tracker().failedTest(__FILE__, __LINE__, \
+      makeComparisonString(#VAL, #COLLECTION, VAL, COLLECTION, " not in ", "    Expected: ", "    to be in: ").toStdString().data()); \
   } __TS_CATCH(__FILE__, __LINE__) }
 
 template<typename T, typename U>
@@ -98,15 +100,15 @@ QString joinToString(FirstType firstInput, InputTypes... inputs) {
   }\
   }
 
-template<class T, class U, typename binaryOperation>
-void assertListTransformed(QList<T> items, binaryOperation transformer, QList<U> expected) {
+template<template<class> class L, class T, class U, typename binaryOperation>
+void assertListTransformed(L<T> items, binaryOperation transformer, QList<U> expected) {
   QList<U> actual;
   std::transform(items.cbegin(), items.cend(), std::back_inserter(actual), transformer);
   QS_ASSERT_EQUALS(actual, expected);
 }
 
-template<class T, class U>
-void assertListProperty(QList<T> items, U (T::*extractor)() const , QList<U> expected) {
+template<template<class> class L, class T, class U>
+void assertListProperty(L<T> items, U (T::*extractor)() const , QList<U> expected) {
   assertListTransformed(items, std::mem_fn(extractor), expected);
 }
 
@@ -142,8 +144,8 @@ template<class T>
 class ForTesting {
 public:
   static int instanceCounter;
-  ForTesting<T>() { ++ instanceCounter; }
-  ~ForTesting<T>() { -- instanceCounter; }
+  ForTesting() { ++ instanceCounter; }
+  ~ForTesting() { -- instanceCounter; }
 };
 
 // Don't forget to add instanceCounter to instanceCounter.cpp
@@ -185,6 +187,7 @@ void doubleClick(QWidget* w, QPoint p = QPoint());
 void doubleClick(QWindow* w, QPoint p = QPoint());
 
 QDebug operator <<(QDebug debug, const std::string &string);
+QDebug operator <<(QDebug debug, const Molsketch::Core::Position &position);
 
 // Qt5 -> Qt6 replacement
 template<class T>
