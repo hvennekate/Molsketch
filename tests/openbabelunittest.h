@@ -58,7 +58,7 @@ const Core::Molecule &CYANIDE{
 
 class OpenBabelUnitTest : public CxxTest::TestSuite {
   void assertButane(const Core::Molecule &molecule) {
-    assertListProperty(molecule.atoms(), &Core::Atom::element, {"C", "C", "C", "C", "Testing that this works"});
+    assertListProperty(molecule.atoms(), &Core::Atom::element, {"C", "C", "C", "C"});
   }
 
   void assertLacticAcid(const Core::Molecule &molecule, Core::Bond::Type stereoBondType) {
