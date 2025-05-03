@@ -85,7 +85,8 @@ list(REMOVE_ITEM maincode_HDRS ${obabeliface_HDRS})
 
 file(GLOB_RECURSE maincode_SRCS ../libmolsketch/*.cpp
                                 ../molsketch/*.cpp
-                                ../obabeliface/*.cpp)
+                                ../obabeliface/*.cpp
+                                ../libmskcore/*.cpp)
 file(GLOB mainfile ../molsketch/main.cpp)
 list(REMOVE_ITEM maincode_SRCS ${mainfile})
 
@@ -122,10 +123,35 @@ foreach(test_h IN LISTS tests)
     set(test_cpp "${test_raw}.cpp")
     add_custom_command(
         COMMAND ${CXXTEST_PATH}/bin/cxxtestgen --have-eh --xunit-printer --part "${test_h}" -o "${test_cpp}"
-        DEPENDS ${test_h}
+        DEPENDS "${test_h}"
         OUTPUT "${test_cpp}"
         )
     list(APPEND tests_cpp "${test_cpp}")
 endforeach()
 message(STATUS "generated: ${tests_cpp}")
 add_library(testcode SHARED ${tests_SRCS} ${tests_cpp})
+
+file(GLOB runner_template ../tests/runnerTemplate.tpl)
+message(STATUS "Runner template: ${runner_template}")
+add_custom_command(
+    COMMAND ${CXXTEST_PATH}/bin/cxxtestgen --have-eh --xunit-printer --root -o cxxrunner.cpp --template "${runner_template}"
+    DEPENDS "${runner_template}"
+    OUTPUT "cxxrunner.cpp"
+    )
+file(GLOB_RECURSE testcode_SRCS *.cpp)
+file(GLOB_RECURSE testcode_HDRS *.h)
+list(REMOVE_ITEM testcode_HDRS ${tests_HDRS})
+if(MSK_QT6)
+  qt_add_executable(TestRunner cxxrunner.cpp ${testcode_SRCS})
+  target_link_libraries(TestRunner PRIVATE Qt6::Core Qt6::Widgets Qt6::Test Qt6::Svg Qt6::Network, Qt6::PrintSupport)
+else(MSK_QT6)
+  add_executable(TestRunner cxxrunner.cpp ${testcode_SRCS})
+  target_link_libraries(TestRunner PRIVATE
+      $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::Core
+      $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::Widgets
+      $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::Test
+      $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::Svg
+      $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::Network
+      $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::PrintSupport)
+endif(MSK_QT6)
+target_link_libraries(TestRunner PRIVATE maincode testcode ${OPENBABEL_LINK_LIBRARIES})
