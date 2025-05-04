@@ -109,7 +109,7 @@ if (NOT DEFINED CXXTEST_PATH)
 endif(NOT DEFINED CXXTEST_PATH)
 add_definitions( -fexceptions )
 
-file (GLOB_RECURSE tests ../tests/*test.h)
+file (GLOB_RECURSE tests *test.h)
 foreach(test_h IN LISTS tests)
     get_filename_component(test_raw "${test_h}" NAME_WLE)
     message(STATUS "current: ${test_h} ${test_raw}")
@@ -157,3 +157,9 @@ endif(MSK_QT6)
 target_link_libraries(testcode PRIVATE ${QT_LIBRARIES})
 target_link_libraries(TestRunner PRIVATE ${QT_LIBRARIES})
 target_link_libraries(TestRunner PRIVATE libmolsketch mskcore maincode testcode obabeliface_LIB ${OPENBABEL_LINK_LIBRARIES} )
+
+set_target_properties(TestRunner PROPERTIES
+  AUTOMOC TRUE
+  AUTOUIC TRUE
+  AUTORCC TRUE
+  )

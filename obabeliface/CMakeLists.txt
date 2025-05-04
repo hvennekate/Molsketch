@@ -23,6 +23,11 @@ if(WIN32 OR WIN64)
 endif(WIN32 OR WIN64)
 
 target_link_libraries(obabeliface_LIB mskcore ${OPENBABEL_LINK_LIBRARIES})
+set_target_properties(obabeliface_LIB PROPERTIES
+  AUTOMOC FALSE
+  AUTOUIC FALSE
+  AUTORCC FALSE
+  )
 
 # Install the executable and the library
 install(TARGETS obabeliface_LIB

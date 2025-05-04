@@ -7,6 +7,12 @@ else(MSK_STATIC_LIB)
   add_library(mskcore SHARED ${libmskcore_SRCS} ${libmskcore_HDRS})
 endif(MSK_STATIC_LIB)
 
+set_target_properties(mskcore PROPERTIES
+  AUTOMOC FALSE
+  AUTOUIC FALSE
+  AUTORCC FALSE
+  )
+
 install(TARGETS mskcore
     RUNTIME DESTINATION ${MSK_INSTALL_BINS}
     LIBRARY DESTINATION ${MSK_INSTALL_LIBS}

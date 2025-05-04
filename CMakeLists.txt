@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 cmake_policy(SET CMP0005 NEW)
 cmake_policy(SET CMP0020 NEW)
+cmake_policy(SET CMP0071 NEW)
 
 project(Molsketch)
 
@@ -15,16 +16,29 @@ project(Molsketch)
 # Here I am adding GCC magic from KDE. With these settings#
 # compiler issues are fixed and more warnings are issued. #
 ###########################################################
-if (CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-long -std=iso9899:1990 -Wundef -Wcast-align")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror-implicit-function-declaration -Wchar-subscripts")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-format-attribute -fno-common")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wchar-subscripts -Wall -W -Wpointer-arith -Wformat-security")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-check-new -fno-common")
-  add_definitions(-D_BSD_SOURCE)
-endif (CMAKE_COMPILER_IS_GNUCXX)
+# TODO
+# disable AUTOMOC
+# extract QT setup into functions
+# clean up tests
+# check QT 5 and 6 builds
+# remvoe debug output
+# fix compiler warnings
+# check if transitioning to CTest is an option
+# windows app icon
+# translations
+# icons
+# licenses
+# remove these
+# if (CMAKE_COMPILER_IS_GNUCXX)
+#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-long -std=iso9899:1990 -Wundef -Wcast-align")
+#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror-implicit-function-declaration -Wchar-subscripts")
+#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security")
+#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-format-attribute -fno-common")
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align")
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wchar-subscripts -Wall -W -Wpointer-arith -Wformat-security")
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-check-new -fno-common")
+#   add_definitions(-D_BSD_SOURCE)
+# endif (CMAKE_COMPILER_IS_GNUCXX)
 
 # Enable CPack
 # set(CPACK_PACKAGE_VERSION_MAJOR "0")
