@@ -1,11 +1,10 @@
 # CMakeLists.txt for the main sourcecode of molsKetch
 cmake_policy(SET CMP0003 NEW)
-include(../include_qt.cmake)
 
-set(QT_USE_QTSVG TRUE)
+# set(QT_USE_QTSVG TRUE)
 
 # Ensure the molsketch include directory is always first
-get_directory_property(tmp_include_dirs INCLUDE_DIRECTORIES)
+# get_directory_property(tmp_include_dirs INCLUDE_DIRECTORIES)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/libmolsketch
                     ${CMAKE_SOURCE_DIR}/obabeliface
@@ -13,13 +12,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 file(GLOB_RECURSE molsketch_SRCS *.cpp)
-file(GLOB_RECURSE molsketch_MOC_HDRS *.h)
-file(GLOB_RECURSE molsketch_RCS *.qrc)
-file(GLOB_RECURSE molsketch_UIS *.ui)
 
 include("../generateTranslations.cmake")
 addTranslationResources(molsketch_TS_resource "molsketch_translations")
+file(GLOB_RECURSE molsketch_RCS *.qrc)
 qt_add_resources(molsketch_SRCS ${molsketch_RCS} ${molsketch_TS_resource})
+
+file(GLOB_RECURSE molsketch_UIS *.ui)
 qt_wrap_ui(molsketch_UIS_H ${molsketch_UIS})
 
 # Add a program icon for windows
@@ -29,18 +28,21 @@ qt_wrap_ui(molsketch_UIS_H ${molsketch_UIS})
 
 # Create the main executable
 add_definitions( -fexceptions )
-link_directories(${CMAKE_BINARY_DIR}/lib)
+# link_directories(${CMAKE_BINARY_DIR}/lib)
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/images/molsketch.ico")
+file(GLOB_RECURSE molsketch_MOC_HDRS *.h)
 if(MSK_QT6)
   qt_add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
-  foreach(package ${QtRequiredPackages})
-    target_link_libraries(molsketch PRIVATE Qt6::${package})
-  endforeach(package)
+  target_link_libraries(molsketch PRIVATE ${QT_LIBRARIES})
+  # foreach(package ${QtRequiredPackages})
+  #   target_link_libraries(molsketch PRIVATE Qt6::${package})
+  # endforeach(package)
 else(MSK_QT6)
   add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
-  foreach(package ${QtRequiredPackages})
-    target_link_libraries(molsketch PRIVATE $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::${package})
-  endforeach(package)
+  target_link_libraries(molsketch PRIVATE ${QT_LIBRARIES})
+  # foreach(package ${QtRequiredPackages})
+  #   target_link_libraries(molsketch PRIVATE $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::${package})
+  # endforeach(package)
 endif(MSK_QT6)
 target_link_libraries(molsketch PRIVATE libmolsketch)
 target_link_libraries(molsketch PRIVATE mskcore)

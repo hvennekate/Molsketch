@@ -4,3 +4,4 @@
 "Libraries (64bit) destination dir";MSK_INSTALL_LIBS64;/lib64/molsketch;/lib
 "Libraries (32bit) destination dir";MSK_INSTALL_LIBS;/lib/molsketch;/lib
 "Build OpenBabel interface";MSK_OBABELIFACE;true;true
+"Build tests";MSK_BUILD_TESTS;false;false
