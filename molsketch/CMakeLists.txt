@@ -39,7 +39,13 @@ if(MSK_QT6)
   # endforeach(package)
 else(MSK_QT6)
   add_executable(molsketch ${molsketch_SRCS} ${molsketch_UIS_H} ${molsketch_MOC_HDRS} ${APP_ICON_RESOURCE_WINDOWS})
-  target_link_libraries(molsketch PRIVATE ${QT_LIBRARIES})
+  target_link_libraries(molsketch PRIVATE
+        Qt5::Core
+        Qt5::Widgets
+        Qt5::Gui
+        Qt5::PrintSupport
+        Qt5::Svg
+        Qt5::Network)
   # foreach(package ${QtRequiredPackages})
   #   target_link_libraries(molsketch PRIVATE $<IF:$<BOOL:${MSK_QT6}>,Qt6,Qt5>::${package})
   # endforeach(package)

@@ -27,6 +27,7 @@ project(Molsketch)
 # licenses
 # remove *.pri *.pro setupQt.cmake
 
+add_definitions( -fexceptions )
 
 # Add support for the "make uninstall" target
 configure_file("${CMAKE_SOURCE_DIR}/cmake_uninstall.cmake.in"
@@ -38,6 +39,7 @@ set(BUILD_SHARED_LIBS ON)
 
 include(read_buildvars.cmake)
 include(include_qt.cmake)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT APPLE )
         set(MSK_INSTALL_LIBS "${MSK_INSTALL_LIBS64}")

@@ -1,5 +1,3 @@
-# Find and setup Qt
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(QtRequiredPackages
         Core
         Widgets
@@ -8,15 +6,30 @@ set(QtRequiredPackages
         Svg
         Network
 )
+list(TRANSFORM QtRequiredPackages PREPEND "Qt6::" OUTPUT_VARIABLE QT_LIBRARIES)
 
 if(MSK_QT6)
   set(QT_MIN_VERSION "6.0.0")
-  find_package(Qt6 REQUIRED COMPONENTS ${QtRequiredPackages})
-  find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+  find_package(Qt6 REQUIRED COMPONENTS LinguistTools ${QtRequiredPackages})
   qt_standard_project_setup()
   foreach(package ${QtRequiredPackages})
     set(QT_LIBRARIES ${QT_LIBRARIES} Qt6::${package})
   endforeach(package)
+
+  list(TRANSFORM QtRequiredPackages PREPEND "Qt6::" OUTPUT_VARIABLE QT_LIBRARIES)
+
+  function(setupQt projectName sources isLib)
+    if(isLib)
+      if(MSK_STATIC_LIB)
+        qt_add_library(${projectName} STATIC ${sources})
+      else(MSK_STATIC_LIB)
+        qt_add_library(${projectName} SHARED ${sources})
+      endif(MSK_STATIC_LIB)
+    else(isLib)
+      add_executable(${projectName} ${sources})
+    endif(isLib)
+    target_link_libraries(${projectName} ${QT_LIBRARIES})
+  endfunction(setupQt)
 else(MSK_QT6)
   set(QT_MIN_VERSION "5.0.0")
   foreach(package ${QtRequiredPackages})
@@ -28,8 +41,23 @@ else(MSK_QT6)
   endforeach(package)
   find_package(Qt5LinguistTools)
 
-  if(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
-          message(FATAL_ERROR "Could not find Qt5. Required parts include: Widgets, Gui, PrintSupport, Svg.")
-  endif(NOT(Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5PrintSupport_FOUND AND Qt5Svg_FOUND))
+  list(TRANSFORM QtRequiredPackages PREPEND "Qt5::" OUTPUT_VARIABLE QT_LIBRARIES)
   set(CMAKE_AUTOMOC ON)
+
+  function(setupQt projectName sources isLib)
+    if(isLib)
+      if(MSK_STATIC_LIB)
+        add_library(${projectName} STATIC ${sources})
+      else(MSK_STATIC_LIB)
+        add_library(${projectName} SHARED ${sources})
+      endif(MSK_STATIC_LIB)
+    else(isLib)
+      add_executable(${projectName} ${sources})
+    endif(isLib)
+    set_target_properties(${prjectName} PROPERTIES
+      AUTOMOC TRUE
+      AUTOUIC TRUE
+      AUTORCC TRUE)
+    target_link_libraries(${projectName} PRIVATE ${QT_LIBRARIES})
+  endfunction(setupQt)
 endif(MSK_QT6)
