@@ -6,16 +6,13 @@ endif (MSK_QT6)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+cmake_policy(SET CMP0003 NEW)
 cmake_policy(SET CMP0005 NEW)
 cmake_policy(SET CMP0020 NEW)
 cmake_policy(SET CMP0071 NEW)
 
 project(Molsketch)
 
-###########################################################
-# Here I am adding GCC magic from KDE. With these settings#
-# compiler issues are fixed and more warnings are issued. #
-###########################################################
 # TODO
 # disable AUTOMOC
 # extract QT setup into functions
@@ -28,25 +25,8 @@ project(Molsketch)
 # translations
 # icons
 # licenses
-# remove these
-# if (CMAKE_COMPILER_IS_GNUCXX)
-#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-long -std=iso9899:1990 -Wundef -Wcast-align")
-#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror-implicit-function-declaration -Wchar-subscripts")
-#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security")
-#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-format-attribute -fno-common")
-#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align")
-#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wchar-subscripts -Wall -W -Wpointer-arith -Wformat-security")
-#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-check-new -fno-common")
-#   add_definitions(-D_BSD_SOURCE)
-# endif (CMAKE_COMPILER_IS_GNUCXX)
+# remove *.pri *.pro setupQt.cmake
 
-# Enable CPack
-# set(CPACK_PACKAGE_VERSION_MAJOR "0")
-# set(CPACK_PACKAGE_VERSION_MINOR "1")
-# set(CPACK_PACKAGE_VERSION_PATCH "0")
-# set(CPACK_SOURCE_PACKAGE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-# set(CPACK_SOURCE_IGNORE_FILES "/build;/.git")
-# include(CPack)
 
 # Add support for the "make uninstall" target
 configure_file("${CMAKE_SOURCE_DIR}/cmake_uninstall.cmake.in"
@@ -55,10 +35,6 @@ configure_file("${CMAKE_SOURCE_DIR}/cmake_uninstall.cmake.in"
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 set(BUILD_SHARED_LIBS ON)
-
-# Setting paths
-# set(_obIncDir ${CMAKE_SOURCE_DIR}/include)
-# set(_obLinkDir ${CMAKE_SOURCE_DIR}/lib)
 
 include(read_buildvars.cmake)
 include(include_qt.cmake)
