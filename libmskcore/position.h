@@ -24,6 +24,7 @@ public:
     Position operator -(const Position &other) const;
     Position operator *(const double &factor) const;
     Position& operator +=(const Position &other);
+    bool operator ==(const Position &other) const;
 };
 
 Position operator*(const double &factor, const Position &pos);

@@ -20,9 +20,9 @@
 #ifndef COREMOLECULETEST_H
 #define COREMOLECULETEST_H
 
-#include "core/coremolecule.h"
-#include "core/coreatom.h"
-#include "core/corebond.h"
+#include "coremolecule.h"
+#include "coreatom.h"
+#include "corebond.h"
 #include <cxxtest/TestSuite.h>
 #include "utilities.h"
 
@@ -33,7 +33,7 @@ public:
     using Molsketch::Core::Atom;
     using Molsketch::Core::Bond;
     auto bond = Bond(0, 1, Bond::DativeDot);
-    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", QPointF(1.5, 3))},
+    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", {1.5, 3})},
                                        {bond},
                                        "test molecule");
 
@@ -59,7 +59,7 @@ public:
     using Molsketch::Core::Atom;
     using Molsketch::Core::Bond;
     auto bond = Bond(0, 1, Bond::DativeDot);
-    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", QPointF(1.5, 3))},
+    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", {1.5, 3})},
                                        {bond},
                                        "test molecule");
 
@@ -68,10 +68,10 @@ public:
     auto moleculeFromVector = molecules.last();
     TS_ASSERT_EQUALS(moleculeFromVector.atoms().size(), 2);
     QS_ASSERT_EQUALS(moleculeFromVector.atoms().at(0).element(), "C");
-    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(0).position().x(), 0);
-    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(0).position().y(), 0);
-    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(1).position().x(), 1.5);
-    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(1).position().y(), 3);
+    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(0).position().getX(), 0);
+    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(0).position().getY(), 0);
+    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(1).position().getX(), 1.5);
+    TS_ASSERT_EQUALS(moleculeFromVector.atoms().at(1).position().getY(), 3);
     QS_ASSERT_EQUALS(moleculeFromVector.atoms().at(1).element(), "N");
     TS_ASSERT_EQUALS(moleculeFromVector.bonds().size(), 1);
     TS_ASSERT_EQUALS(moleculeFromVector.bonds().at(0).start(), 0);
@@ -83,33 +83,33 @@ public:
     using Molsketch::Core::Atom;
     using Molsketch::Core::Bond;
     auto bond = Bond(0, 1, Bond::DativeDot);
-    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", QPointF(1.5, 3))},
+    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", {1.5, 3})},
                                        {bond},
                                        "test molecule");
-    QPointF expectedAveragePosition(0.75, 1.5);
+    Molsketch::Core::Position expectedAveragePosition(0.75, 1.5);
     QS_ASSERT_EQUALS(molecule.center(), expectedAveragePosition);
   }
 
   void testAveragePositionForInvalidMolecule() {
     Molsketch::Core::Molecule molecule({}, {});
 
-    QS_ASSERT_EQUALS(molecule.center(), QPointF());
+    QS_ASSERT_EQUALS(molecule.center(), Molsketch::Core::Position());
   }
 
   void testShift() {
     using Molsketch::Core::Atom;
     using Molsketch::Core::Bond;
     auto bond = Bond(0, 1, Bond::DativeDot);
-    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", QPointF(1.5, 3))},
+    Molsketch::Core::Molecule molecule({Atom("C"), Atom("N", {1.5, 3})},
                                        {bond},
                                        "test molecule");
 
     auto shiftedMolecule = molecule.shiftedBy({-3.5, +10.5});
     TS_ASSERT_EQUALS(shiftedMolecule.atoms().size(), 2);
-    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(0).position().x(), -3.5);
-    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(0).position().y(), 10.5);
-    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(1).position().x(), -2);
-    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(1).position().y(), 13.5);
+    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(0).position().getX(), -3.5);
+    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(0).position().getY(), 10.5);
+    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(1).position().getX(), -2);
+    TS_ASSERT_EQUALS(shiftedMolecule.atoms().at(1).position().getY(), 13.5);
   }
 };
 

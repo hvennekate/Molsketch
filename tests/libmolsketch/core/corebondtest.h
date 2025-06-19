@@ -20,7 +20,7 @@
 #ifndef COREBONDTEST_H
 #define COREBONDTEST_H
 
-#include <core/corebond.h>
+#include <corebond.h>
 #include <cxxtest/TestSuite.h>
 
 class CoreBondTest : public CxxTest::TestSuite {

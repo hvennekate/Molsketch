@@ -57,6 +57,7 @@ namespace Molsketch {
     Atom(const QPointF & position = QPointF(), const QString & element = QString(),
          bool implicitHydrogens = true, QGraphicsItem* parent = 0) ;
     Atom(const Core::Position &position, const QString &element);
+    Atom(const QString &element);
     Atom(const Atom& other);
     ~Atom() ;
     virtual QRectF boundingRect() const override;
@@ -165,6 +166,9 @@ namespace Molsketch {
     qreal getExtentForEndOnCorner(const QPolygonF &fullBondPolygon, const QLineF &middleLine, const QPointF &corner) const;
     friend class LegacyAtom;
   };
+
+  inline Atom::Atom(const QString &element)
+    : Atom(QPointF(), element) {}
 
   class LegacyAtom : public Atom {
   private:

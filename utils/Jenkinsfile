@@ -1,6 +1,6 @@
 pipeline {
   agent any
-  // TODO determine version and check it does not yet exist
+  // TODO check version does not yet exist
   // TODO push tag to github
 
   stages {

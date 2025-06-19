@@ -5,7 +5,7 @@ matrixJob('Molsketch/tests') {
     githubProjectUrl 'https://github.com/hvennekate/Molsketch'
   }
   axes {
-    text 'qmake_executable', 'qmake-qt5', 'qmake6'
+    text 'qt_version', 'QT5', 'QT6'
     text 'openbabel_version', '2.4.1', '3.1.1'
   }
   scm {
@@ -20,7 +20,7 @@ matrixJob('Molsketch/tests') {
   }
   concurrentBuild true
   steps {
-    shell 'echo "QMake: ${qmake_executable}, OpenBabel: ${openbabel_version}"'
+    shell 'echo "QMake: ${qt_version}, OpenBabel: ${openbabel_version}"'
     shell '''
       [[ -e build ]] && rm -r build # TODO this should be done by workspace cleanup (also the source code should be disposed of by that)
       mkdir build
@@ -28,16 +28,15 @@ matrixJob('Molsketch/tests') {
       LD_LIBRARY_PATH=/opt/openbabel-${openbabel_version}/lib
       ATOM_H_FILE=$(find /opt/openbabel-${openbabel_version}/ -name "atom.h")
       INCHIFORMAT_SO_FILE=$(find /opt/openbabel-${openbabel_version}/ -name "inchiformat.so")
-      ${qmake_executable} ../sources/tests \
-              -spec linux-g++ \
-              CONFIG+=debug \
-              CONFIG-=qml_debug \
-              CXXTEST_PATH=/opt/cxxtest-4.4 \
-              MSK_OB_LIB_DIR=/opt/openbabel-${openbabel_version}/lib/ \
-              MSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h} \
-              MSK_OB_FORMATS_DIR=${INCHIFORMAT_SO_FILE%inchiformat.so}
+      cmake \
+              -DCXXTEST_PATH=/opt/cxxtest-4.4 \
+              -DMSK_BUILD_TESTS=true \
+              -DMSK_OB_LIB_DIR=/opt/openbabel-${openbabel_version}/lib/ \
+              -DMSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h} \
+              -DMSK_OB_FORMATS_DIR=${INCHIFORMAT_SO_FILE%inchiformat.so}
+              ../sources/
       make -j 8
-      LD_LIBRARY_PATH=.:/opt/openbabel-${openbabel_version}/lib xvfb-run -a ./msktestrunner
+      LD_LIBRARY_PATH=.:/opt/openbabel-${openbabel_version}/lib xvfb-run -a ./tests/TestRunner
       '''
   }
   publishers {

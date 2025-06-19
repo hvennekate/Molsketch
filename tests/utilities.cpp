@@ -123,3 +123,7 @@ void doubleClick(QWindow *w, QPoint p) {
 QDebug operator <<(QDebug debug, const std::string &string) {
   return debug << QString::fromStdString(string);
 }
+
+QDebug operator <<(QDebug debug, const Molsketch::Core::Position &position) {
+  return debug << "(" << position.getX() << ", " << position.getY() << ")";
+}

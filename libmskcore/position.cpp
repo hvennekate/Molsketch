@@ -19,8 +19,8 @@ Molsketch::Core::BoundingRect Molsketch::Core::Position::boundingRect(const Coor
     for (auto coord : coords) {
         left = std::min(left, coord.x);
         right = std::max(right, coord.x);
-        top = std::min(top, coord.x);
-        bottom = std::max(bottom, coord.x);
+        top = std::min(top, coord.y);
+        bottom = std::max(bottom, coord.y);
     }
 
     return std::make_pair(Position(left, top), Position(right, bottom));
@@ -52,6 +52,11 @@ Molsketch::Core::Position &Molsketch::Core::Position::operator +=(const Position
   x += other.getX();
   y += other.getY();
   return *this;
+}
+
+bool Molsketch::Core::Position::operator ==(const Position &other) const
+{
+  return x == other.x && y == other.y;
 }
 
 Molsketch::Core::Position Molsketch::Core::operator*(const double &factor, const Position &pos)

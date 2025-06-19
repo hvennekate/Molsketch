@@ -58,14 +58,14 @@ const Core::Molecule &CYANIDE{
 
 class OpenBabelUnitTest : public CxxTest::TestSuite {
   void assertButane(const Core::Molecule &molecule) {
-    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, {"C", "C", "C", "C"});
+    assertListProperty(molecule.atoms(), &Core::Atom::element, {"C", "C", "C", "C"});
   }
 
   void assertLacticAcid(const Core::Molecule &molecule, Core::Bond::Type stereoBondType) {
-    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, QList<QString>{"C", "C", "C", "O", "O", "O"});
+    assertListProperty(molecule.atoms(), &Core::Atom::element, {"C", "C", "C", "O", "O", "O"});
     typedef std::tuple<unsigned, unsigned, unsigned> BondTuple;
     auto singleBond = Core::Bond::Single;
-    assertListTransformed(molecule.bonds().toList(), [](Core::Bond bond) { return std::make_tuple(bond.type(), bond.start(), bond.end()); },
+    assertListTransformed(molecule.bonds(), [](Core::Bond bond) { return std::make_tuple(bond.type(), bond.start(), bond.end()); },
       QList<BondTuple>{{stereoBondType, 0, 1}, {singleBond, 1, 2}, {singleBond, 1, 3}, {Core::Bond::DoubleLegacy, 2, 4}, {singleBond, 2, 5}});
   }
 public:
@@ -124,7 +124,10 @@ public:
   void testOptimizationOfCoordinates() { TS_SKIP("NEEDS FIXING!");
     auto optimizedCoords = optimizeCoordinates(BUTANE);
     TS_ASSERT_EQUALS(optimizedCoords.size(), 4);
-    for (auto point : optimizedCoords) TS_ASSERT(!point.isNull());
+    for (auto point : optimizedCoords) {
+      TS_ASSERT_DIFFERS(std::abs(point.getX()), 0.);
+      TS_ASSERT_DIFFERS(std::abs(point.getY()), 0.);
+    }
   }
 
   void testOptimizationOfNullMolecule() { TS_SKIP("NEEDS FIXING!");
@@ -145,9 +148,9 @@ public:
   void testReadingImplicitHydrogens() { TS_SKIP("NEEDS FIXING!");
     std::istringstream input("InChI=1S/C2H5/c1-2/h1H2,2H3\n");
     auto molecule = loadFile(&input, "testinput.inchi");
-    assertListProperty(molecule.bonds().toList(), &Core::Bond::type, {Core::Bond::Single});
-    assertListProperty(molecule.atoms().toList(), &Core::Atom::charge, {0, 0});
-    assertListProperty(molecule.atoms().toList(), &Core::Atom::hAtoms, {2, 3});
+    assertListProperty(molecule.bonds(), &Core::Bond::type, {Core::Bond::Single});
+    assertListProperty(molecule.atoms(), &Core::Atom::charge, {0, 0});
+    assertListProperty(molecule.atoms(), &Core::Atom::hAtoms, {2, 3});
   }
 
   void testWritingImplicitHydrogens() { TS_SKIP("NEEDS FIXING!");
@@ -160,11 +163,11 @@ public:
   void testReadingCharge() { TS_SKIP("NEEDS FIXING!");
     std::istringstream input(CYANIDE_FULL_INCHI);
     auto molecule = loadFile(&input, "testinput.inchi");
-    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, {"C", "N"});
-    assertListProperty(molecule.atoms().toList(), &Core::Atom::charge, {-1, 0});
-    assertListProperty(molecule.bonds().toList(), &Core::Bond::type, {Core::Bond::Triple});
-    assertListProperty(molecule.bonds().toList(), &Core::Bond::start, {0});
-    assertListProperty(molecule.bonds().toList(), &Core::Bond::end, {1});
+    assertListProperty(molecule.atoms(), &Core::Atom::element, {"C", "N"});
+    assertListProperty(molecule.atoms(), &Core::Atom::charge, {-1, 0});
+    assertListProperty(molecule.bonds(), &Core::Bond::type, {Core::Bond::Triple});
+    assertListProperty(molecule.bonds(), &Core::Bond::start, {0});
+    assertListProperty(molecule.bonds(), &Core::Bond::end, {1});
   }
 
   void testWritingCharge() { TS_SKIP("NEEDS FIXING!");
@@ -181,9 +184,9 @@ public:
     // it is acceptable here to have one "big" united molecule,
     // as the disjoint parts will be split in MainWindow::readSceneUsingOpenBabel
     // (should possibly be moved
-    assertListProperty(molecule.atoms().toList(), &Core::Atom::element, {"C", "C", "C", "C", "C", "N"});
-    assertListProperty(molecule.bonds().toList(), &Core::Bond::start, {0, 1, 2, 4});
-    assertListProperty(molecule.bonds().toList(), &Core::Bond::end, {2, 3, 3, 5});
+    assertListProperty(molecule.atoms(), &Core::Atom::element, {"C", "C", "C", "C", "C", "N"});
+    assertListProperty(molecule.bonds(), &Core::Bond::start, {0, 1, 2, 4});
+    assertListProperty(molecule.bonds(), &Core::Bond::end, {2, 3, 3, 5});
   }
 
   void testWriteMultipleMolecules() { TS_SKIP("NEEDS FIXING!");

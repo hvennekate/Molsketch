@@ -20,7 +20,7 @@
 #ifndef COREATOMTEST_H
 #define COREATOMTEST_H
 
-#include <core/coreatom.h>
+#include <coreatom.h>
 #include <cxxtest/TestSuite.h>
 #include "utilities.h"
 
@@ -30,7 +30,7 @@ public:
   void testCreation() {
     Molsketch::Core::Atom atom("Ba", {5,3.5}, 3, -4);
     QS_ASSERT_EQUALS(atom.element(), "Ba");
-    QPointF x{5, 3.5};
+    Molsketch::Core::Position x{5, 3.5};
     TS_ASSERT_EQUALS(atom.position(), x);
     TS_ASSERT_EQUALS(atom.hAtoms(), 3);
     TS_ASSERT_EQUALS(atom.charge(), -4);
