@@ -1,6 +1,7 @@
 cmake_policy(SET CMP0003 NEW)
 
 include_directories(${CMAKE_SOURCE_DIR}/libmskcore)
+file(GLOB_RECURSE libmolsketch_SRCS *.cpp)
 
 include("../generateTranslations.cmake")
 addTranslationResources(libmolsketch_TS_resource "libmolsketch_translations")
@@ -9,7 +10,6 @@ qt_add_resources(libmolsketch_SRCS ${libmolsketch_RCS} ${libmolsketch_TS_resourc
 
 file(GLOB_RECURSE libmolsketch_UIS *.ui)
 qt_wrap_ui(libmolsketch_UIS_H ${libmolsketch_UIS})
-file(GLOB_RECURSE libmolsketch_SRCS *.cpp)
 
 link_directories(${CMAKE_BINARY_DIR}/lib)
 if(MSK_QT6)
