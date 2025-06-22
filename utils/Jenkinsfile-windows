@@ -39,6 +39,7 @@ pipeline {
             -DCMAKE_PREFIX_PATH=/opt/Qt6/6.6.1/windows-static/lib/cmake/ \
             -DOB_INCLUDE_DIRS=/opt/openbabel-3.1.1-static-mingw64/include/openbabel3/ \
             -DOB_LIBRARY_DIRS=/opt/openbabel-3.1.1-static-mingw64/lib \
+            -DCMAKE_PREFIX_PATH=/opt/Qt6/6.9.1/windows-static/ \
             -S ${WORKSPACE}/sources
         '''
         dir('build') {
