@@ -33,7 +33,7 @@ matrixJob('Molsketch/tests') {
               -DMSK_BUILD_TESTS=true \
               -DMSK_OB_LIB_DIR=/opt/openbabel-${openbabel_version}/lib/ \
               -DMSK_OB_INC_DIR=${ATOM_H_FILE%openbabel/atom.h} \
-              -DMSK_OB_FORMATS_DIR=${INCHIFORMAT_SO_FILE%inchiformat.so}
+              -DMSK_OB_FORMATS_DIR=${INCHIFORMAT_SO_FILE%inchiformat.so} \
               ../sources/
       make -j 8
       LD_LIBRARY_PATH=.:/opt/openbabel-${openbabel_version}/lib xvfb-run -a ./tests/TestRunner
