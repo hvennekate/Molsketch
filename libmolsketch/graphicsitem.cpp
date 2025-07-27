@@ -89,10 +89,12 @@ namespace Molsketch {
       lineWidthScaling(1),
       d(new privateData)
   {
-    //    setCacheMode(QGraphicsItem::NoCache);
     setFlags(QGraphicsItem::ItemIsFocusable | QGraphicsItem::ItemIsSelectable);
     setAcceptHoverEvents(true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+    MolScene* molScene = dynamic_cast<MolScene*>(scene());
+    if (molScene) setColor(molScene->settings()->defaultColor()->get());
+    else setColor(QColor(0, 0, 0));
   }
 
   graphicsItem::graphicsItem(const graphicsItem &other)
@@ -365,6 +367,7 @@ namespace Molsketch {
                  << "Pos:"  << item.pos()
                  << "Scene Pos:" << item.scenePos()
                  << "Bounds:" << item.boundingRect()
+                 << "Color:" << item.getColor()
                     ;
   }
 #endif
