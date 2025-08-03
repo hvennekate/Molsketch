@@ -6,6 +6,11 @@
     </ul>
 </b>
 
+<h2>0.8.3 Fluorine-15</h2>
+<ul>
+    <li>Fix accidental color change, e.g. when inserting fused rings</li>
+<ul>
+
 <h2>0.8.2 Fluorine-14</h2>
 <ul>
     <li>Fix placement of icons in settings dialog sidebar</li>

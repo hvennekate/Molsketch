@@ -135,12 +135,6 @@ namespace Molsketch {
     setZValue(3);
     setShapeType(Rectangle);
 
-    MolScene *molScene = qobject_cast<MolScene*>(scene());
-
-    if (molScene) {
-      setColor (molScene->settings()->defaultColor()->get());
-    }
-    else setColor (QColor (0, 0, 0));
     // Enabling hovereffects
     setAcceptHoverEvents(true) ;
 
