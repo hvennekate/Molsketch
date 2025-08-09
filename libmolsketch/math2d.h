@@ -32,6 +32,7 @@ namespace Molsketch {
 
   inline QPointF normalized(const QPointF &v)
   {
+    if (v.isNull()) return QPointF();
     QPointF n = v;
     qreal length = sqrt(n.x() * n.x() + n.y() * n.y());
     n /= length;

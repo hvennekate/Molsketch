@@ -543,7 +543,7 @@ void Molecule::paintElectronSystems(QPainter *painter) const {
         dir += normalized(nbr->pos() - atom->pos());
       dir /= atom->numBonds();
       dir = normalized(dir);
-      if (!atom->numBonds()) {
+      if (!atom->numBonds() || dir.isNull()) {
         dir = QPointF(0.0, 1.0);
         orthogonal = QPointF(1.0, 0.0);
       } else {
