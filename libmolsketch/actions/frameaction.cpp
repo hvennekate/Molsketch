@@ -24,6 +24,8 @@
 #include "commands.h"
 #include "frame.h"
 #include "iconutils.h"
+#include "scenesettings.h"
+#include "settingsitem.h"
 
 namespace Molsketch {
 
@@ -121,6 +123,7 @@ namespace Molsketch {
     event->accept();
     if (d->currentFrame) delete d->currentFrame;
     d->currentFrame= new Frame() ;
+    d->currentFrame->setColor(scene()->settings()->defaultColor()->get());
     d->currentFrame->setFrameString(activeSubAction()->data().toString());
     d->mousePressPosition = event->scenePos();
     d->currentFrame->setCoordinates(QVector<QPointF>(2, d->mousePressPosition)) ;

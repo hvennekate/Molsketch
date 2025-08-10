@@ -21,6 +21,8 @@
 #include "molscene.h"
 #include "commands.h"
 #include "iconutils.h"
+#include "scenesettings.h"
+#include "settingsitem.h"
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 
@@ -68,6 +70,7 @@ namespace Molsketch {
     event->accept();
     if (d->currentArrow) delete d->currentArrow ;
     d->currentArrow = new Arrow() ;
+    d->currentArrow->setColor(scene()->settings()->defaultColor()->get());
     if (activeSubAction() == d->doubleArrow)
       d->currentArrow->setArrowType(Arrow::LowerForward
                                     | Arrow::UpperForward

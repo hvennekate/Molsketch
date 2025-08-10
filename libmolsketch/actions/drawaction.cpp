@@ -70,10 +70,11 @@ namespace Molsketch {
       // Initialize hint point circle
       qreal bondAngle = scene->settings()->bondAngle()->get();
       qreal bondLength = scene->settings()->bondLength()->get();
+      auto color = scene->settings()->gridColor()->get();
       for (qreal angle = 0; angle < 360. ; angle += bondAngle)
       {
         QGraphicsEllipseItem* dot = new QGraphicsEllipseItem(-2.5,-2.5,5,5);
-        dot->setBrush(Qt::lightGray);
+        dot->setBrush(color);
         dot->setPen(Qt::NoPen);
         dot->setPos(QLineF::fromPolar(bondLength, angle).p2());
         hintPointsGroup.addToGroup(dot);
@@ -263,6 +264,9 @@ namespace Molsketch {
     // hint line
     d->hintLine.setLine(QLineF(downPos, event->scenePos()));
     scene()->addItem(&(d->hintLine)); // TODO attn: scene takes ownership...
+    auto pen = d->hintLine.pen();
+    pen.setColor(scene()->settings()->defaultColor()->get());
+    d->hintLine.setPen(pen);
     d->hintLine.setVisible(true);
     event->accept();
   }

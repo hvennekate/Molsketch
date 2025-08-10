@@ -9,6 +9,9 @@
 <h2>0.8.4 Fluorine-16</h2>
 <ul>
     <li>Fix vector normalization (led to crashes when drawing arrows)</li>
+    <li>Initialize arrows with scene default color</li>
+    <li>Initialize frames/brackets with scene default color</li>
+    <li>Use grid color for hint points during drawing and default color for lines</li>
 </ul>
 
 <h2>0.8.3 Fluorine-15</h2>
