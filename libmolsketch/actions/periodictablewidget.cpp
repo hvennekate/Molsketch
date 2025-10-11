@@ -115,7 +115,7 @@ namespace Molsketch {
     : QWidget(parent),
       d(new privateData(this))
   {
-    QGridLayout *layout = new QGridLayout(this) ;
+    QGridLayout *layout = new QGridLayout(this);
     layout->setSpacing(0);
     layout->setContentsMargins(0,0,0,0);
     setAdditionalElements("");

@@ -12,6 +12,7 @@
     <li>Initialize arrows with scene default color</li>
     <li>Initialize frames/brackets with scene default color</li>
     <li>Use grid color for hint points during drawing and default color for lines</li>
+    <li>Fix export via OpenBabel (including crashes when trying to open or save)</li>
 </ul>
 
 <h2>0.8.3 Fluorine-15</h2>

@@ -23,6 +23,7 @@
 #include <QLibrary>
 #include <molecule.h>
 #include <QMessageBox>
+#include <iterator>
 
 #define ENCAPSULE_OB_CALL(CALL) try { CALL } catch (...) { \
   QMessageBox::critical(nullptr, "Error", "OpenBabel/obabeliface threw an exception. Please report to the author."); }
@@ -87,15 +88,17 @@ OBabelIfaceLoader::OBabelIfaceLoader (QObject* parent) : QObject (parent), d_ptr
 
 OBabelIfaceLoader::~OBabelIfaceLoader () { delete d_ptr; }
 
-template<class Output, class Input, typename Transformation>
-Output convertContainer(Input inputContainer, Transformation transformation = [] (auto item) { return item; }) {
+template<class Output, class Input, typename Insertion>
+Output convertContainer(Input inputContainer, Insertion insertion) {
   Output result;
-  std::transform(inputContainer.cbegin(), inputContainer.cend(), result.begin(), transformation);
+  std::for_each(inputContainer.cbegin(), inputContainer.cend(), [&] (auto &item) { insertion(result, item); });
   return result;
 }
 
 QStringList toQStringList(const std::vector<std::string>& vectorOfStrings) {
-  return convertContainer<QStringList>(vectorOfStrings, &QString::fromStdString);
+  return convertContainer<QStringList>(vectorOfStrings, [] (auto &stringList, auto& input) {
+    stringList.append(QString::fromStdString(input));
+  });
 }
 
 QStringList OBabelIfaceLoader::inputFormats () {
@@ -121,8 +124,10 @@ Molsketch::Molecule* OBabelIfaceLoader::loadFile (std::istream *input, const std
 
 bool OBabelIfaceLoader::saveFile (std::ostream *output, const std::string &filename, const QList<Molsketch::Molecule *> &originalMolecules, bool use3d, bool addHydrogens, qreal scaling) {
   auto nonNullMolecules = QList<Molsketch::Molecule*>();
-  std::copy_if(originalMolecules.cbegin(), originalMolecules.cend(), nonNullMolecules.begin(), [] (auto *input) { return input != nullptr; });
-  auto molecules = convertContainer<std::vector<Molsketch::Core::Molecule>>(nonNullMolecules, [&] (Molsketch::Molecule* original) { return original->toCoreMolecule(scaling); });
+  std::copy_if(originalMolecules.cbegin(), originalMolecules.cend(), std::back_inserter(nonNullMolecules),
+               [] (auto *input) { return input != nullptr; });
+  auto molecules = convertContainer<std::vector<Molsketch::Core::Molecule>>(nonNullMolecules,
+    [&] (auto &result, auto &original) { return result.push_back(original->toCoreMolecule(scaling)); });
   Q_D (OBabelIfaceLoader);
   ENCAPSULE_OB_CALL(if (d->save) return d->save (output, filename, molecules, use3d ? 3 : 2, addHydrogens);)
   qWarning ("No support for saving OpenBabel available");
@@ -141,7 +146,9 @@ QVector<QPointF> OBabelIfaceLoader::optimizeCoordinates(const Molsketch::Molecul
   Q_D(OBabelIfaceLoader);
   ENCAPSULE_OB_CALL(if (d->optimizeCoordinates)
                     return convertContainer<QVector<QPointF>>
-                    (d->optimizeCoordinates(molecule->toCoreMolecule()), [] (auto item) { return QPointF(item.getX(), item.getY()); }); )
+                    (d->optimizeCoordinates(molecule->toCoreMolecule()), [] (auto &container, auto &item) {
+                      container.append(QPointF(item.getX(), item.getY()));
+                    }); )
   qWarning("No support for optimizing coordinates using OpenBabel available");
   return molecule->coordinates();
 }
