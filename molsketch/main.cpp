@@ -26,6 +26,8 @@
 #include <QSettings>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 
 #include "applicationsettings.h"
 #include "mainwindow.h"
@@ -64,6 +66,23 @@ int main(int argc, char *argv[])
   QCoreApplication::setOrganizationName("SourceForge");
   QCoreApplication::setOrganizationDomain("sourceforge.net");
   QCoreApplication::setApplicationName("Molsketch");
+
+  // Portable mode: if a "settings" folder exists next to the executable, keep the
+  // settings there (as an INI file) instead of the system location (e.g. the
+  // Windows registry, which would be shared with an installed Molsketch), and use
+  // the OpenBabel interface and plugins shipped next to the executable.
+  const QDir appDir(QCoreApplication::applicationDirPath());
+  if (appDir.exists("settings")) {
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, appDir.filePath("settings"));
+    ApplicationSettings portableSettings(Molsketch::SettingsFacade::persistedSettings(new QSettings));
+    const QString obabelIface = appDir.filePath(QFileInfo(OBABEL_IFACE_LOCATION).fileName());
+    if (QFileInfo::exists(obabelIface)) portableSettings.setObabelIfacePath(QDir::toNativeSeparators(obabelIface));
+    if (appDir.exists("openbabel/plugins"))
+      portableSettings.setObabelFormatsPath(QDir::toNativeSeparators(appDir.filePath("openbabel/plugins")));
+    if (appDir.exists("openbabel/data") && !qEnvironmentVariableIsSet("BABEL_DATADIR"))
+      qputenv("BABEL_DATADIR", QDir::toNativeSeparators(appDir.filePath("openbabel/data")).toUtf8());
+  }
 
   QTranslator molsketchTranslator, libraryTranslator;
   auto molsketchTranslationsLoaded = molsketchTranslator.load(QLocale::system(), "molsketch", "_", ":/i18n"); // TODO also load Qt module translations

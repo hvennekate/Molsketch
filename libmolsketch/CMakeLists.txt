@@ -31,6 +31,8 @@ else(MSK_QT6)
   target_link_libraries(libmolsketch ${QT_LIBRARIES})
 endif(MSK_QT6)
 set_target_properties(libmolsketch PROPERTIES OUTPUT_NAME "molsketch")
+# libmolsketch uses the core classes; shared libraries on Windows must not leave them unresolved
+target_link_libraries(libmolsketch mskcore)
 
 # Install the executable and the library
 install(TARGETS libmolsketch

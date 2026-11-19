@@ -56,6 +56,10 @@ target_link_libraries(molsketch PRIVATE mskcore)
 install(TARGETS molsketch DESTINATION ${MSK_INSTALL_BINS})
 set_property(TARGET molsketch PROPERTY INSTALL_RPATH ${MSK_INSTALL_LIBS})
 set_target_properties(molsketch PROPERTIES OUTPUT_NAME "molsketch")
+if(WIN32)
+  # GUI application: do not open a console window next to the main window
+  set_target_properties(molsketch PROPERTIES WIN32_EXECUTABLE TRUE)
+endif(WIN32)
 
 # Install menu entries on Linux
 if(UNIX)
