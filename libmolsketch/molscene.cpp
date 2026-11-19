@@ -90,6 +90,11 @@ namespace Molsketch {
     SceneSettings *settings;
     graphicsItem* dragItem;
     graphicsItem* hoverItem;
+    // Bonds collected once per rendering pass (between drawBackground() and drawForeground()).
+    // Every bond asks for all bonds of the scene when it is painted, and collecting them
+    // via QGraphicsScene::items() for each bond made painting quadratic.
+    QList<Bond*> renderPassBonds;
+    int renderPassDepth = 0;
 
     privateData(MolScene* scene, SceneSettings* settings)
       : privateData(new QUndoStack(scene), scene, settings)
@@ -268,7 +273,16 @@ namespace Molsketch {
     for (auto item : selectedItems()) selectionArea |= item->boundingRect();
     QList<QGraphicsItem*> selectedList(selectedItems());
     clearSelection();
-    mimeData->setImageData(renderImage(selectionArea));
+    // Render the clipboard image at high resolution, but limit its pixel count:
+    // at a fixed 10x scale, a 1300x550 drawing became a ~70 megapixel (280 MB) image,
+    // which took seconds to render and even longer to convert for the system
+    // clipboard (application not responding on every copy/cut).
+    const qreal maxClipboardImagePixels = 8e6;
+    qreal imageScaling = 10;
+    const qreal selectionPixels = selectionArea.width() * selectionArea.height();
+    if (selectionPixels > 0)
+      imageScaling = qMin(imageScaling, qSqrt(maxClipboardImagePixels / selectionPixels));
+    mimeData->setImageData(renderImage(selectionArea, imageScaling));
 
     // add SVG
     mimeData->setData("image/svg+xml", toSvg());
@@ -528,6 +542,26 @@ namespace Molsketch {
       if (auto molecule = dynamic_cast<Molecule*>(item))
         result << molecule;
     return result;
+  }
+
+  QList<Bond *> MolScene::bonds() const {
+    if (d->renderPassDepth > 0) return d->renderPassBonds;
+    QList<Bond *> result;
+    for (auto item : items())
+      if (auto bond = dynamic_cast<Bond*>(item))
+        result << bond;
+    return result;
+  }
+
+  void MolScene::drawBackground(QPainter *painter, const QRectF &rect) {
+    QGraphicsScene::drawBackground(painter, rect);
+    if (d->renderPassDepth == 0) d->renderPassBonds = bonds(); // collect before marking the pass as active
+    ++d->renderPassDepth;
+  }
+
+  void MolScene::drawForeground(QPainter *painter, const QRectF &rect) {
+    QGraphicsScene::drawForeground(painter, rect);
+    if (d->renderPassDepth > 0 && --d->renderPassDepth == 0) d->renderPassBonds.clear();
   }
 
   void MolScene::selectionSlot() {

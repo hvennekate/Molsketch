@@ -361,10 +361,13 @@ namespace Molsketch {
 
   QVariant Atom::itemChange(GraphicsItemChange change, const QVariant &value)
   {
-    updateLabel();
+    // Item changes (selection, position, flags, ...) never change the sum formula,
+    // so the molecule's tooltip need not be recomputed here (that made every
+    // selection or move of an atom linear in the molecule size).
+    regenerateLabel();
     if (change == ItemPositionChange) {
       for (auto neighbor : neighbours())
-        neighbor->updateLabel();
+        neighbor->regenerateLabel();
       if (parentItem()) {
         parentItem()->update();
         dynamic_cast<Molecule*>(parentItem())->rebuild();
@@ -779,9 +782,13 @@ namespace Molsketch {
   }
 
   void Atom::updateLabel() {
+    regenerateLabel();
+    if (auto m = molecule()) m->updateTooltip();
+  }
+
+  void Atom::regenerateLabel() {
     prepareGeometryChange();
     label.reset(TextField::generateLabelForAtom(m_elementSymbol, getSymbolFont(), labelAlignment(), numImplicitHydrogens(), charge()));
-    if (auto m = molecule()) m->updateTooltip();
   }
 
   void Atom::setIndex(const QString &index) {

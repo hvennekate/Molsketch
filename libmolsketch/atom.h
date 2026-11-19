@@ -134,6 +134,8 @@ namespace Molsketch {
   private:
     QScopedPointer<TextField> label;
     Alignment autoLabelAlignment() const;
+    /** Regenerates the label without updating the molecule's tooltip (sum formula). */
+    void regenerateLabel();
 
     void initialize(const QPointF & position,
                     const QString & element,

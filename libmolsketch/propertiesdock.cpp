@@ -18,6 +18,7 @@
  ***************************************************************************/
 #include "molscene.h"
 #include "propertiesdock.h"
+#include <QPointer>
 #include <QScrollArea>
 #include <graphicsitem.h>
 
@@ -25,6 +26,9 @@ namespace Molsketch {
 
   struct PropertiesDockPrivate {
     QScrollArea *scrollArea;
+    // Scene whose (selection independent) properties widget is currently shown, if any.
+    QPointer<MolScene> sceneOfCurrentWidget;
+    QPointer<QWidget> currentSceneWidget;
   };
 
   PropertiesDock::PropertiesDock(QWidget *parent)
@@ -50,10 +54,22 @@ namespace Molsketch {
     if (!scene) return;
     auto selectedItems = scene->selectedItems();
 
-    if (auto currentItem = getCurrentItem(selectedItems))
+    if (auto currentItem = getCurrentItem(selectedItems)) {
+      d->sceneOfCurrentWidget.clear();
+      d->currentSceneWidget.clear();
       d->scrollArea->setWidget(currentItem->getPropertiesWidget());
-    else
-      d->scrollArea->setWidget(scene->getPropertiesWidget());
+      return;
+    }
+    // The scene's properties widget does not depend on the selection. Rebuilding it
+    // for every selection change (e.g. once per item in "select all" or "copy")
+    // was very slow.
+    if (d->sceneOfCurrentWidget == scene && d->currentSceneWidget
+        && d->scrollArea->widget() == d->currentSceneWidget)
+      return;
+    auto sceneWidget = scene->getPropertiesWidget();
+    d->scrollArea->setWidget(sceneWidget);
+    d->sceneOfCurrentWidget = scene;
+    d->currentSceneWidget = sceneWidget;
   }
 
 } // namespace Molsketch

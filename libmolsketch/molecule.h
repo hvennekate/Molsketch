@@ -146,6 +146,8 @@ namespace Molsketch {
 
     /// Returns a list of the bonds connected to @p atom.
     QList<Bond*> bonds(const Atom* atom);
+    /// Must be called whenever the atoms of one of this molecule's bonds change.
+    void invalidateBondsByAtom();
     /// Returns a pointer to the bond between @p atomA and @p atomB, or a NULL if none.
     Bond* bondBetween(const Atom *atomA, const Atom *atomB) const;
 
@@ -186,6 +188,8 @@ namespace Molsketch {
     void readAttributes(const QXmlStreamAttributes& attributes) override;
     QXmlStreamAttributes xmlAttributes() const override;
   private:
+    void blockTooltipUpdates();
+    void unblockTooltipUpdates();
     void redoIndexes();
     void setDefaults();
     void clone(QSet<Atom*> atoms);

@@ -424,6 +424,12 @@ namespace Molsketch {
     QList<Bond*> result;
     auto sc = scene();
     if (!sc) return result;
+    if (auto molScene = qobject_cast<MolScene*>(sc)) {
+      for (auto bond : molScene->bonds())
+        if (bond->zValue() > zValue() && collidesWithItem(bond))
+          result << bond;
+      return result;
+    }
     for (auto item : sc->items())
       if (auto bond = dynamic_cast<Bond*>(item))
         if (bond->zValue() > zValue() && collidesWithItem(bond))
@@ -639,6 +645,7 @@ namespace Molsketch {
   {
     m_beginAtom = A ;
     m_endAtom = B ;
+    if (Molecule *m = molecule()) m->invalidateBondsByAtom();
     if (m_beginAtom) {
       m_beginAtom->updateLabel();
       setPos(m_beginAtom->scenePos()) ;

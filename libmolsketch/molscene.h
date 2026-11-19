@@ -104,6 +104,9 @@ namespace Molsketch {
 
       QList<Atom *> atoms() const;
       QList<Molecule *> molecules() const;
+      /** All bonds in the scene. While the scene is being rendered, this list
+       * is computed only once per rendering pass. */
+      QList<Bond *> bonds() const;
 
     signals:
       void copyAvailable(bool);
@@ -143,6 +146,9 @@ namespace Molsketch {
       void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
 
       void wheelEvent(QGraphicsSceneWheelEvent *event) override;
+
+      void drawBackground(QPainter *painter, const QRectF &rect) override;
+      void drawForeground(QPainter *painter, const QRectF &rect) override;
   public:
 
       QString xmlName() const override;

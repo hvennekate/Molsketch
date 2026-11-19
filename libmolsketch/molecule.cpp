@@ -86,6 +86,15 @@ namespace Molsketch {
   struct MoleculePrivate {
     AtomProxyList atomList;
     BondProxyList bondList;
+    // Cache for Molecule::bonds(const Atom*). Looking up an atom's bonds is done
+    // very frequently while painting (Atom::isDrawn(), Atom::boundingRect(), ...),
+    // so scanning all children every time made painting quadratic in the molecule size.
+    QHash<const Atom*, QList<Bond*>> bondsByAtom;
+    bool bondsByAtomValid = false;
+    // While > 0, tooltip updates are postponed. Recomputing the sum formula
+    // after every single atom/bond added made building molecules (copy, split,
+    // combine) cubic in the molecule size.
+    int tooltipUpdateBlockers = 0;
     explicit MoleculePrivate(Molecule* m) : atomList(m), bondList(m) {}
   };
 
@@ -112,6 +121,7 @@ namespace Molsketch {
       DEFAULTINITIALIZER
   {
     setDefaults();
+    blockTooltipUpdates();
 
     foreach(Atom* atom, atomSet) addAtom(atom);
 
@@ -123,6 +133,7 @@ namespace Molsketch {
       if (begin && !atomSet.contains(begin)) addAtom(begin);
       if (end && !atomSet.contains(end)) addAtom(end);
     }
+    unblockTooltipUpdates();
   }
 
   Molecule::Molecule(const Molecule &mol)
@@ -164,6 +175,7 @@ namespace Molsketch {
       DEFAULTINITIALIZER
   {
     setName(QString::fromStdString(coreMolecule.name()));
+    blockTooltipUpdates();
 
     QList<Atom*> newAtoms;
     QMap<Atom*, QPair<unsigned, int>> hAtomsAndCharges;
@@ -181,6 +193,7 @@ namespace Molsketch {
       it.key()->setNumImplicitHydrogens(it.value().first);
       it.key()->setCharge(it.value().second);
     }
+    unblockTooltipUpdates();
   }
 
   Molecule *Molecule::fromCoreMolecule(const Core::Molecule &coreMolecule, qreal scaling) {
@@ -201,6 +214,7 @@ namespace Molsketch {
 
   void Molecule::clone(QSet<Atom *> atoms)
   {
+    blockTooltipUpdates();
     QMap<Atom*, Atom*> oldToNewAtoms;
     QSet<Bond*> oldBonds;
     foreach(Atom* atom, atoms)
@@ -218,11 +232,13 @@ namespace Molsketch {
     foreach(Bond* bond, oldBonds)
       addBond(new Bond(*bond, oldToNewAtoms[bond->beginAtom()],
               oldToNewAtoms[bond->endAtom()]));
+    unblockTooltipUpdates();
   }
 
   Molecule* Molecule::combineMolecules(const QSet<Molecule*>& molecules, QMap<Atom *, Atom *> *givenAtomMap, QMap<Bond*,Bond*> *givenBondMap)
   {
     Molecule* result = new Molecule;
+    result->blockTooltipUpdates();
     QMap<Atom*,Atom*> atomMap;
     QMap<Bond*,Bond*> bondMap;
     foreach(Molecule* molecule, molecules)
@@ -241,6 +257,7 @@ namespace Molsketch {
         bondMap[bond] = newBond;
       }
     }
+    result->unblockTooltipUpdates();
     if (givenAtomMap) atomMap.swap(*givenAtomMap);
     if (givenBondMap) bondMap.swap(*givenBondMap);
     return result;
@@ -334,7 +351,17 @@ namespace Molsketch {
     updateTooltip();
   }
 
+  void Molecule::blockTooltipUpdates() {
+    ++d_ptr->tooltipUpdateBlockers;
+  }
+
+  void Molecule::unblockTooltipUpdates() {
+    if (d_ptr->tooltipUpdateBlockers > 0 && --d_ptr->tooltipUpdateBlockers == 0)
+      updateTooltip();
+  }
+
   void Molecule::updateTooltip() {
+    if (d_ptr && d_ptr->tooltipUpdateBlockers > 0) return;
     setToolTip(sumFormula().toHtml());
   }
 
@@ -457,6 +484,7 @@ namespace Molsketch {
   {
     if (change == ItemTransformHasChanged) rebuild();
     if (change == ItemChildAddedChange || change == ItemChildRemovedChange) {
+      invalidateBondsByAtom();
       redoIndexes();
       updateTooltip();
     }
@@ -489,13 +517,22 @@ namespace Molsketch {
 
   QList< Bond * > Molecule::bonds(const Atom * atom)
   {
-    QList<Bond*> bondList;
+    Q_D(Molecule);
+    if (!d->bondsByAtomValid) {
+      d->bondsByAtom.clear();
+      for (Bond* bond : bonds()) {
+        Atom *begin = bond->beginAtom(), *end = bond->endAtom();
+        if (begin) d->bondsByAtom[begin] << bond;
+        if (end && end != begin) d->bondsByAtom[end] << bond;
+      }
+      d->bondsByAtomValid = true;
+    }
+    return d->bondsByAtom.value(atom);
+  }
 
-    foreach(Bond* bond, bonds())
-      if (bond->hasAtom(atom))
-        bondList << bond;
-
-    return bondList;
+  void Molecule::invalidateBondsByAtom()
+  {
+    if (d_ptr) d_ptr->bondsByAtomValid = false;
   }
 
 void Molecule::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
