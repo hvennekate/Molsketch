@@ -737,12 +737,9 @@ namespace Molsketch {
 
   void MolScene::wheelEvent(QGraphicsSceneWheelEvent *event)
   {
-    foreach(QGraphicsView* vp, views()) // TODO track back event to originator
-    {
-      MolView *mvp = qobject_cast<MolView*>(vp);
-      if (!mvp) continue;
-      mvp->scaleView(pow((double)2, -event->delta() / MOUSEWHEELDIVIDER));
-    }
+    // Zooming and panning are handled by MolView. Wheel events only reach the
+    // scene with Alt pressed, for cycling tool options (see genericAction).
+    event->ignore();
   }
 
   QString MolScene::xmlName() const { return xmlClassName(); }

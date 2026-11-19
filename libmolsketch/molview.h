@@ -50,6 +50,12 @@ namespace Molsketch {
     void zoomReset();
     void zoomFit();
     void scaleView(qreal scaleFactor);
+  protected:
+    void wheelEvent(QWheelEvent *event) override;
+    bool viewportEvent(QEvent *event) override;
+    bool event(QEvent *event) override;
+  private:
+    bool handlePinchGesture(QEvent *event);
   };
 
 } // namespace

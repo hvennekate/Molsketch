@@ -23,6 +23,10 @@
 #include <QDebug>
 #include <QGraphicsScene>
 #include <QWheelEvent>
+#include <QNativeGestureEvent>
+#include <QApplication>
+#include <QScrollBar>
+#include <QtMath>
 #include "molscene.h"
 #include "scenesettings.h"
 
@@ -83,6 +87,56 @@ namespace Molsketch {
     qreal factor = transform().scale(scaleFactor, scaleFactor).mapRect(QRect(0,0,1,1)).width();
     if (factor < 0.07 || factor > 100) return;
     scale(scaleFactor, scaleFactor);
+  }
+
+  void MolView::wheelEvent(QWheelEvent *event) {
+    // Ctrl + wheel zooms. Touchpad pinch gestures are delivered this way on Windows
+    // (and through WSLg), so pinching zooms as well.
+    if (event->modifiers() & Qt::ControlModifier) {
+      int delta = event->angleDelta().y();
+      if (!delta) delta = event->angleDelta().x();
+      if (delta) scaleView(qPow(2., delta / 240.)); // one wheel notch (120): factor ~1.41
+      event->accept();
+      return;
+    }
+
+    // Alt + wheel is passed on to the scene, i.e. to the active tool
+    // (cycling tool options, if enabled in the settings).
+    if (event->modifiers() & Qt::AltModifier) {
+      QGraphicsView::wheelEvent(event);
+      return;
+    }
+
+    // Plain scrolling (mouse wheel or two-finger touchpad scrolling) only pans the view.
+    QPoint delta = event->pixelDelta();
+    if (delta.isNull()) {
+      const int pixelsPerNotch = QApplication::wheelScrollLines() * 20;
+      delta = event->angleDelta() * pixelsPerNotch / 120;
+    }
+    if ((event->modifiers() & Qt::ShiftModifier) && !delta.x())
+      delta = QPoint(delta.y(), 0); // Shift + wheel scrolls horizontally
+    horizontalScrollBar()->setValue(horizontalScrollBar()->value() - delta.x());
+    verticalScrollBar()->setValue(verticalScrollBar()->value() - delta.y());
+    event->accept();
+  }
+
+  bool MolView::handlePinchGesture(QEvent *event) {
+    if (event->type() != QEvent::NativeGesture) return false;
+    auto gesture = static_cast<QNativeGestureEvent*>(event);
+    if (gesture->gestureType() != Qt::ZoomNativeGesture) return false;
+    scaleView(1. + gesture->value());
+    event->accept();
+    return true;
+  }
+
+  bool MolView::viewportEvent(QEvent *event) {
+    if (handlePinchGesture(event)) return true;
+    return QGraphicsView::viewportEvent(event);
+  }
+
+  bool MolView::event(QEvent *event) {
+    if (handlePinchGesture(event)) return true;
+    return QGraphicsView::event(event);
   }
 
   MolScene *MolView::scene() const {
