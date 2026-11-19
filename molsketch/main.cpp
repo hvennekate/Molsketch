@@ -27,6 +27,7 @@
 #include <QCommandLineParser>
 #include <QDebug>
 #include <QDir>
+#include <QStyleHints>
 #include <QFileInfo>
 
 #include "applicationsettings.h"
@@ -62,6 +63,10 @@ int main(int argc, char *argv[])
   Q_INIT_RESOURCE(toolicons_inverted);
 
   QApplication app(argc, argv);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+  // Always use the light color scheme, even if the system (e.g. Windows) is set to dark mode.
+  QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
+#endif
 
   QCoreApplication::setOrganizationName("SourceForge");
   QCoreApplication::setOrganizationDomain("sourceforge.net");
